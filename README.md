@@ -1,10 +1,12 @@
 <div align="center">
   <img src="docs/screenshots/dashboard-landscape.svg" width="860" alt="Thor Stream Butler dashboard concept in landscape orientation">
   <h1>Thor Stream Butler</h1>
-  <p><strong>Stream. Check. Launch.</strong></p>
-  <p>The local, controller-first game-streaming launcher for Android handhelds.</p>
+  <p><strong>Stream. Check. Launch. · Streamen. Prüfen. Starten.</strong></p>
+  <p>The local, controller-first game-streaming launcher for Android handhelds.<br>Der lokale, controller-first Gaming-Streaming-Launcher für Android-Handhelds.</p>
   <p>
-    <a href="https://strugglechen1337.github.io/thor-stream-butler/"><strong>Project website</strong></a>
+    <a href="https://strugglechen1337.github.io/thor-stream-butler/"><strong>English website</strong></a>
+    ·
+    <a href="https://strugglechen1337.github.io/thor-stream-butler/de/"><strong>Deutsche Website</strong></a>
     ·
     <a href="#build"><strong>Build guide</strong></a>
     ·
@@ -21,6 +23,10 @@
   </p>
 </div>
 
+**English** | [Deutsch](#deutsch)
+
+## English
+
 Thor Stream Butler brings installed game-streaming apps together, optionally
 checks network quality before launch, and manages local streaming hosts with
 Wake-on-LAN. The current codebase is a compilable MVP with no account, cloud
@@ -32,7 +38,7 @@ similar devices running Android 9 or newer.
 
 > Local-first by design. Measurements, hosts, settings, and history stay on the device.
 
-## Screenshots
+### Screenshots
 
 These are interface previews. They will be replaced with captures from tested
 handheld hardware as the project moves toward its first release.
@@ -41,7 +47,7 @@ handheld hardware as the project moves toward its first release.
 |---|---|
 | ![Dashboard preview](docs/screenshots/dashboard-landscape.svg) | ![Network test preview](docs/screenshots/networktest-portrait.svg) |
 
-## Features
+### Features
 
 - Adaptive launcher UI for portrait and landscape orientation
 - Full controller, D-pad, keyboard, and touch support
@@ -71,7 +77,7 @@ Product names are used only to describe compatible categories. The project does
 not bundle protected service logos. Icons for installed apps are loaded locally
 through Android at runtime.
 
-## How launch protection works
+### How launch protection works
 
 1. Focus and activate a launcher tile.
 2. If enabled, Thor Stream Butler runs a short network check without a download test.
@@ -83,7 +89,7 @@ through Android at runtime.
 
 Every part of this flow can be adjusted in Settings.
 
-## Network diagnostics
+### Network diagnostics
 
 The diagnostic service uses public Android APIs and performs real measurement
 attempts. Missing values stay `null` and are shown as unavailable or not
@@ -114,7 +120,7 @@ downloads time-limited test data over HTTPS from `speed.cloudflare.com`. The
 provider can technically see the public IP address during that test. Thor
 Stream Butler sends no account data and stores none of the response content.
 
-## Quality rating
+### Quality rating
 
 The quality evaluator lives in `core/network/QualityEvaluator.kt`, is independent
 of Android components, and can be unit-tested directly. Thresholds are centralized
@@ -134,7 +140,7 @@ internet access, and host reachability. Download speed alone never determines
 the overall rating. Ethernet and 5/6 GHz Wi-Fi are preferred; cellular and
 2.4 GHz Wi-Fi produce a contextual note even when the other metrics are good.
 
-## Technical foundation
+### Technical foundation
 
 - Kotlin with Coroutines and Flow
 - Jetpack Compose and Material 3
@@ -152,7 +158,7 @@ WorkManager is deliberately not included in the MVP. Diagnostics and app launch
 are explicit, visible user actions, and there is currently no reliable background
 job that would justify the dependency.
 
-## Project structure
+### Project structure
 
 The MVP uses a single `app` module. Package boundaries are designed so features
 can later move into separate Gradle modules without a major rewrite.
@@ -188,9 +194,9 @@ The central interfaces are `NetworkDiagnosticsService`, `PingService`,
 `InstalledAppsRepository`, `StreamingEntryRepository`, and
 `NetworkHistoryRepository`.
 
-## Build
+### Build
 
-### Requirements
+#### Requirements
 
 - JDK 17
 - Android SDK Platform 37
@@ -199,7 +205,7 @@ The central interfaces are `NetworkDiagnosticsService`, `PingService`,
 
 The repository includes Gradle Wrapper 9.5.0; no global Gradle installation is required.
 
-### Local SDK configuration
+#### Local SDK configuration
 
 Create an untracked `local.properties` file in the project root:
 
@@ -213,7 +219,7 @@ On macOS or Linux, for example:
 sdk.dir=/Users/NAME/Library/Android/sdk
 ```
 
-### Compile and test
+#### Compile and test
 
 Windows PowerShell:
 
@@ -239,7 +245,7 @@ JVM tests run without a device. Instrumented Room repository tests are compiled
 with `:app:assembleDebugAndroidTest` and can run on an emulator or device with
 `connectedDebugAndroidTest`.
 
-## Permissions
+### Permissions
 
 Dangerous permissions are requested only when the related feature is used.
 
@@ -263,7 +269,7 @@ visibility to activities with a launcher intent.
 Further reading: [Android local network permission](https://developer.android.com/privacy-and-security/local-network-permission),
 [Android Wi-Fi permissions](https://developer.android.com/develop/connectivity/wifi/wifi-permissions).
 
-## Privacy and security
+### Privacy and security
 
 - No account or cloud backend
 - No advertising, trackers, telemetry, or analytics SDKs
@@ -278,7 +284,7 @@ Further reading: [Android local network permission](https://developer.android.co
 Uninstalling the app removes the local database and DataStore settings through
 Android. Measurement history can also be deleted separately inside the app.
 
-## Known Android limitations
+### Known Android limitations
 
 - Android or the device manufacturer may redact SSID and Wi-Fi metadata even after permission is granted.
 - Wi-Fi link speed is a negotiated PHY value, not a real download-speed measurement.
@@ -290,7 +296,7 @@ Android. Measurement history can also be deleted separately inside the app.
 - The MVP history is a list of the latest 100 measurements. Full charts are not implemented yet.
 - Automatic Sunshine/Moonlight discovery and port scanning are explicitly outside the MVP.
 
-## Tests
+### Tests
 
 The test suite covers:
 
@@ -306,7 +312,7 @@ Test fakes implement network service and settings interfaces without Android
 network access. GitHub Actions builds the app, runs unit tests and lint, compiles
 instrumented tests, and uploads the debug APK and reports.
 
-## Roadmap after the MVP
+### Roadmap after the MVP
 
 - Automatic Sunshine and Moonlight host discovery through an Android 17-compliant, privacy-friendly flow
 - Port scanning only for explicitly entered hosts
@@ -324,23 +330,367 @@ instrumented tests, and uploads the debug APK and reports.
 - Notifications for unstable connections
 - Optional Windows companion service
 
-## Transparency: AI-assisted development
+### Language and release policy
+
+Public GitHub documentation, project pages, changelogs, and release notes are
+always maintained in **English and German**. A release is not complete until
+both language sections describe the same behavior, limitations, and upgrade
+information. See [CHANGELOG.md](CHANGELOG.md) and the
+[release guide](docs/RELEASE.md).
+
+### Transparency: AI-assisted development
 
 The initial application, architecture, tests, documentation, and project website
 were developed in collaboration with OpenAI Codex. The complete implementation
 is public for review, and bug reports, focused pull requests, and technical
 feedback are welcome.
 
-## Thor family
+### Thor family
 
 Thor Stream Butler follows the same local-first and handheld-first philosophy as
 [Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), the Android
 assistant for organizing, checking, patching, and maintaining ROM collections.
 
-## Optional support
+### Optional support
 
 Thor Stream Butler stays free of advertising, tracking, and telemetry. If the
 project helps you and you would like to say thanks voluntarily, you can buy me a
 coffee:
+
+[paypal.me/marcelstrohmeyer](https://paypal.me/marcelstrohmeyer)
+
+---
+
+## Deutsch
+
+Thor Stream Butler bündelt installierte Gaming-Streaming-Apps, prüft auf Wunsch
+vor dem Start die Netzwerkqualität und verwaltet lokale Streaming-Hosts
+einschließlich Wake-on-LAN. Der aktuelle Stand ist ein kompilierbarer MVP ohne
+Konto, Cloud-Backend, Werbung, Tracking oder Telemetrie.
+
+Die App ist für Android-Gaming-Handhelds wie **AYN Thor / Odin** und
+**Retroid Pocket** entwickelt, funktioniert aber auch auf Smartphones, Tablets
+und vergleichbaren Geräten ab Android 9.
+
+> Local-first by Design: Messungen, Hosts, Einstellungen und Historie bleiben auf dem Gerät.
+
+### Screenshots
+
+Die folgenden Grafiken sind Oberflächenvorschauen. Sie werden auf dem Weg zum
+ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
+
+| Landscape-Dashboard | Portrait-Netzwerktest |
+|---|---|
+| ![Dashboard-Vorschau](docs/screenshots/dashboard-landscape-de.svg) | ![Netzwerktest-Vorschau](docs/screenshots/networktest-portrait-de.svg) |
+
+### Funktionen
+
+- Adaptive Launcher-Oberfläche für Portrait und Landscape
+- Vollständig per Controller, D-Pad, Tastatur und Touch bedienbar
+- Große fokussierbare Kacheln mit deutlich sichtbarem Fokusrahmen
+- Auswahl startbarer Android-Apps über den `PackageManager`
+- Lokale Speicherung von Anzeigename, Package Name, Kategorie, Icon-Referenz und Reihenfolge
+- Prüfung des Launch-Intents mit verständlichem Fehler bei fehlender App
+- Optionaler Netzwerkcheck vor dem Start einer Streaming-App
+- Grün/Gelb/Rot/Grau-Bewertung mit Begründung und Empfehlungen
+- Vollständiger, abbrechbarer Netzwerktest mit Live-Fortschritt
+- Lokale Hostverwaltung, TCP-Port-Tests und Wake-on-LAN
+- Room-Historie mit einfachem Vergleich zur vorherigen Messung
+- DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
+
+Erste Streaming-Kategorien:
+
+- GeForce NOW
+- Xbox Cloud Gaming
+- Xbox Remote Play / XBPlay
+- PlayStation Remote Play / PXPlay
+- Moonlight
+- Steam Link
+- Sunshine Host
+- jede frei ausgewählte Android-App
+
+Produktnamen dienen ausschließlich zur Beschreibung kompatibler Kategorien. Das
+Projekt bündelt keine geschützten Dienstlogos. Icons installierter Apps werden
+zur Laufzeit lokal über Android geladen.
+
+### Startschutz
+
+1. Eine Launcher-Kachel fokussieren und aktivieren.
+2. Falls aktiviert, führt Thor Stream Butler einen kurzen Netzwerkcheck ohne Downloadtest aus.
+3. Die App zeigt Farbe, Begründung und Empfehlung.
+4. Bei Grün kann die Ziel-App nach einer kurzen Anzeige automatisch starten.
+5. Bei Gelb erscheint ein Hinweis, danach wird die App gestartet.
+6. Bei Rot stehen **Trotzdem starten**, **Erneut testen** und **Abbrechen** zur Wahl.
+7. Grau bedeutet, dass Android oder das Netzwerk keine verlässlichen Werte liefern konnte.
+
+Jeder Teil dieses Ablaufs ist in den Einstellungen anpassbar.
+
+### Netzwerkdiagnose
+
+Die Diagnose verwendet ausschließlich öffentliche Android-APIs und führt reale
+Messversuche aus. Fehlende Werte bleiben `null` und werden als nicht verfügbar
+oder nicht messbar angezeigt; die App erfindet niemals plausibel wirkende Werte.
+
+Abhängig von Android-Version, Berechtigungen, Hardware und Netzwerk kann sie
+folgende Daten erfassen:
+
+- aktiver Transport: Ethernet, WLAN, Mobilfunk, VPN oder anderer Transport
+- lokale IPv4-Adresse und Standard-Gateway
+- WLAN-SSID, Frequenz, Link-Geschwindigkeit und Signalstärke
+- Androids validierter Internetstatus
+- DNS-Auflösung
+- Ping-Latenz, Jitter und Paketverlust
+- optionaler kurzer HTTPS-Downloadtest
+- Erreichbarkeit eines explizit konfigurierten Hosts und TCP-Ports
+
+Für Ping wird zunächst das auf Android übliche `/system/bin/ping` mit getrennten
+Prozessargumenten verwendet. Ist es nicht verfügbar, fällt der Dienst auf
+`InetAddress.isReachable()` zurück. Blockieren Gerät oder Netzwerk ICMP, wird
+das als Paketverlust oder nicht messbares Ergebnis behandelt und führt nicht
+zum Absturz.
+
+Jitter ist der Mittelwert der absoluten Differenzen aufeinanderfolgender
+erfolgreicher Latenzmessungen. Paketverlust ist
+`(gesendet - empfangen) / gesendet × 100`.
+
+Der optionale Downloadtest ist standardmäßig deaktiviert. Nach Aktivierung lädt
+die App zeitlich begrenzt Testdaten per HTTPS von `speed.cloudflare.com`. Der
+Anbieter kann dabei technisch die öffentliche IP-Adresse sehen. Thor Stream
+Butler sendet keine Kontodaten und speichert keine Antwortinhalte.
+
+### Qualitätsbewertung
+
+Die Bewertungslogik liegt in `core/network/QualityEvaluator.kt`, ist unabhängig
+von Android-Komponenten und direkt unit-testbar. Grenzwerte sind zentral in
+`QualityThresholds` abgelegt.
+
+Aktuelle Standardwerte:
+
+| Messwert | Optimal / gut | Warnung | Problematisch |
+|---|---:|---:|---:|
+| Latenz | bis 30 ms | über 30 ms | über 60 ms |
+| Jitter | bis 10 ms | über 10 ms | über 20 ms |
+| Paketverlust | 0 % | über 0 % | über 1 % |
+| WLAN-Signal | mindestens 55 % | unter 55 % | unter 35 % |
+
+Zusätzlich berücksichtigt die Bewertung Transporttyp, 2,4-/5-/6-GHz-WLAN,
+validierten Internetzugang und Host-Erreichbarkeit. Downloadgeschwindigkeit
+allein entscheidet nie über die Gesamtqualität. Ethernet und 5-/6-GHz-WLAN
+werden bevorzugt; Mobilfunk und 2,4-GHz-WLAN erzeugen einen passenden Hinweis.
+
+### Technische Grundlage
+
+- Kotlin mit Coroutines und Flow
+- Jetpack Compose und Material 3
+- Gradle Kotlin DSL und Version Catalog
+- Minimum SDK 28
+- Compile / Target SDK 37 (Android 17)
+- Android Gradle Plugin 9.3.0 mit eingebautem Kotlin
+- MVVM und Repository Pattern
+- Hilt und KSP
+- Room für Launcher-Einträge, Hosts und Messhistorie
+- Preferences DataStore für Einstellungen
+- Navigation Compose
+
+WorkManager ist im MVP bewusst nicht enthalten. Diagnose und App-Start sind
+explizite, sichtbare Benutzeraktionen; derzeit gibt es keine sinnvolle
+Hintergrundaufgabe, die diese Abhängigkeit rechtfertigt.
+
+### Projektstruktur
+
+Der MVP verwendet ein einzelnes `app`-Modul. Die Paketgrenzen sind so aufgebaut,
+dass Features später ohne große Umstrukturierung in eigene Gradle-Module
+verschoben werden können.
+
+```text
+app/src/main/java/de/thorstream/butler/
+├── core/
+│   ├── common/          Result- und Fehlertypen
+│   ├── designsystem/    Thor-Theme und Farben
+│   ├── network/         Berechnungen, Bewertung, WOL-Paket
+│   └── validation/      Host-, IPv4- und MAC-Validierung
+├── data/
+│   ├── database/        Room Entities, DAOs und Datenbank
+│   ├── datastore/       Einstellungen
+│   ├── di/              Hilt-Module
+│   ├── repository/      Android- und Room-Repositories
+│   └── service/         Netzwerk-, Ping-, Host- und WOL-Dienste
+├── domain/
+│   ├── model/           Android-unabhängige Modelle
+│   ├── repository/      Repository-Interfaces
+│   └── service/         Service-Interfaces
+├── feature/
+│   ├── dashboard/
+│   ├── history/
+│   ├── hosts/
+│   ├── networktest/
+│   └── settings/
+└── navigation/          Adaptive App-Navigation
+```
+
+Zentrale Schnittstellen sind `NetworkDiagnosticsService`, `PingService`,
+`SpeedTestService`, `HostDiscoveryService`, `WakeOnLanService`,
+`InstalledAppsRepository`, `StreamingEntryRepository` und
+`NetworkHistoryRepository`.
+
+### Build
+
+Voraussetzungen:
+
+- JDK 17
+- Android SDK Platform 37
+- Android SDK Build Tools 36.0.0 oder neuer
+- Android Studio mit Android-17-Unterstützung oder eine entsprechende Kommandozeileninstallation
+
+Der Gradle Wrapper 9.5.0 ist enthalten; eine globale Gradle-Installation ist
+nicht erforderlich.
+
+Lege eine nicht versionierte `local.properties` im Projektverzeichnis an:
+
+```properties
+sdk.dir=C\:\\Users\\NAME\\AppData\\Local\\Android\\Sdk
+```
+
+Unter macOS oder Linux beispielsweise:
+
+```properties
+sdk.dir=/Users/NAME/Library/Android/sdk
+```
+
+Windows PowerShell:
+
+```powershell
+./gradlew.bat :app:assembleDebug
+./gradlew.bat :app:testDebugUnitTest
+./gradlew.bat :app:assembleDebugAndroidTest
+./gradlew.bat :app:lintDebug
+```
+
+macOS oder Linux:
+
+```bash
+./gradlew :app:assembleDebug
+./gradlew :app:testDebugUnitTest
+./gradlew :app:assembleDebugAndroidTest
+./gradlew :app:lintDebug
+```
+
+Die Debug-APK wird unter `app/build/outputs/apk/debug/app-debug.apk` erzeugt.
+JVM-Tests laufen ohne Gerät. Instrumentierte Room-Repositorytests werden mit
+`:app:assembleDebugAndroidTest` gebaut und mit `connectedDebugAndroidTest` auf
+einem Emulator oder Gerät ausgeführt.
+
+### Berechtigungen
+
+Gefährliche Berechtigungen werden erst angefragt, wenn die zugehörige Funktion
+verwendet wird.
+
+| Berechtigung | Android-Version | Zweck | Verhalten ohne Berechtigung |
+|---|---|---|---|
+| `INTERNET` | alle | DNS, Ping-Fallback, TCP-Test, HTTPS-Test, Wake-on-LAN | Diagnose und Hostaktionen nicht verfügbar |
+| `ACCESS_NETWORK_STATE` | alle | aktives Netzwerk, Transport und validierter Internetstatus | Basisdiagnose nicht verfügbar |
+| `ACCESS_WIFI_STATE` | alle | WLAN-Linkdaten | WLAN-Details fehlen |
+| `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` | bis Android 12L; Manifest `maxSdkVersion=32` | SSID und WLAN-Details auf älteren Versionen | SSID und einzelne WLAN-Werte fehlen |
+| `NEARBY_WIFI_DEVICES` | ab Android 13 | aktuelle WLAN-Details, mit `neverForLocation` | SSID und einzelne WLAN-Werte fehlen |
+| `ACCESS_LOCAL_NETWORK` | ab Android 17 bei Target SDK 37 | TCP-/UDP-Kommunikation mit gespeicherten LAN-Hosts und Wake-on-LAN | Hosttests und WOL werden nicht ausgeführt; Internettests bleiben verfügbar |
+
+`CHANGE_WIFI_MULTICAST_STATE` wird im MVP nicht deklariert, weil keine
+Multicast- oder mDNS-Erkennung stattfindet. UDP-Broadcast an ein explizit
+konfiguriertes Wake-on-LAN-Ziel benötigt sie nicht. Bei späterer automatischer
+Host-Erkennung muss diese Entscheidung neu geprüft werden.
+
+Der `<queries>`-Block im Manifest ist keine Laufzeitberechtigung. Er beschränkt
+die Package-Sichtbarkeit auf Activities mit Launcher-Intent.
+
+Weiterführend: [Android Local Network Permission](https://developer.android.com/privacy-and-security/local-network-permission),
+[Android Wi-Fi Permissions](https://developer.android.com/develop/connectivity/wifi/wifi-permissions).
+
+### Datenschutz und Sicherheit
+
+- kein Konto und kein Cloud-Backend
+- keine Werbung, Tracker, Telemetrie oder Analytics-SDKs
+- keine gespeicherten Zugangsdaten
+- keine versteckten Android-APIs und kein Root-Zugriff
+- Hosts, Netzwerkdaten, Einstellungen und Historie bleiben in der privaten App-Sandbox
+- Android-Backup ist für den MVP deaktiviert (`allowBackup=false`)
+- Cleartext-HTTP ist deaktiviert; der optionale Downloadtest verwendet HTTPS
+- Logs enthalten keine IP-Adressen, SSIDs oder MAC-Adressen
+- Netzwerkoperationen haben Timeouts und respektieren Coroutine-Cancellation
+
+Beim Deinstallieren entfernt Android die lokale Datenbank und DataStore-Daten.
+Die Messhistorie kann außerdem separat in der App gelöscht werden.
+
+### Bekannte Android-Einschränkungen
+
+- Android oder der Gerätehersteller kann SSID und WLAN-Metadaten trotz Berechtigung redigieren.
+- Die WLAN-Link-Geschwindigkeit ist ein ausgehandelter PHY-Wert und keine echte Downloadmessung.
+- Ein Ziel, das ICMP blockiert, kann wie Paketverlust wirken; der Fallback ist geräteabhängig.
+- `NET_CAPABILITY_VALIDATED` ist Androids Sicht auf Internetzugang, keine Garantie für einen bestimmten Streaming-Dienst.
+- Wake-on-LAN funktioniert nur, wenn Host, Firmware, Netzwerkkarte und Router Magic Packets unterstützen.
+- Der Broadcast `255.255.255.255` funktioniert nicht in jedem Netz; pro Host kann ein Subnetz-Broadcast oder Unicast-Ziel gesetzt werden.
+- Demo-Kacheln nutzen verbreitete Package-Namen; Hersteller- oder Store-Varianten können abweichen.
+- Die MVP-Historie zeigt die letzten 100 Messungen als Liste; vollständige Diagramme fehlen noch.
+- Automatische Sunshine-/Moonlight-Erkennung und Port-Scanning gehören ausdrücklich nicht zum MVP.
+
+### Tests
+
+Abgedeckt sind:
+
+- Qualitätsbewertung für Grün, Gelb, Rot und Grau
+- Jitter- und Paketverlustberechnung
+- IPv4-, Hostname- und MAC-Validierung
+- exakter Aufbau des 102-Byte-Wake-on-LAN-Pakets
+- erfolgreiche und fehlgeschlagene Netzwerktest-ViewModel-Flows
+- Fehlerfall ohne aktives Netzwerk und ohne erfundene Messwerte
+- Room-Repositories für Launcher-Kacheln, Hosts und Historie
+
+Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
+Android-Netzwerkzugriff. GitHub Actions baut die App, führt Unit Tests und Lint
+aus, kompiliert instrumentierte Tests und lädt Debug-APK sowie Berichte hoch.
+
+### Roadmap nach dem MVP
+
+- automatische Sunshine- und Moonlight-Host-Erkennung über Android-17-konforme, datenschutzfreundliche Abläufe
+- Port-Scanning nur für explizit eingetragene Hosts
+- Profile pro Streaming-Dienst
+- empfohlene Auflösung und Bitrate
+- getrennte Profile für WLAN und Ethernet
+- Widgets und Quick Settings Tile
+- Export und Import der Konfiguration
+- Backup auf ein lokales NAS
+- Controller-Mapping-Test
+- Streaming-Session-Timer
+- Akku- und Temperaturüberwachung
+- VPN-Erkennung in Bewertung und Oberfläche
+- Vergleich mehrerer WLAN-Netze
+- Benachrichtigung bei instabiler Verbindung
+- optionaler Windows-Companion-Dienst
+
+### Sprach- und Release-Regel
+
+Öffentliche GitHub-Dokumentation, Projektseiten, Changelogs und Release Notes
+werden immer auf **Englisch und Deutsch** gepflegt. Ein Release ist erst
+vollständig, wenn beide Sprachabschnitte dasselbe Verhalten, dieselben
+Einschränkungen und dieselben Upgrade-Hinweise beschreiben. Siehe
+[CHANGELOG.md](CHANGELOG.md) und [Release-Anleitung](docs/RELEASE.md).
+
+### Transparenz: KI-unterstützte Entwicklung
+
+Die erste App-Version, Architektur, Tests, Dokumentation und Projektwebsite
+entstanden in Zusammenarbeit mit OpenAI Codex. Die vollständige Implementierung
+ist öffentlich einsehbar; Bugreports, fokussierte Pull Requests und technisches
+Feedback sind willkommen.
+
+### Thor-Familie
+
+Thor Stream Butler folgt derselben local-first und handheld-first Philosophie wie
+[Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), der
+Android-Assistent zum Sortieren, Prüfen, Patchen und Pflegen von ROM-Sammlungen.
+
+### Optional unterstützen
+
+Thor Stream Butler bleibt frei von Werbung, Tracking und Telemetrie. Wenn dir
+das Projekt hilft und du freiwillig Danke sagen möchtest, kannst du mir gerne
+einen Kaffee ausgeben:
 
 [paypal.me/marcelstrohmeyer](https://paypal.me/marcelstrohmeyer)

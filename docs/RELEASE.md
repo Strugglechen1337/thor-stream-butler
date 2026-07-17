@@ -1,0 +1,65 @@
+# Release guide / Release-Anleitung
+
+Every Thor Stream Butler release must be complete in English and German. Use
+[`.github/RELEASE_TEMPLATE.md`](../.github/RELEASE_TEMPLATE.md) as the release
+body and keep both sections equivalent.
+
+Jedes Thor-Stream-Butler-Release muss auf Englisch und Deutsch vollständig sein.
+Verwende [`.github/RELEASE_TEMPLATE.md`](../.github/RELEASE_TEMPLATE.md) als
+Release-Text und halte beide Abschnitte inhaltlich gleichwertig.
+
+## English
+
+### Before creating a release
+
+1. Choose the version and update every version reference consistently.
+2. Move completed entries from `Unreleased` into a dated version in `CHANGELOG.md`.
+3. Describe features, fixes, limitations, migration steps, and known issues in English and German.
+4. Run unit tests, lint, the debug build, and the instrumented-test build.
+5. Build the configured signed release APK. Never publish a debug APK as a production release.
+6. Generate and verify a SHA-256 checksum for every downloadable APK.
+7. Test installation or update on representative Android hardware.
+8. Replace or sanitize screenshots so they contain no private network data.
+
+### GitHub release body
+
+- Keep **English first** and **Deutsch second** for a predictable structure.
+- Use the same version, facts, links, warnings, and installation steps in both sections.
+- Keep product names factual and do not add protected service logos without licensed assets.
+- State explicitly when a function is unavailable or not part of the release.
+- Donations are optional and must never be presented as required for functionality.
+
+### After publishing
+
+1. Verify the release page, APK, and checksum without an authenticated session.
+2. Verify the English and German project pages.
+3. Confirm that Android CI and GitHub Pages are green.
+4. Add the new release link to the README when downloads become available.
+
+## Deutsch
+
+### Vor dem Erstellen eines Releases
+
+1. Version festlegen und alle Versionsangaben einheitlich aktualisieren.
+2. Fertige Einträge aus `Unreleased` in eine datierte Version in `CHANGELOG.md` verschieben.
+3. Funktionen, Fehlerbehebungen, Einschränkungen, Migration und bekannte Probleme auf Englisch und Deutsch beschreiben.
+4. Unit Tests, Lint, Debug-Build und instrumentierten Test-Build ausführen.
+5. Die konfigurierte signierte Release-APK bauen. Niemals eine Debug-APK als produktives Release veröffentlichen.
+6. Für jede herunterladbare APK eine SHA-256-Prüfsumme erzeugen und prüfen.
+7. Installation oder Update auf repräsentativer Android-Hardware testen.
+8. Screenshots ersetzen oder bereinigen, sodass sie keine privaten Netzwerkdaten enthalten.
+
+### GitHub-Release-Text
+
+- Für eine einheitliche Struktur **English zuerst** und **Deutsch danach** verwenden.
+- Version, Fakten, Links, Warnungen und Installationsschritte in beiden Abschnitten gleich halten.
+- Produktnamen sachlich verwenden und keine geschützten Logos ohne lizenzierte Assets hinzufügen.
+- Deutlich kennzeichnen, wenn eine Funktion nicht verfügbar oder nicht Teil des Releases ist.
+- Unterstützung ist freiwillig und darf niemals als Voraussetzung für Funktionen dargestellt werden.
+
+### Nach der Veröffentlichung
+
+1. Release-Seite, APK und Prüfsumme ohne angemeldete Sitzung prüfen.
+2. Englische und deutsche Projektseite prüfen.
+3. Sicherstellen, dass Android CI und GitHub Pages grün sind.
+4. Den neuen Release-Link in der README ergänzen, sobald Downloads verfügbar sind.

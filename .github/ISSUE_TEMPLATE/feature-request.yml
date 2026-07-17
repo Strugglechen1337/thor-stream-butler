@@ -1,34 +1,34 @@
-name: Suggest a feature
-description: Propose an idea for the launcher, diagnostics, or handheld controls
+name: Suggest a feature / Funktion vorschlagen
+description: Propose an idea / Schlage eine Idee vor
 title: "[Feature]: "
 labels: [enhancement, triage]
 body:
   - type: textarea
     id: problem
     attributes:
-      label: What problem should this solve?
-      description: Describe the use case, not only the requested feature.
+      label: What problem should this solve? / Welches Problem soll gelöst werden?
+      description: Describe the use case, not only the feature. / Beschreibe den Nutzungskontext, nicht nur die Funktion.
     validations:
       required: true
   - type: textarea
     id: proposal
     attributes:
-      label: Proposed solution
+      label: Proposed solution / Vorgeschlagene Lösung
     validations:
       required: true
   - type: dropdown
     id: priority
     attributes:
-      label: Relevance
+      label: Relevance / Relevanz
       options:
-        - Common handheld workflow
-        - Specific streaming service
-        - Specific device or Android version
-        - Usability improvement
+        - Common handheld workflow / Häufiger Handheld-Workflow
+        - Specific streaming service / Bestimmter Streaming-Dienst
+        - Specific device or Android version / Bestimmtes Gerät oder Android-Version
+        - Usability improvement / Komfortverbesserung
   - type: checkboxes
     id: constraints
     attributes:
-      label: Project principles
+      label: Project principles / Projektprinzipien
       options:
-        - label: The idea works without an account, tracking, or cloud backend.
-        - label: The idea can be used with both controller and touch input.
+        - label: The idea works without an account, tracking, or cloud backend. / Die Idee funktioniert ohne Konto, Tracking oder Cloud-Backend.
+        - label: The idea works with controller and touch. / Die Idee lässt sich per Controller und Touch bedienen.

@@ -1,10 +1,12 @@
-## What changed?
+## What changed? / Was ändert sich?
 
-<!-- Provide a short, concrete summary. -->
+<!-- EN: Provide a short, concrete summary. -->
+<!-- DE: Gib eine kurze, konkrete Zusammenfassung. -->
 
-## Why?
+## Why? / Warum?
 
-<!-- Describe the user problem, technical reason, or linked issue. -->
+<!-- EN: Describe the user problem, technical reason, or linked issue. -->
+<!-- DE: Beschreibe Nutzerproblem, technischen Grund oder verknüpftes Issue. -->
 
 ## Verification
 
@@ -15,8 +17,9 @@
 - [ ] Controller and D-pad focus checked when UI is affected
 - [ ] Portrait and landscape checked when UI is affected
 - [ ] No IPs, SSIDs, MAC addresses, credentials, or private data in logs/screenshots
-- [ ] English documentation updated when behavior or permissions changed
+- [ ] English and German documentation updated when behavior, permissions, or releases changed
 
-## Screenshots
+## Screenshots / Bildschirmfotos
 
-<!-- For UI changes, include sanitized portrait and landscape captures when relevant. -->
+<!-- EN: For UI changes, include sanitized portrait and landscape captures when relevant. -->
+<!-- DE: Füge bei UI-Änderungen bereinigte Portrait- und Landscape-Aufnahmen hinzu. -->
