@@ -36,6 +36,11 @@ Keine unveröffentlichten Änderungen.
   and predefined event types, never network identifiers.
 - A bilingual PowerShell helper prepares a permanent production signing key and
   can explicitly configure all four GitHub signing secrets.
+- Full English and German privacy pages, an MIT license, bilingual third-party
+  notices, in-app privacy details, and an adaptive Thor launcher icon.
+- IPv6 host validation supports bracketed and scoped forms without DNS lookups.
+- Bilingual physical-device validation and store/Data-safety documents define
+  the remaining production release gate without exposing private test data.
 
 #### Changed
 
@@ -47,11 +52,33 @@ Keine unveröffentlichten Änderungen.
   migration that preserves existing tiles.
 - Updates the build to Gradle 9.6.1, Kotlin 2.4.10, Compose BOM 2026.06.01,
   AndroidX Core 1.19.0, Hilt Navigation 1.4.0, and Coroutines 1.11.0.
+- Configuration import is size-bounded, validates all references and values,
+  replaces Room data transactionally, honors cancellation, and restores it if
+  the settings write fails or the operation is cancelled.
+- History is capped at the latest 100 measurements. Unexpected network, storage,
+  discovery, and ViewModel failures now preserve cancellation and surface safely.
+- Quality evaluation now considers DNS, measured download speed, and Wi-Fi link
+  rate in addition to latency, jitter, packet loss, transport, signal, and host reachability.
+- Portrait handhelds use bottom navigation, system bars follow the selected theme,
+  focused app-picker rows are visible, and destructive actions require confirmation.
+- Partial diagnostic failures stay gray and can never trigger automatic launch;
+  IPv6-only local addresses and gateways are displayed when IPv4 is unavailable.
+- The signing helper keeps passwords out of `keytool` command arguments and
+  verifies every individual GitHub secret upload.
+- Release variants now use R8 and resource shrinking. CI builds APK and AAB,
+  runs Android 15 instrumentation tests, pins all workflow actions to reviewed
+  commits, rejects new moderate-or-higher dependency vulnerabilities, and the
+  release workflow rejects unsigned bundles explicitly.
+- Gradle now verifies the wrapper distribution and resolved dependency artifacts
+  with reviewed SHA-256 metadata across Windows, Linux, and macOS build hosts.
 
 #### Testing
 
 - Added recommendation, comparable-history, dashboard launch-flow, Room
   migration, configuration transfer, and private-log coverage.
+- The final local run passed 40 JVM tests, 12 Android instrumentation tests,
+  debug/release lint, an optimized APK/AAB build, D-pad navigation, permission
+  denial, configuration, diagnostics, history, and real target-app launch on Android 15.
 
 #### Migration
 
@@ -64,7 +91,8 @@ Keine unveröffentlichten Änderungen.
 - The release remains a debug-signed alpha unless all production-signing
   secrets are configured. A debug-signed build may require uninstalling the
   previous alpha, which removes its local data.
-- Physical Android handheld validation was not available during development.
+- Android 15 emulator validation is complete; physical handheld/controller,
+  vendor Wi-Fi, Ethernet, Wake-on-LAN, and long-session validation is still pending.
 - Discovery only finds compatible hosts advertising `_nvstream._tcp` on the
   same local network; routers and Android devices may filter discovery traffic.
 - Stored profiles and recommendations are guidance. Thor Stream Butler cannot
@@ -88,6 +116,12 @@ Keine unveröffentlichten Änderungen.
   Zeitpunkte und fest definierte Ereignistypen, niemals Netzwerkkennungen.
 - Ein zweisprachiger PowerShell-Helfer bereitet einen dauerhaften produktiven
   Signing-Schlüssel vor und kann explizit alle vier GitHub-Secrets einrichten.
+- Vollständige englische und deutsche Datenschutzseiten, eine MIT-Lizenz,
+  zweisprachige Drittanbieterhinweise, Datenschutzdetails in der App und ein
+  adaptives Thor-Launcher-Icon.
+- Die IPv6-Hostvalidierung unterstützt Klammer- und Bereichsnotation ohne DNS-Abfrage.
+- Zweisprachige Hardware-Abnahme- und Store-/Data-Safety-Dokumente definieren
+  das verbleibende Produktions-Gate ohne private Testdaten zu veröffentlichen.
 
 #### Geändert
 
@@ -99,11 +133,34 @@ Keine unveröffentlichten Änderungen.
   getesteten Migration, die vorhandene Kacheln erhält.
 - Aktualisiert den Build auf Gradle 9.6.1, Kotlin 2.4.10, Compose BOM 2026.06.01,
   AndroidX Core 1.19.0, Hilt Navigation 1.4.0 und Coroutines 1.11.0.
+- Der Konfigurationsimport ist größenbegrenzt, validiert Referenzen und Werte,
+  ersetzt Room-Daten transaktional, respektiert Cancellation und stellt sie bei
+  einem Einstellungsfehler oder Abbruch wieder her.
+- Die Historie ist auf die letzten 100 Messungen begrenzt. Unerwartete Netzwerk-,
+  Speicher-, Such- und ViewModel-Fehler werden ohne Verlust der Cancellation sicher angezeigt.
+- Die Bewertung berücksichtigt nun zusätzlich DNS, gemessene Downloadrate und
+  WLAN-Linkrate sowie weiterhin Latenz, Jitter, Paketverlust, Transport, Signal und Host.
+- Portrait-Handhelds verwenden die untere Navigation, Systemleisten folgen dem
+  Theme, fokussierte App-Zeilen sind sichtbar und destruktive Aktionen verlangen Bestätigung.
+- Teilweise fehlgeschlagene Diagnosen bleiben grau und können keinen automatischen
+  App-Start auslösen; IPv6-Adressen und -Gateways werden ohne IPv4 angezeigt.
+- Der Signing-Helfer hält Passwörter aus `keytool`-Kommandoargumenten heraus und
+  prüft jeden einzelnen Upload eines GitHub-Secrets.
+- Release-Varianten verwenden R8 und Ressourcenverkleinerung. CI baut APK und AAB,
+  führt Android-15-Instrumentationstests aus, setzt alle Workflow-Aktionen auf
+  geprüfte Commits fest, blockiert neue Abhängigkeitsschwachstellen ab mittlerer
+  Schwere und weist unsignierte Bundles ausdrücklich zurück.
+- Gradle prüft Wrapper-Distribution und aufgelöste Abhängigkeitsartefakte jetzt
+  per kontrollierter SHA-256-Metadaten auf Windows-, Linux- und macOS-Buildhosts.
 
 #### Tests
 
 - Neue Abdeckung für Profilempfehlungen, vergleichbare Historientrends,
   Dashboard-Startablauf, Room-Migration, Konfigurationstransfer und privates Log.
+- Der abschließende lokale Lauf bestand 40 JVM-Tests, 12 Android-
+  Instrumentationstests, Debug-/Release-Lint, optimierten APK-/AAB-Build,
+  D-Pad-Navigation, Berechtigungsverweigerung, Konfiguration, Diagnose, Historie
+  und den echten Ziel-App-Start auf Android 15.
 
 #### Migration
 
@@ -116,7 +173,9 @@ Keine unveröffentlichten Änderungen.
 - Das Release bleibt eine debug-signierte Alpha, solange nicht alle produktiven
   Signing-Secrets eingerichtet sind. Ein Debug-Build kann die Deinstallation
   der vorherigen Alpha erfordern; dabei werden deren lokale Daten gelöscht.
-- Eine Prüfung auf physischer Android-Handheld-Hardware war nicht verfügbar.
+- Die Android-15-Emulatorprüfung ist abgeschlossen; Tests auf physischem Handheld
+  und Controller sowie herstellerspezifischem WLAN, Ethernet, Wake-on-LAN und
+  langen Sitzungen stehen noch aus.
 - Die Suche findet nur kompatible Hosts, die `_nvstream._tcp` im selben lokalen
   Netz ankündigen; Router und Android-Geräte können Discovery-Verkehr filtern.
 - Gespeicherte Profile und Empfehlungen dienen als Orientierung. Thor Stream

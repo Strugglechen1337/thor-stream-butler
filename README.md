@@ -22,6 +22,7 @@
     <img src="https://img.shields.io/badge/Android-28--37-3DDC84?logo=android&logoColor=white" alt="Android API 28 through 37">
     <img src="https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin 2.4.10">
     <img src="https://img.shields.io/badge/Tracking-none-4ADE80" alt="No tracking">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-72E6FF" alt="MIT License"></a>
   </p>
 </div>
 
@@ -84,7 +85,9 @@ handheld hardware as the project moves toward its first release.
 - Per-tile local-host assignment and resolution, FPS, and bitrate profiles
 - Network-aware streaming-profile recommendations based on all quality signals
 - User-initiated Sunshine/Moonlight-compatible discovery through Android NSD
-- Versioned JSON configuration export/import with optional history
+- Versioned JSON configuration export/import with optional history, strict size
+  and value validation, and rollback if any part of an import fails
+- IPv4, IPv6 (including bracketed and scoped addresses), and hostname support
 - Room-backed history with filters, averages, a latency sparkline, and comparable trends
 - Optional privacy-safe diagnostic event log without network identifiers
 - DataStore settings for launch behavior, diagnostics, and presentation
@@ -161,6 +164,8 @@ Current defaults:
 | Jitter | up to 10 ms | above 10 ms | above 20 ms |
 | Packet loss | 0% | above 0% | above 1% |
 | Wi-Fi signal | 55% or higher | below 55% | below 35% |
+| Wi-Fi link rate | 100 Mbit/s or higher | below 100 Mbit/s | below 25 Mbit/s |
+| Measured download | 25 Mbit/s or higher | below 25 Mbit/s | below 10 Mbit/s |
 
 The evaluator also considers transport type, 2.4/5/6 GHz Wi-Fi, validated
 internet access, and host reachability. Download speed alone never determines
@@ -168,7 +173,8 @@ the overall rating. Ethernet and 5/6 GHz Wi-Fi are preferred; cellular and
 2.4 GHz Wi-Fi produce a contextual note even when the other metrics are good.
 An active VPN is detected before its underlying transport and adds a non-critical
 warning. The measured latency, jitter, packet loss, and host reachability still
-determine whether the connection is actually problematic.
+determine whether the connection is actually problematic. Link rate and download
+speed affect the rating only when Android or the optional test supplied a real value.
 
 ### Technical foundation
 
@@ -235,6 +241,8 @@ The central interfaces are `NetworkDiagnosticsService`, `PingService`,
 - Android Studio with Android 17 support, or an equivalent command-line SDK installation
 
 The repository includes Gradle Wrapper 9.6.1; no global Gradle installation is required.
+The wrapper distribution and all resolved build dependencies are protected by
+SHA-256 verification metadata in `gradle/verification-metadata.xml`.
 
 #### Local SDK configuration
 
@@ -259,6 +267,7 @@ Windows PowerShell:
 ./gradlew.bat :app:testDebugUnitTest
 ./gradlew.bat :app:assembleDebugAndroidTest
 ./gradlew.bat :app:lintDebug
+./gradlew.bat :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 macOS or Linux:
@@ -268,13 +277,22 @@ macOS or Linux:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebugAndroidTest
 ./gradlew :app:lintDebug
+./gradlew :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+Optimized local release builds use R8 and resource shrinking and produce an
+unsigned APK plus AAB unless production signing is configured. See the
+[release guide](docs/RELEASE.md) before distributing either artifact.
 
 JVM tests run without a device. Instrumented Room repository tests are compiled
 with `:app:assembleDebugAndroidTest` and can run on an emulator or device with
 `connectedDebugAndroidTest`.
+
+After an intentional dependency update, regenerate verification metadata with
+the same full task set plus `--write-verification-metadata sha256`, review every
+new checksum against the configured Google/Maven/Gradle source, and retain the
+Linux, macOS, and Windows AAPT2 classifiers required by supported build hosts.
 
 ### Permissions
 
@@ -315,6 +333,11 @@ Further reading: [Android local network permission](https://developer.android.co
 - Configuration exports are created only at a user-selected document location;
   they may contain sensitive host data and optional measurement history
 
+Full notices: [Privacy policy](docs/privacy/index.html),
+[MIT license](LICENSE), and [third-party notices](THIRD_PARTY_NOTICES.md).
+Release preparation: [physical-device test plan](docs/PHYSICAL_TEST_PLAN.md) and
+[store listing/Data safety draft](docs/STORE_LISTING.md).
+
 Uninstalling the app removes the local database and DataStore settings through
 Android. Measurement history can also be deleted separately inside the app.
 
@@ -337,7 +360,7 @@ The test suite covers:
 
 - quality evaluation across green, yellow, red, and gray outcomes
 - jitter and packet-loss calculations
-- IPv4, hostname, and MAC validation
+- IPv4, IPv6, hostname, and MAC validation
 - exact construction of the 102-byte Wake-on-LAN packet
 - successful and failed network-test ViewModel flows
 - no-active-network errors without invented measurements
@@ -345,11 +368,17 @@ The test suite covers:
 - Room schema migration from version 1 to 2
 - streaming-profile recommendations and comparable history trends
 - dashboard pre-launch host integration and successful app launching
-- configuration export/import and privacy-safe diagnostic logging
+- configuration export/import validation, database/DataStore rollback, history
+  retention, and privacy-safe diagnostic logging
+- D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. GitHub Actions builds the app, runs unit tests and lint, compiles
-instrumented tests, and uploads the debug APK and reports.
+network access. The latest validation run passed 40 JVM tests and 12 Android
+instrumentation tests on Android 15. GitHub Actions builds debug and optimized
+release variants, runs unit tests, both lint variants, and the 12 Android 15
+instrumentation tests, then uploads APK, AAB, and reports. Workflow dependencies
+are pinned to reviewed commit hashes and kept current through Dependabot;
+dependency review blocks newly introduced vulnerabilities of moderate or higher severity.
 
 ### Roadmap after the MVP
 
@@ -384,6 +413,12 @@ feedback are welcome.
 Thor Stream Butler follows the same local-first and handheld-first philosophy as
 [Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), the Android
 assistant for organizing, checking, patching, and maintaining ROM collections.
+
+### License
+
+Thor Stream Butler is available under the [MIT License](LICENSE). An
+[unofficial German reading aid](LICENSE.de.md) and bilingual
+[third-party notices](THIRD_PARTY_NOTICES.md) are included.
 
 ### Optional support
 
@@ -453,7 +488,10 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - Host-Zuordnung pro Kachel sowie Profile für Auflösung, FPS und Bitrate
 - Netzwerkabhängige Streaming-Empfehlungen aus allen Qualitätssignalen
 - Benutzergesteuerte Sunshine-/Moonlight-kompatible Erkennung über Android NSD
-- Versionierter JSON-Konfigurationsexport/-import mit optionaler Historie
+- Versionierter JSON-Konfigurationsexport/-import mit optionaler Historie,
+  strikter Größen-/Werteprüfung und Rollback bei einem unvollständigen Import
+- Unterstützung für IPv4, IPv6 (einschließlich Klammer- und Bereichsnotation)
+  sowie Hostnamen
 - Room-Historie mit Filtern, Mittelwerten, Latenzverlauf und vergleichbaren Trends
 - Optionales datenschutzsicheres Diagnoseprotokoll ohne Netzwerkkennungen
 - DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
@@ -532,6 +570,8 @@ Aktuelle Standardwerte:
 | Jitter | bis 10 ms | über 10 ms | über 20 ms |
 | Paketverlust | 0 % | über 0 % | über 1 % |
 | WLAN-Signal | mindestens 55 % | unter 55 % | unter 35 % |
+| WLAN-Linkrate | mindestens 100 Mbit/s | unter 100 Mbit/s | unter 25 Mbit/s |
+| gemessener Download | mindestens 25 Mbit/s | unter 25 Mbit/s | unter 10 Mbit/s |
 
 Zusätzlich berücksichtigt die Bewertung Transporttyp, 2,4-/5-/6-GHz-WLAN,
 validierten Internetzugang und Host-Erreichbarkeit. Downloadgeschwindigkeit
@@ -540,7 +580,8 @@ werden bevorzugt; Mobilfunk und 2,4-GHz-WLAN erzeugen einen passenden Hinweis.
 Ein aktives VPN wird vor seinem darunterliegenden Transport erkannt und erzeugt
 einen nicht kritischen Hinweis. Ob die Verbindung tatsächlich problematisch ist,
 entscheiden weiterhin die gemessene Latenz, der Jitter, der Paketverlust und die
-Host-Erreichbarkeit.
+Host-Erreichbarkeit. Linkrate und Downloadgeschwindigkeit beeinflussen die
+Bewertung nur, wenn Android oder der optionale Test einen echten Wert geliefert hat.
 
 ### Technische Grundlage
 
@@ -609,6 +650,8 @@ Voraussetzungen:
 
 Der Gradle Wrapper 9.6.1 ist enthalten; eine globale Gradle-Installation ist
 nicht erforderlich.
+Wrapper-Distribution und alle aufgelösten Build-Abhängigkeiten sind durch
+SHA-256-Prüfmetadaten in `gradle/verification-metadata.xml` geschützt.
 
 Lege eine nicht versionierte `local.properties` im Projektverzeichnis an:
 
@@ -629,6 +672,7 @@ Windows PowerShell:
 ./gradlew.bat :app:testDebugUnitTest
 ./gradlew.bat :app:assembleDebugAndroidTest
 ./gradlew.bat :app:lintDebug
+./gradlew.bat :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 macOS oder Linux:
@@ -638,12 +682,21 @@ macOS oder Linux:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebugAndroidTest
 ./gradlew :app:lintDebug
+./gradlew :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 Die Debug-APK wird unter `app/build/outputs/apk/debug/app-debug.apk` erzeugt.
+Optimierte lokale Release-Builds verwenden R8 und Ressourcenverkleinerung und
+erzeugen ohne eingerichtete Produktionssignierung eine unsignierte APK sowie
+ein AAB. Vor einer Verteilung die [Release-Anleitung](docs/RELEASE.md) beachten.
 JVM-Tests laufen ohne Gerät. Instrumentierte Room-Repositorytests werden mit
 `:app:assembleDebugAndroidTest` gebaut und mit `connectedDebugAndroidTest` auf
 einem Emulator oder Gerät ausgeführt.
+
+Nach einer beabsichtigten Abhängigkeitsaktualisierung die Prüfmetadaten mit
+demselben vollständigen Task-Satz und `--write-verification-metadata sha256`
+neu erzeugen. Jede neue Prüfsumme mit der konfigurierten Google-/Maven-/Gradle-
+Quelle abgleichen und die benötigten Linux-, macOS- und Windows-AAPT2-Varianten erhalten.
 
 ### Berechtigungen
 
@@ -686,6 +739,11 @@ Weiterführend: [Android Local Network Permission](https://developer.android.com
 - Konfigurationsexporte entstehen nur an einem vom Benutzer gewählten Ort; sie
   können sensible Hostdaten und optional die Messhistorie enthalten
 
+Vollständige Hinweise: [Datenschutzerklärung](docs/de/datenschutz/index.html),
+[MIT-Lizenz](LICENSE) und [Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md).
+Release-Vorbereitung: [Hardware-Testplan](docs/PHYSICAL_TEST_PLAN.md) und
+[Store-Eintrag/Data-Safety-Entwurf](docs/STORE_LISTING.md).
+
 Beim Deinstallieren entfernt Android die lokale Datenbank und DataStore-Daten.
 Die Messhistorie kann außerdem separat in der App gelöscht werden.
 
@@ -708,7 +766,7 @@ Abgedeckt sind:
 
 - Qualitätsbewertung für Grün, Gelb, Rot und Grau
 - Jitter- und Paketverlustberechnung
-- IPv4-, Hostname- und MAC-Validierung
+- IPv4-, IPv6-, Hostname- und MAC-Validierung
 - exakter Aufbau des 102-Byte-Wake-on-LAN-Pakets
 - erfolgreiche und fehlgeschlagene Netzwerktest-ViewModel-Flows
 - Fehlerfall ohne aktives Netzwerk und ohne erfundene Messwerte
@@ -716,11 +774,18 @@ Abgedeckt sind:
 - Room-Schema-Migration von Version 1 auf 2
 - Streaming-Profilempfehlungen und vergleichbare Historientrends
 - Dashboard-Startablauf mit Host-Integration und erfolgreichem App-Start
-- Konfigurationsexport/-import und datenschutzsicheres Diagnoseprotokoll
+- Validierung von Konfigurationsexport/-import, Datenbank-/DataStore-Rollback,
+  Historienbegrenzung und datenschutzsicheres Diagnoseprotokoll
+- D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. GitHub Actions baut die App, führt Unit Tests und Lint
-aus, kompiliert instrumentierte Tests und lädt Debug-APK sowie Berichte hoch.
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 12
+Android-Instrumentationstests auf Android 15. GitHub Actions baut Debug- und
+optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und die 12
+Android-15-Instrumentationstests aus und lädt danach APK, AAB sowie Berichte hoch.
+Workflow-Abhängigkeiten sind auf geprüfte Commit-Hashes festgesetzt und werden
+über Dependabot aktuell gehalten; die Abhängigkeitsprüfung blockiert neu
+eingebrachte Schwachstellen ab mittlerer Schwere.
 
 ### Roadmap nach dem MVP
 
@@ -755,6 +820,12 @@ Feedback sind willkommen.
 Thor Stream Butler folgt derselben local-first und handheld-first Philosophie wie
 [Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), der
 Android-Assistent zum Sortieren, Prüfen, Patchen und Pflegen von ROM-Sammlungen.
+
+### Lizenz
+
+Thor Stream Butler ist unter der [MIT-Lizenz](LICENSE) verfügbar. Eine
+[inoffizielle deutsche Lesehilfe](LICENSE.de.md) und zweisprachige
+[Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md) sind enthalten.
 
 ### Optional unterstützen
 

@@ -5,6 +5,7 @@
 .tools/
 build/
 captures/
+.artifacts/
 local.properties
 app/build/
 
