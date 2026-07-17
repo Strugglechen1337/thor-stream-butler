@@ -13,10 +13,12 @@ import de.thorstream.butler.data.database.NetworkMeasurementDao
 import de.thorstream.butler.data.database.StreamingEntryDao
 import de.thorstream.butler.data.database.ThorDatabase
 import de.thorstream.butler.data.datastore.DataStoreSettingsRepository
+import de.thorstream.butler.data.repository.AndroidInstalledAppsRepository
 import de.thorstream.butler.data.repository.RoomLocalHostRepository
 import de.thorstream.butler.data.repository.RoomNetworkHistoryRepository
 import de.thorstream.butler.data.repository.RoomStreamingEntryRepository
 import de.thorstream.butler.domain.repository.LocalHostRepository
+import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
@@ -38,9 +40,9 @@ object DatabaseModule {
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds abstract fun bindInstalledAppsRepository(implementation: AndroidInstalledAppsRepository): InstalledAppsRepository
     @Binds abstract fun bindStreamingRepository(implementation: RoomStreamingEntryRepository): StreamingEntryRepository
     @Binds abstract fun bindHostRepository(implementation: RoomLocalHostRepository): LocalHostRepository
     @Binds abstract fun bindHistoryRepository(implementation: RoomNetworkHistoryRepository): NetworkHistoryRepository
     @Binds abstract fun bindSettingsRepository(implementation: DataStoreSettingsRepository): SettingsRepository
 }
-

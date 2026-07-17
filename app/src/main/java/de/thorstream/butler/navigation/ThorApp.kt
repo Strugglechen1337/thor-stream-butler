@@ -25,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import de.thorstream.butler.core.designsystem.ThorTheme
+import de.thorstream.butler.feature.dashboard.DashboardRoute
 
 private enum class Destination(val route: String, val title: String, val icon: ImageVector) {
     Dashboard("dashboard", "Dashboard", Icons.Rounded.Home),
@@ -63,7 +64,8 @@ fun ThorApp() = ThorTheme {
             startDestination = Destination.Dashboard.route,
             modifier = Modifier.padding(padding),
         ) {
-            Destination.entries.forEach { destination ->
+            composable(Destination.Dashboard.route) { DashboardRoute() }
+            Destination.entries.filterNot { it == Destination.Dashboard }.forEach { destination ->
                 composable(destination.route) { InitialScreen(destination.title) }
             }
         }
@@ -82,4 +84,3 @@ private fun InitialScreen(title: String) {
         Text("Initiale Projektstruktur ist bereit.")
     }
 }
-
