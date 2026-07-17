@@ -89,6 +89,12 @@ Local signed builds read `signing/keystore.properties` (the whole `signing/`
 directory is gitignored — back up the keystore externally, otherwise future
 app updates become impossible):
 
+On Windows, run `./scripts/New-ReleaseSigningKey.ps1` once to create both local
+files without printing passwords. Add `-ConfigureGitHubSecrets` only when the
+GitHub CLI is authenticated for the intended repository and you want the script
+to upload all four secrets. The key and passwords are permanent release assets;
+keep separate offline backups. The project cannot recreate a lost update key.
+
 ```properties
 storeFile=thor-stream-release.jks
 storePassword=...
@@ -114,6 +120,14 @@ always fails. Every tag requires equivalent bilingual release notes at
 Lokale signierte Builds lesen `signing/keystore.properties` (das gesamte
 `signing/`-Verzeichnis ist gitignored — Keystore unbedingt extern sichern,
 sonst sind keine App-Updates mehr möglich):
+
+Unter Windows einmal `./scripts/New-ReleaseSigningKey.ps1` ausführen, um beide
+lokalen Dateien ohne Passwortausgabe zu erstellen. Den Schalter
+`-ConfigureGitHubSecrets` nur verwenden, wenn die GitHub CLI für das richtige
+Repository angemeldet ist und alle vier Secrets hochgeladen werden sollen.
+Schlüssel und Passwörter sind dauerhafte Release-Werte und benötigen getrennte
+Offline-Sicherungen. Ein verlorener Update-Schlüssel kann nicht wiederhergestellt
+werden.
 
 ```properties
 storeFile=thor-stream-release.jks

@@ -16,6 +16,112 @@ No unreleased changes.
 
 Keine unveröffentlichten Änderungen.
 
+## [0.4.0-alpha.1] - 2026-07-17
+
+### English
+
+#### Added
+
+- Dashboard tiles can be linked to a saved local host and store an individual
+  resolution, frame-rate, and bitrate profile.
+- Network-aware profile recommendations consider latency, jitter, packet loss,
+  transport, host reachability, and measured download speed.
+- User-initiated Sunshine/Moonlight-compatible host discovery uses Android NSD
+  for `_nvstream._tcp` without subnet scanning or hidden APIs.
+- Versioned local JSON export/import covers apps, hosts, settings, and optional
+  measurement history through Android's document picker.
+- History filters, averages, a compact latency sparkline, and comparisons only
+  between matching connection contexts.
+- An optional privacy-safe diagnostic event log stores at most 200 timestamps
+  and predefined event types, never network identifiers.
+- A bilingual PowerShell helper prepares a permanent production signing key and
+  can explicitly configure all four GitHub signing secrets.
+
+#### Changed
+
+- Pre-launch diagnostics now test the tile's linked host and expose Wake-on-LAN
+  directly when that host is unreachable.
+- Dashboard focus restoration, nested focus visibility, D-pad tile ordering,
+  and removal confirmation improve controller use.
+- Room schema 2 adds host assignments and streaming profiles with a tested
+  migration that preserves existing tiles.
+- Updates the build to Gradle 9.6.1, Kotlin 2.4.10, Compose BOM 2026.06.01,
+  AndroidX Core 1.19.0, Hilt Navigation 1.4.0, and Coroutines 1.11.0.
+
+#### Testing
+
+- Added recommendation, comparable-history, dashboard launch-flow, Room
+  migration, configuration transfer, and private-log coverage.
+
+#### Migration
+
+- Existing local data is migrated automatically from Room schema 1 to 2.
+- Configuration import replaces apps, hosts, and settings. It replaces history
+  only when the selected file contains history data.
+
+#### Known limitations
+
+- The release remains a debug-signed alpha unless all production-signing
+  secrets are configured. A debug-signed build may require uninstalling the
+  previous alpha, which removes its local data.
+- Physical Android handheld validation was not available during development.
+- Discovery only finds compatible hosts advertising `_nvstream._tcp` on the
+  same local network; routers and Android devices may filter discovery traffic.
+- Stored profiles and recommendations are guidance. Thor Stream Butler cannot
+  configure third-party streaming apps that expose no supported settings API.
+
+### Deutsch
+
+#### Hinzugefügt
+
+- Dashboard-Kacheln können mit einem gespeicherten lokalen Host verknüpft werden
+  und ein eigenes Auflösungs-, Bildraten- und Bitratenprofil speichern.
+- Netzwerkabhängige Profilempfehlungen berücksichtigen Latenz, Jitter,
+  Paketverlust, Transport, Host-Erreichbarkeit und gemessene Downloadrate.
+- Die benutzergesteuerte Sunshine-/Moonlight-kompatible Host-Suche verwendet
+  Android NSD für `_nvstream._tcp` ohne Subnetz-Scan oder versteckte APIs.
+- Versionierter lokaler JSON-Export/-Import umfasst Apps, Hosts, Einstellungen
+  und optional die Messhistorie über die Android-Dateiauswahl.
+- Historienfilter, Mittelwerte, ein kompakter Latenzverlauf und Vergleiche nur
+  zwischen passenden Verbindungskontexten.
+- Ein optionales datenschutzsicheres Diagnoseprotokoll speichert höchstens 200
+  Zeitpunkte und fest definierte Ereignistypen, niemals Netzwerkkennungen.
+- Ein zweisprachiger PowerShell-Helfer bereitet einen dauerhaften produktiven
+  Signing-Schlüssel vor und kann explizit alle vier GitHub-Secrets einrichten.
+
+#### Geändert
+
+- Der Netzwerkcheck vor dem Start prüft nun den verknüpften Host und bietet bei
+  Nichterreichbarkeit direkt Wake-on-LAN an.
+- Fokuswiederherstellung, sichtbarer Fokus innerhalb der Kachel,
+  D-Pad-Sortierung und Löschbestätigung verbessern die Controller-Bedienung.
+- Room-Schema 2 ergänzt Host-Zuordnungen und Streaming-Profile mit einer
+  getesteten Migration, die vorhandene Kacheln erhält.
+- Aktualisiert den Build auf Gradle 9.6.1, Kotlin 2.4.10, Compose BOM 2026.06.01,
+  AndroidX Core 1.19.0, Hilt Navigation 1.4.0 und Coroutines 1.11.0.
+
+#### Tests
+
+- Neue Abdeckung für Profilempfehlungen, vergleichbare Historientrends,
+  Dashboard-Startablauf, Room-Migration, Konfigurationstransfer und privates Log.
+
+#### Migration
+
+- Vorhandene lokale Daten werden automatisch von Room-Schema 1 auf 2 migriert.
+- Ein Konfigurationsimport ersetzt Apps, Hosts und Einstellungen. Die Historie
+  wird nur ersetzt, wenn die ausgewählte Datei Historiendaten enthält.
+
+#### Bekannte Einschränkungen
+
+- Das Release bleibt eine debug-signierte Alpha, solange nicht alle produktiven
+  Signing-Secrets eingerichtet sind. Ein Debug-Build kann die Deinstallation
+  der vorherigen Alpha erfordern; dabei werden deren lokale Daten gelöscht.
+- Eine Prüfung auf physischer Android-Handheld-Hardware war nicht verfügbar.
+- Die Suche findet nur kompatible Hosts, die `_nvstream._tcp` im selben lokalen
+  Netz ankündigen; Router und Android-Geräte können Discovery-Verkehr filtern.
+- Gespeicherte Profile und Empfehlungen dienen als Orientierung. Thor Stream
+  Butler kann Drittanbieter-Apps ohne unterstützte Einstellungs-API nicht konfigurieren.
+
 ## [0.3.0-alpha.1] - 2026-07-17
 
 ### English
