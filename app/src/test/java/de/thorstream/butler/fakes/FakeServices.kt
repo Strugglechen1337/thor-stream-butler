@@ -5,6 +5,7 @@ import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.LocalHost
+import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.repository.LocalHostRepository
@@ -13,6 +14,9 @@ import de.thorstream.butler.domain.repository.DiagnosticLogEntry
 import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
+import de.thorstream.butler.domain.repository.InstalledAppsRepository
+import de.thorstream.butler.domain.repository.StreamingEntryRepository
+import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.service.DiagnosticProgress
 import de.thorstream.butler.domain.service.HostDiscoveryService
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
@@ -39,7 +43,13 @@ class FakeNetworkDiagnosticsService(
     var progress: Flow<DiagnosticProgress> = emptyFlow(),
     var snapshotResult: AppResult<NetworkSnapshot> = AppResult.Failure(AppError.NoNetwork("no network")),
 ) : NetworkDiagnosticsService {
-    override fun runDiagnostics(target: String, pingCount: Int, host: String?, port: Int?, includeDownloadTest: Boolean, testDurationSeconds: Int) = progress
+    var lastHost: String? = null
+    var lastPort: Int? = null
+    override fun runDiagnostics(target: String, pingCount: Int, host: String?, port: Int?, includeDownloadTest: Boolean, testDurationSeconds: Int): Flow<DiagnosticProgress> {
+        lastHost = host
+        lastPort = port
+        return progress
+    }
     override suspend fun readConnectionSnapshot() = snapshotResult
 }
 
@@ -74,6 +84,38 @@ class FakeHistoryRepository : NetworkHistoryRepository {
     }
     override suspend fun replaceAll(measurements: List<NetworkMeasurement>) { values.value = measurements }
     override suspend fun clear() { values.value = emptyList() }
+}
+
+class FakeInstalledAppsRepository : InstalledAppsRepository {
+    var appsResult: AppResult<List<InstalledApp>> = AppResult.Success(emptyList())
+    var launchResult: AppResult<Unit> = AppResult.Success(Unit)
+    val launchedPackages = mutableListOf<String>()
+    override suspend fun getLaunchableApps() = appsResult
+    override fun canLaunch(packageName: String) = true
+    override fun launch(packageName: String): AppResult<Unit> {
+        launchedPackages += packageName
+        return launchResult
+    }
+}
+
+class FakeStreamingEntryRepository : StreamingEntryRepository {
+    val values = MutableStateFlow<List<StreamingEntry>>(emptyList())
+    override fun observeEntries() = values
+    override suspend fun getEntries() = values.value
+    override suspend fun save(entry: StreamingEntry): Long {
+        val id = entry.id.takeIf { it != 0L } ?: ((values.value.maxOfOrNull { it.id } ?: 0L) + 1L)
+        values.value = (values.value.filterNot { it.id == id } + entry.copy(id = id)).sortedBy { it.sortOrder }
+        return id
+    }
+    override suspend fun delete(entry: StreamingEntry) { values.value = values.value.filterNot { it.id == entry.id } }
+    override suspend fun markLaunched(id: Long, timestamp: Long, quality: String?) {
+        values.value = values.value.map { if (it.id == id) it.copy(lastUsedAt = timestamp) else it }
+    }
+    override suspend fun updateSortOrders(entries: List<StreamingEntry>) {
+        values.value = entries.mapIndexed { index, entry -> entry.copy(sortOrder = index) }
+    }
+    override suspend fun replaceAll(entries: List<StreamingEntry>) { values.value = entries }
+    override suspend fun ensureDemoEntries() = Unit
 }
 
 class FakeDiagnosticLogRepository : DiagnosticLogRepository {

@@ -149,15 +149,15 @@ class DashboardViewModel @Inject constructor(
                 launchTarget(entry, null)
                 return@launch
             }
+            val linkedHost = entry.hostId?.let { hostId -> localHostRepository.getHosts().firstOrNull { it.id == hostId } }
             localState.value = localState.value.copy(
                 preLaunch = PreLaunchUiState(
                     entry = entry,
-                    host = uiState.value.items.firstOrNull { it.entry.id == entry.id }?.host,
+                    host = linkedHost,
                     stepRes = R.string.dashboard_check_preparing,
                     progress = 0f,
                 ),
             )
-            val linkedHost = localState.value.preLaunch?.host
             diagnosticsService.runDiagnostics(
                 target = settings.defaultTestTarget,
                 pingCount = settings.pingCount.coerceAtMost(5),
@@ -277,5 +277,9 @@ class DashboardViewModel @Inject constructor(
 
     fun consumeMessage() {
         localState.value = localState.value.copy(message = null)
+    }
+
+    fun reportLocalNetworkPermissionDenied() {
+        localState.value = localState.value.copy(message = strings.get(R.string.hosts_msg_local_permission))
     }
 }

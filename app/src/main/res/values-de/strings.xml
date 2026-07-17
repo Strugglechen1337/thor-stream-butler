@@ -54,6 +54,9 @@
     <string name="dashboard_empty_title">Noch keine Streaming-Apps eingerichtet</string>
     <string name="dashboard_empty_action">Erste App auswählen</string>
     <string name="dashboard_remove_tile">Kachel entfernen</string>
+    <string name="dashboard_remove_confirm_title">Dashboard-Kachel entfernen?</string>
+    <string name="dashboard_remove_confirm_text">%1$s vom Dashboard entfernen? Die installierte App wird nicht deinstalliert.</string>
+    <string name="dashboard_remove_confirm_action">Entfernen</string>
     <string name="dashboard_last_used">Zuletzt %1$s</string>
     <string name="dashboard_ready">Bereit</string>
     <string name="dashboard_not_installed">Nicht installiert</string>

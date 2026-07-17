@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,6 +72,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -104,13 +106,14 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
     var showPicker by remember { mutableStateOf(false) }
     var editedItem by remember { mutableStateOf<DashboardItem?>(null) }
+    var pendingDelete by remember { mutableStateOf<DashboardItem?>(null) }
     val firstTileFocusRequester = remember { FocusRequester() }
     var initialFocusRequested by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val localNetworkPermission = "android.permission.ACCESS_LOCAL_NETWORK"
     var pendingLocalAction by remember { mutableStateOf<(() -> Unit)?>(null) }
     val localPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) pendingLocalAction?.invoke()
+        if (granted) pendingLocalAction?.invoke() else viewModel.reportLocalNetworkPermissionDenied()
         pendingLocalAction = null
     }
     val withLocalNetworkPermission: (Boolean, () -> Unit) -> Unit = { required, action ->
@@ -159,7 +162,7 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
                     columns = GridCells.Adaptive(minSize = 230.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().focusRestorer().focusGroup(),
                 ) {
                     items(state.items, key = { it.entry.id }) { item ->
                         StreamingTile(
@@ -170,7 +173,7 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
                             onEdit = { editedItem = item },
                             onMoveBack = { viewModel.moveEntry(item.entry, -1) },
                             onMoveForward = { viewModel.moveEntry(item.entry, 1) },
-                            onDelete = { viewModel.delete(item.entry) },
+                            onDelete = { pendingDelete = item },
                         )
                     }
                 }
@@ -195,6 +198,19 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
                 viewModel.saveConfiguration(item.entry, hostId, profile)
                 editedItem = null
             },
+        )
+    }
+    pendingDelete?.let { item ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(stringResource(R.string.dashboard_remove_confirm_title)) },
+            text = { Text(stringResource(R.string.dashboard_remove_confirm_text, item.entry.displayName)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(item.entry); pendingDelete = null }) {
+                    Text(stringResource(R.string.dashboard_remove_confirm_action))
+                }
+            },
+            dismissButton = { TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
     state.preLaunch?.let { preLaunch ->
@@ -308,11 +324,11 @@ private fun StreamingTile(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.45f)
+            .aspectRatio(1.25f)
             .scale(scale)
             .border(3.dp, borderColor, shape)
             .clip(shape)
-            .onFocusChanged { focused = it.isFocused }
+            .onFocusChanged { focused = it.hasFocus }
             .clickable(enabled = item.isInstalled, onClick = onLaunch)
             .focusable(),
         shape = shape,

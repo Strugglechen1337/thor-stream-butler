@@ -54,6 +54,9 @@
     <string name="dashboard_empty_title">No streaming apps set up yet</string>
     <string name="dashboard_empty_action">Choose your first app</string>
     <string name="dashboard_remove_tile">Remove tile</string>
+    <string name="dashboard_remove_confirm_title">Remove dashboard tile?</string>
+    <string name="dashboard_remove_confirm_text">Remove %1$s from the dashboard? The installed app is not uninstalled.</string>
+    <string name="dashboard_remove_confirm_action">Remove</string>
     <string name="dashboard_last_used">Last used %1$s</string>
     <string name="dashboard_ready">Ready</string>
     <string name="dashboard_not_installed">Not installed</string>
