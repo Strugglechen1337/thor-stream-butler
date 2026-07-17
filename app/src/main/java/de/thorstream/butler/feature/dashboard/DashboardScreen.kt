@@ -120,6 +120,7 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
                     items(state.items, key = { it.entry.id }) { item ->
                         StreamingTile(
                             item = item,
+                            focusAnimationsEnabled = state.focusAnimationsEnabled,
                             onLaunch = { viewModel.launch(item.entry) },
                             onDelete = { viewModel.delete(item.entry) },
                         )
@@ -207,9 +208,9 @@ private fun EmptyDashboard(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun StreamingTile(item: DashboardItem, onLaunch: () -> Unit, onDelete: () -> Unit) {
+private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, onLaunch: () -> Unit, onDelete: () -> Unit) {
     var focused by remember { mutableStateOf(false) }
-    val scale by animateFloatAsState(if (focused) 1.035f else 1f, label = "tile-scale")
+    val scale by animateFloatAsState(if (focused && focusAnimationsEnabled) 1.035f else 1f, label = "tile-scale")
     val borderColor by animateColorAsState(if (focused) ThorCyan else Color.Transparent, label = "tile-border")
     val shape = RoundedCornerShape(20.dp)
     ElevatedCard(

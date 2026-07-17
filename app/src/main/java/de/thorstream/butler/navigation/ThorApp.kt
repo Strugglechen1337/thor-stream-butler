@@ -1,7 +1,7 @@
 package de.thorstream.butler.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -13,13 +13,16 @@ import androidx.compose.material.icons.rounded.Speed
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -29,6 +32,9 @@ import de.thorstream.butler.feature.dashboard.DashboardRoute
 import de.thorstream.butler.feature.networktest.NetworkTestRoute
 import de.thorstream.butler.feature.history.HistoryRoute
 import de.thorstream.butler.feature.hosts.HostsRoute
+import de.thorstream.butler.feature.settings.SettingsRoute
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private enum class Destination(val route: String, val title: String, val icon: ImageVector) {
     Dashboard("dashboard", "Dashboard", Icons.Rounded.Home),
@@ -39,54 +45,66 @@ private enum class Destination(val route: String, val title: String, val icon: I
 }
 
 @Composable
-fun ThorApp() = ThorTheme {
-    val navController = rememberNavController()
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                Destination.entries.forEach { destination ->
-                    NavigationBarItem(
-                        selected = currentRoute == destination.route,
-                        onClick = {
-                            navController.navigate(destination.route) {
-                                popUpTo(Destination.Dashboard.route) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(destination.icon, contentDescription = null) },
-                        label = { Text(destination.title) },
-                    )
+fun ThorApp(viewModel: ThorAppViewModel = hiltViewModel()) {
+    val settings by viewModel.settings.collectAsStateWithLifecycle()
+    ThorTheme(themePreference = settings.theme) {
+        val navController = rememberNavController()
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        BoxWithConstraints(Modifier.fillMaxSize()) {
+            val useNavigationRail = maxWidth >= 700.dp
+            if (useNavigationRail) {
+                Row(Modifier.fillMaxSize()) {
+                    NavigationRail {
+                        Destination.entries.forEach { destination ->
+                            NavigationRailItem(
+                                selected = currentRoute == destination.route,
+                                onClick = { navController.open(destination) },
+                                icon = { Icon(destination.icon, contentDescription = null) },
+                                label = { Text(destination.title) },
+                            )
+                        }
+                    }
+                    ThorNavHost(navController, Modifier.weight(1f))
                 }
-            }
-        },
-    ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = Destination.Dashboard.route,
-            modifier = Modifier.padding(padding),
-        ) {
-            composable(Destination.Dashboard.route) { DashboardRoute() }
-            composable(Destination.Network.route) { NetworkTestRoute() }
-            composable(Destination.History.route) { HistoryRoute() }
-            composable(Destination.Hosts.route) { HostsRoute() }
-            Destination.entries.filterNot { it == Destination.Dashboard || it == Destination.Network || it == Destination.History || it == Destination.Hosts }.forEach { destination ->
-                composable(destination.route) { InitialScreen(destination.title) }
+            } else {
+                Scaffold(
+                    bottomBar = {
+                        NavigationBar {
+                            Destination.entries.forEach { destination ->
+                                NavigationBarItem(
+                                    selected = currentRoute == destination.route,
+                                    onClick = { navController.open(destination) },
+                                    icon = { Icon(destination.icon, contentDescription = null) },
+                                    label = { Text(destination.title) },
+                                )
+                            }
+                        }
+                    },
+                ) { padding -> ThorNavHost(navController, Modifier.padding(padding)) }
             }
         }
     }
 }
 
+private fun NavHostController.open(destination: Destination) {
+    navigate(destination.route) {
+        popUpTo(Destination.Dashboard.route) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
+
 @Composable
-private fun InitialScreen(title: String) {
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.Start,
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+private fun ThorNavHost(navController: NavHostController, modifier: Modifier) {
+    NavHost(
+        navController = navController,
+        startDestination = Destination.Dashboard.route,
+        modifier = modifier,
     ) {
-        Text("THOR // STREAM BUTLER", style = androidx.compose.material3.MaterialTheme.typography.labelLarge)
-        Text(title, style = androidx.compose.material3.MaterialTheme.typography.headlineLarge)
-        Text("Initiale Projektstruktur ist bereit.")
+        composable(Destination.Dashboard.route) { DashboardRoute() }
+        composable(Destination.Network.route) { NetworkTestRoute() }
+        composable(Destination.History.route) { HistoryRoute() }
+        composable(Destination.Hosts.route) { HostsRoute() }
+        composable(Destination.Settings.route) { SettingsRoute() }
     }
 }

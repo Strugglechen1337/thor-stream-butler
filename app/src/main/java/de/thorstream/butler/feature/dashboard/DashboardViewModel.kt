@@ -37,6 +37,7 @@ data class DashboardUiState(
     val isLoadingApps: Boolean = false,
     val message: String? = null,
     val preLaunch: PreLaunchUiState? = null,
+    val focusAnimationsEnabled: Boolean = true,
 )
 
 data class PreLaunchUiState(
@@ -63,8 +64,12 @@ class DashboardViewModel @Inject constructor(
     val uiState: StateFlow<DashboardUiState> = combine(
         entriesRepository.observeEntries(),
         localState,
-    ) { entries, local ->
-        local.copy(items = entries.map { DashboardItem(it, installedAppsRepository.canLaunch(it.packageName)) })
+        settingsRepository.settings,
+    ) { entries, local, settings ->
+        local.copy(
+            items = entries.map { DashboardItem(it, installedAppsRepository.canLaunch(it.packageName)) },
+            focusAnimationsEnabled = settings.focusAnimationsEnabled,
+        )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 
     init {
