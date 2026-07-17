@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
@@ -16,6 +17,12 @@ interface StreamingEntryDao {
     @Upsert
     suspend fun upsert(entity: StreamingEntryEntity): Long
 
+    @Query("SELECT * FROM streaming_entries ORDER BY sortOrder, displayName")
+    suspend fun getAll(): List<StreamingEntryEntity>
+
+    @Upsert
+    suspend fun upsertAll(entities: List<StreamingEntryEntity>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfAbsent(entity: StreamingEntryEntity): Long
 
@@ -24,6 +31,21 @@ interface StreamingEntryDao {
 
     @Query("UPDATE streaming_entries SET lastUsedAt = :timestamp, lastNetworkQuality = :quality WHERE id = :id")
     suspend fun markLaunched(id: Long, timestamp: Long, quality: String?)
+
+    @Query("UPDATE streaming_entries SET sortOrder = :sortOrder WHERE id = :id")
+    suspend fun updateSortOrder(id: Long, sortOrder: Int)
+
+    @Query("UPDATE streaming_entries SET hostId = NULL WHERE hostId = :hostId")
+    suspend fun clearHostAssignments(hostId: Long)
+
+    @Query("DELETE FROM streaming_entries")
+    suspend fun deleteAll()
+
+    @Transaction
+    suspend fun replaceAll(entities: List<StreamingEntryEntity>) {
+        deleteAll()
+        upsertAll(entities)
+    }
 
     @Delete
     suspend fun delete(entity: StreamingEntryEntity)
@@ -36,6 +58,21 @@ interface LocalHostDao {
 
     @Upsert
     suspend fun upsert(entity: LocalHostEntity): Long
+
+    @Query("SELECT * FROM local_hosts ORDER BY name")
+    suspend fun getAll(): List<LocalHostEntity>
+
+    @Upsert
+    suspend fun upsertAll(entities: List<LocalHostEntity>)
+
+    @Query("DELETE FROM local_hosts")
+    suspend fun deleteAll()
+
+    @Transaction
+    suspend fun replaceAll(entities: List<LocalHostEntity>) {
+        deleteAll()
+        upsertAll(entities)
+    }
 
     @Delete
     suspend fun delete(entity: LocalHostEntity)
@@ -52,7 +89,18 @@ interface NetworkMeasurementDao {
     @Insert
     suspend fun insert(entity: NetworkMeasurementEntity): Long
 
+    @Query("SELECT * FROM network_measurements ORDER BY timestamp DESC LIMIT 100")
+    suspend fun getRecent(): List<NetworkMeasurementEntity>
+
+    @Insert
+    suspend fun insertAll(entities: List<NetworkMeasurementEntity>)
+
     @Query("DELETE FROM network_measurements")
     suspend fun clear()
-}
 
+    @Transaction
+    suspend fun replaceAll(entities: List<NetworkMeasurementEntity>) {
+        clear()
+        insertAll(entities)
+    }
+}

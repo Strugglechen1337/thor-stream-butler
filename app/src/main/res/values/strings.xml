@@ -67,6 +67,25 @@
     <string name="dashboard_check_launching">Launching the app in a moment</string>
     <string name="dashboard_check_finished">Check finished</string>
     <string name="dashboard_launch_anyway">Launch anyway</string>
+    <string name="dashboard_configure_tile">Configure tile</string>
+    <string name="dashboard_configure_title">Configure %1$s</string>
+    <string name="dashboard_configuration_saved">Tile configuration saved.</string>
+    <string name="dashboard_host_assignment">Local host</string>
+    <string name="dashboard_no_host">No linked host</string>
+    <string name="dashboard_linked_host">Host: %1$s</string>
+    <string name="dashboard_streaming_profile">Streaming profile</string>
+    <string name="dashboard_profile_fps">FPS</string>
+    <string name="dashboard_profile_bitrate">Mbit/s</string>
+    <string name="dashboard_profile_summary">%1$s · %2$d FPS · %3$d Mbit/s</string>
+    <string name="dashboard_recommended_profile">Recommended for this connection: %1$s, %2$d FPS, %3$d Mbit/s</string>
+    <string name="dashboard_wake_host">Wake %1$s</string>
+    <string name="dashboard_move_back">Move tile back</string>
+    <string name="dashboard_move_forward">Move tile forward</string>
+    <string name="resolution_auto">Auto recommendation</string>
+    <string name="resolution_720p">720p</string>
+    <string name="resolution_1080p">1080p</string>
+    <string name="resolution_1440p">1440p</string>
+    <string name="resolution_4k">4K</string>
 
     <!-- Network test -->
     <string name="nettest_kicker">THOR // DIAGNOSTICS</string>

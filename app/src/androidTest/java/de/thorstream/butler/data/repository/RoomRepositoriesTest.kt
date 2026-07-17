@@ -42,7 +42,7 @@ class RoomRepositoriesTest {
 
     @Test
     fun hostsCanBePersistedUpdatedAndDeleted() = runTest {
-        val repository = RoomLocalHostRepository(database.localHostDao())
+        val repository = RoomLocalHostRepository(database.localHostDao(), database.streamingEntryDao())
         val id = repository.save(LocalHost(name = "Gaming-PC", address = "192.168.1.10", port = 47984))
         repository.updateTestResult(id, true, 1234L)
         val host = repository.observeHosts().first().single()
@@ -66,4 +66,3 @@ class RoomRepositoriesTest {
         assertTrue(repository.observeHistory().first().isEmpty())
     }
 }
-

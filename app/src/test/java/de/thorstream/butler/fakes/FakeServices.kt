@@ -64,18 +64,33 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings()) : SettingsRep
 class FakeHistoryRepository : NetworkHistoryRepository {
     val values = MutableStateFlow<List<NetworkMeasurement>>(emptyList())
     override fun observeHistory() = values
+    override suspend fun getHistory() = values.value
     override suspend fun save(measurement: NetworkMeasurement): Long {
         values.value = listOf(measurement.copy(id = (values.value.size + 1).toLong())) + values.value
         return values.value.first().id
     }
+    override suspend fun replaceAll(measurements: List<NetworkMeasurement>) { values.value = measurements }
     override suspend fun clear() { values.value = emptyList() }
 }
 
 class FakeLocalHostRepository : LocalHostRepository {
     val values = MutableStateFlow<List<LocalHost>>(emptyList())
     override fun observeHosts() = values
-    override suspend fun save(host: LocalHost): Long = 1
-    override suspend fun delete(host: LocalHost) = Unit
-    override suspend fun updateTestResult(id: Long, reachable: Boolean, testedAt: Long) = Unit
+    override suspend fun getHosts() = values.value
+    override suspend fun save(host: LocalHost): Long {
+        val id = host.id.takeIf { it != 0L } ?: ((values.value.maxOfOrNull { it.id } ?: 0L) + 1L)
+        values.value = values.value.filterNot { it.id == id } + host.copy(id = id)
+        return id
+    }
+    override suspend fun delete(host: LocalHost) { values.value = values.value.filterNot { it.id == host.id } }
+    override suspend fun replaceAll(hosts: List<LocalHost>) { values.value = hosts }
+    override suspend fun updateTestResult(id: Long, reachable: Boolean, testedAt: Long) {
+        values.value = values.value.map { value ->
+            if (value.id == id) value.copy(
+                lastReachable = reachable,
+                lastSuccessfulTestAt = testedAt.takeIf { reachable } ?: value.lastSuccessfulTestAt,
+            ) else value
+        }
+    }
 }
 

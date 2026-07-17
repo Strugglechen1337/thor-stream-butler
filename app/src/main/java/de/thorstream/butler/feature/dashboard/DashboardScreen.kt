@@ -1,6 +1,10 @@
 package de.thorstream.butler.feature.dashboard
 
 import android.graphics.drawable.Drawable
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
@@ -27,8 +31,12 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Bolt
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Gamepad
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -61,6 +69,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -69,6 +79,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.thorstream.butler.R
@@ -80,6 +91,9 @@ import de.thorstream.butler.core.designsystem.ThorYellow
 import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.NetworkQuality
+import de.thorstream.butler.domain.model.LocalHost
+import de.thorstream.butler.domain.model.StreamingProfile
+import de.thorstream.butler.domain.model.StreamingResolution
 import de.thorstream.butler.domain.model.StreamingType
 import java.text.DateFormat
 import java.util.Date
@@ -89,11 +103,36 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var showPicker by remember { mutableStateOf(false) }
+    var editedItem by remember { mutableStateOf<DashboardItem?>(null) }
+    val firstTileFocusRequester = remember { FocusRequester() }
+    var initialFocusRequested by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val localNetworkPermission = "android.permission.ACCESS_LOCAL_NETWORK"
+    var pendingLocalAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val localPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) pendingLocalAction?.invoke()
+        pendingLocalAction = null
+    }
+    val withLocalNetworkPermission: (Boolean, () -> Unit) -> Unit = { required, action ->
+        if (!required || Build.VERSION.SDK_INT < 37 || ContextCompat.checkSelfPermission(context, localNetworkPermission) == PackageManager.PERMISSION_GRANTED) {
+            action()
+        } else {
+            pendingLocalAction = action
+            localPermissionLauncher.launch(localNetworkPermission)
+        }
+    }
 
     LaunchedEffect(state.message) {
         state.message?.let {
             snackbarHostState.showSnackbar(it)
             viewModel.consumeMessage()
+        }
+    }
+
+    LaunchedEffect(state.items.isNotEmpty()) {
+        if (state.items.isNotEmpty() && !initialFocusRequested) {
+            initialFocusRequested = true
+            firstTileFocusRequester.requestFocus()
         }
     }
 
@@ -126,7 +165,11 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
                         StreamingTile(
                             item = item,
                             focusAnimationsEnabled = state.focusAnimationsEnabled,
-                            onLaunch = { viewModel.launch(item.entry) },
+                            modifier = if (item.entry.id == state.items.first().entry.id) Modifier.focusRequester(firstTileFocusRequester) else Modifier,
+                            onLaunch = { withLocalNetworkPermission(item.host != null) { viewModel.launch(item.entry) } },
+                            onEdit = { editedItem = item },
+                            onMoveBack = { viewModel.moveEntry(item.entry, -1) },
+                            onMoveForward = { viewModel.moveEntry(item.entry, 1) },
                             onDelete = { viewModel.delete(item.entry) },
                         )
                     }
@@ -143,12 +186,24 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             onAdd = { app, type, name -> viewModel.addApp(app, type, name); showPicker = false },
         )
     }
+    editedItem?.let { item ->
+        TileConfigurationDialog(
+            item = item,
+            hosts = state.hosts,
+            onDismiss = { editedItem = null },
+            onSave = { hostId, profile ->
+                viewModel.saveConfiguration(item.entry, hostId, profile)
+                editedItem = null
+            },
+        )
+    }
     state.preLaunch?.let { preLaunch ->
         PreLaunchDialog(
             state = preLaunch,
             onCancel = viewModel::cancelPreLaunch,
             onRetry = viewModel::retryPreLaunch,
             onLaunchAnyway = viewModel::launchAnyway,
+            onWake = { withLocalNetworkPermission(true, viewModel::wakeLinkedHost) },
         )
     }
 }
@@ -159,6 +214,7 @@ private fun PreLaunchDialog(
     onCancel: () -> Unit,
     onRetry: () -> Unit,
     onLaunchAnyway: () -> Unit,
+    onWake: () -> Unit,
 ) {
     val assessment = state.assessment
     val requiresDecision = assessment?.quality == NetworkQuality.PROBLEMATIC || assessment?.quality == NetworkQuality.NOT_MEASURABLE
@@ -181,6 +237,24 @@ private fun PreLaunchDialog(
                     })
                     it.problems.take(3).forEach { problem -> Text("• $problem") }
                     it.recommendations.firstOrNull()?.let { recommendation -> Text("→ $recommendation", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+                state.recommendation?.let { recommendation ->
+                    Text(
+                        stringResource(
+                            R.string.dashboard_recommended_profile,
+                            resolutionLabel(recommendation.resolution),
+                            recommendation.framesPerSecond,
+                            recommendation.bitrateMbps,
+                        ),
+                        color = ThorCyan,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                if (state.host?.wakeOnLanEnabled == true && state.host.macAddress != null && state.snapshot?.hostReachable == false) {
+                    FilledTonalButton(onClick = onWake) {
+                        Icon(Icons.Rounded.Bolt, contentDescription = null)
+                        Text(" " + stringResource(R.string.dashboard_wake_host, state.host.name))
+                    }
                 }
             }
         },
@@ -217,13 +291,22 @@ private fun EmptyDashboard(onAdd: () -> Unit) {
 }
 
 @Composable
-private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, onLaunch: () -> Unit, onDelete: () -> Unit) {
+private fun StreamingTile(
+    item: DashboardItem,
+    focusAnimationsEnabled: Boolean,
+    modifier: Modifier = Modifier,
+    onLaunch: () -> Unit,
+    onEdit: () -> Unit,
+    onMoveBack: () -> Unit,
+    onMoveForward: () -> Unit,
+    onDelete: () -> Unit,
+) {
     var focused by remember { mutableStateOf(false) }
     val scale by animateFloatAsState(if (focused && focusAnimationsEnabled) 1.035f else 1f, label = "tile-scale")
     val borderColor by animateColorAsState(if (focused) ThorCyan else Color.Transparent, label = "tile-border")
     val shape = RoundedCornerShape(20.dp)
     ElevatedCard(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .aspectRatio(1.45f)
             .scale(scale)
@@ -245,9 +328,24 @@ private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, 
                     Text(item.entry.displayName, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text(item.entry.streamingType.label(), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
+                IconButton(onClick = onEdit) { Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.dashboard_configure_tile)) }
                 IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.dashboard_remove_tile)) }
             }
             Column {
+                item.host?.let { host ->
+                    Text(stringResource(R.string.dashboard_linked_host, host.name), color = ThorCyan, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                Text(
+                    stringResource(
+                        R.string.dashboard_profile_summary,
+                        resolutionLabel(item.entry.profile.resolution),
+                        item.entry.profile.framesPerSecond,
+                        item.entry.profile.bitrateMbps,
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     QualityDot(item.entry.lastNetworkQuality)
                     Text(
@@ -258,14 +356,104 @@ private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, 
                     )
                 }
                 Spacer(Modifier.height(10.dp))
-                FilledTonalButton(onClick = onLaunch, enabled = item.isInstalled, modifier = Modifier.fillMaxWidth()) {
-                    Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                    Text(" " + stringResource(if (item.isInstalled) R.string.dashboard_launch else R.string.dashboard_unavailable))
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = onMoveBack) { Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = stringResource(R.string.dashboard_move_back)) }
+                    FilledTonalButton(onClick = onLaunch, enabled = item.isInstalled, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Rounded.PlayArrow, contentDescription = null)
+                        Text(" " + stringResource(if (item.isInstalled) R.string.dashboard_launch else R.string.dashboard_unavailable))
+                    }
+                    IconButton(onClick = onMoveForward) { Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = stringResource(R.string.dashboard_move_forward)) }
                 }
             }
         }
     }
 }
+
+@Composable
+private fun TileConfigurationDialog(
+    item: DashboardItem,
+    hosts: List<LocalHost>,
+    onDismiss: () -> Unit,
+    onSave: (Long?, StreamingProfile) -> Unit,
+) {
+    var hostId by remember(item.entry.id) { mutableStateOf(item.entry.hostId) }
+    var resolution by remember(item.entry.id) { mutableStateOf(item.entry.profile.resolution) }
+    var framesPerSecond by remember(item.entry.id) { mutableStateOf(item.entry.profile.framesPerSecond.toString()) }
+    var bitrate by remember(item.entry.id) { mutableStateOf(item.entry.profile.bitrateMbps.toString()) }
+    var hostMenu by remember { mutableStateOf(false) }
+    var resolutionMenu by remember { mutableStateOf(false) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.dashboard_configure_title, item.entry.displayName)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.dashboard_host_assignment), fontWeight = FontWeight.Bold)
+                Box {
+                    FilledTonalButton(onClick = { hostMenu = true }) {
+                        Text(hosts.firstOrNull { it.id == hostId }?.name ?: stringResource(R.string.dashboard_no_host))
+                    }
+                    DropdownMenu(expanded = hostMenu, onDismissRequest = { hostMenu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.dashboard_no_host)) }, onClick = { hostId = null; hostMenu = false })
+                        hosts.forEach { host ->
+                            DropdownMenuItem(text = { Text(host.name) }, onClick = { hostId = host.id; hostMenu = false })
+                        }
+                    }
+                }
+                Text(stringResource(R.string.dashboard_streaming_profile), fontWeight = FontWeight.Bold)
+                Box {
+                    FilledTonalButton(onClick = { resolutionMenu = true }) { Text(resolutionLabel(resolution)) }
+                    DropdownMenu(expanded = resolutionMenu, onDismissRequest = { resolutionMenu = false }) {
+                        StreamingResolution.entries.forEach { option ->
+                            DropdownMenuItem(text = { Text(resolutionLabel(option)) }, onClick = { resolution = option; resolutionMenu = false })
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = framesPerSecond,
+                        onValueChange = { framesPerSecond = it.filter(Char::isDigit).take(3) },
+                        label = { Text(stringResource(R.string.dashboard_profile_fps)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                    )
+                    OutlinedTextField(
+                        value = bitrate,
+                        onValueChange = { bitrate = it.filter(Char::isDigit).take(3) },
+                        label = { Text(stringResource(R.string.dashboard_profile_bitrate)) },
+                        modifier = Modifier.weight(1f),
+                        singleLine = true,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onSave(
+                        hostId,
+                        StreamingProfile(
+                            resolution = resolution,
+                            framesPerSecond = framesPerSecond.toIntOrNull()?.coerceIn(30, 120) ?: 60,
+                            bitrateMbps = bitrate.toIntOrNull()?.coerceIn(1, 200) ?: 20,
+                        ),
+                    )
+                },
+            ) { Text(stringResource(R.string.action_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+@Composable
+private fun resolutionLabel(resolution: StreamingResolution): String = stringResource(
+    when (resolution) {
+        StreamingResolution.AUTO -> R.string.resolution_auto
+        StreamingResolution.HD_720P -> R.string.resolution_720p
+        StreamingResolution.FULL_HD_1080P -> R.string.resolution_1080p
+        StreamingResolution.QHD_1440P -> R.string.resolution_1440p
+        StreamingResolution.UHD_4K -> R.string.resolution_4k
+    },
+)
 
 @Composable
 private fun QualityDot(quality: NetworkQuality?) {

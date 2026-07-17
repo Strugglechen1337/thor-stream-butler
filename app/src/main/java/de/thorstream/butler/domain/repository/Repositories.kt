@@ -16,22 +16,29 @@ interface InstalledAppsRepository {
 
 interface StreamingEntryRepository {
     fun observeEntries(): Flow<List<StreamingEntry>>
+    suspend fun getEntries(): List<StreamingEntry>
     suspend fun save(entry: StreamingEntry): Long
     suspend fun delete(entry: StreamingEntry)
     suspend fun markLaunched(id: Long, timestamp: Long, quality: String?)
+    suspend fun updateSortOrders(entries: List<StreamingEntry>)
+    suspend fun replaceAll(entries: List<StreamingEntry>)
     suspend fun ensureDemoEntries()
 }
 
 interface NetworkHistoryRepository {
     fun observeHistory(): Flow<List<NetworkMeasurement>>
+    suspend fun getHistory(): List<NetworkMeasurement>
     suspend fun save(measurement: NetworkMeasurement): Long
+    suspend fun replaceAll(measurements: List<NetworkMeasurement>)
     suspend fun clear()
 }
 
 interface LocalHostRepository {
     fun observeHosts(): Flow<List<LocalHost>>
+    suspend fun getHosts(): List<LocalHost>
     suspend fun save(host: LocalHost): Long
     suspend fun delete(host: LocalHost)
+    suspend fun replaceAll(hosts: List<LocalHost>)
     suspend fun updateTestResult(id: Long, reachable: Boolean, testedAt: Long)
 }
 
@@ -39,4 +46,3 @@ interface SettingsRepository {
     val settings: Flow<AppSettings>
     suspend fun update(settings: AppSettings)
 }
-

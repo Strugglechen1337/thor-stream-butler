@@ -67,6 +67,25 @@
     <string name="dashboard_check_launching">App wird gleich gestartet</string>
     <string name="dashboard_check_finished">Prüfung abgeschlossen</string>
     <string name="dashboard_launch_anyway">Trotzdem starten</string>
+    <string name="dashboard_configure_tile">Kachel konfigurieren</string>
+    <string name="dashboard_configure_title">%1$s konfigurieren</string>
+    <string name="dashboard_configuration_saved">Kachelkonfiguration gespeichert.</string>
+    <string name="dashboard_host_assignment">Lokaler Host</string>
+    <string name="dashboard_no_host">Kein verknüpfter Host</string>
+    <string name="dashboard_linked_host">Host: %1$s</string>
+    <string name="dashboard_streaming_profile">Streaming-Profil</string>
+    <string name="dashboard_profile_fps">FPS</string>
+    <string name="dashboard_profile_bitrate">Mbit/s</string>
+    <string name="dashboard_profile_summary">%1$s · %2$d FPS · %3$d Mbit/s</string>
+    <string name="dashboard_recommended_profile">Für diese Verbindung empfohlen: %1$s, %2$d FPS, %3$d Mbit/s</string>
+    <string name="dashboard_wake_host">%1$s aufwecken</string>
+    <string name="dashboard_move_back">Kachel zurückschieben</string>
+    <string name="dashboard_move_forward">Kachel vorschieben</string>
+    <string name="resolution_auto">Automatische Empfehlung</string>
+    <string name="resolution_720p">720p</string>
+    <string name="resolution_1080p">1080p</string>
+    <string name="resolution_1440p">1440p</string>
+    <string name="resolution_4k">4K</string>
 
     <!-- Network test -->
     <string name="nettest_kicker">THOR // DIAGNOSE</string>
