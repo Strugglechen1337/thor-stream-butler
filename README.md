@@ -74,6 +74,7 @@ handheld hardware as the project moves toward its first release.
 - Launch-intent validation with a clear error when an app is unavailable
 - Optional network check before opening a streaming app
 - Green, yellow, red, or gray quality rating with explanations and recommendations
+- VPN-aware transport detection with a contextual quality recommendation
 - Complete cancellable network test with live progress
 - Local host management, TCP port checks, and Wake-on-LAN
 - Room-backed history with a simple latency comparison to the previous measurement
@@ -156,6 +157,9 @@ The evaluator also considers transport type, 2.4/5/6 GHz Wi-Fi, validated
 internet access, and host reachability. Download speed alone never determines
 the overall rating. Ethernet and 5/6 GHz Wi-Fi are preferred; cellular and
 2.4 GHz Wi-Fi produce a contextual note even when the other metrics are good.
+An active VPN is detected before its underlying transport and adds a non-critical
+warning. The measured latency, jitter, packet loss, and host reachability still
+determine whether the connection is actually problematic.
 
 ### Technical foundation
 
@@ -342,7 +346,6 @@ instrumented tests, and uploads the debug APK and reports.
 - Controller mapping test
 - Streaming-session timer
 - Battery and temperature monitoring
-- VPN-aware evaluation and UI
 - Comparison of multiple Wi-Fi networks
 - Notifications for unstable connections
 - Optional Windows companion service
@@ -426,6 +429,7 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - Prüfung des Launch-Intents mit verständlichem Fehler bei fehlender App
 - Optionaler Netzwerkcheck vor dem Start einer Streaming-App
 - Grün/Gelb/Rot/Grau-Bewertung mit Begründung und Empfehlungen
+- VPN-bewusste Transporterkennung mit passender Qualitätsempfehlung
 - Vollständiger, abbrechbarer Netzwerktest mit Live-Fortschritt
 - Lokale Hostverwaltung, TCP-Port-Tests und Wake-on-LAN
 - Room-Historie mit einfachem Vergleich zur vorherigen Messung
@@ -510,6 +514,10 @@ Zusätzlich berücksichtigt die Bewertung Transporttyp, 2,4-/5-/6-GHz-WLAN,
 validierten Internetzugang und Host-Erreichbarkeit. Downloadgeschwindigkeit
 allein entscheidet nie über die Gesamtqualität. Ethernet und 5-/6-GHz-WLAN
 werden bevorzugt; Mobilfunk und 2,4-GHz-WLAN erzeugen einen passenden Hinweis.
+Ein aktives VPN wird vor seinem darunterliegenden Transport erkannt und erzeugt
+einen nicht kritischen Hinweis. Ob die Verbindung tatsächlich problematisch ist,
+entscheiden weiterhin die gemessene Latenz, der Jitter, der Paketverlust und die
+Host-Erreichbarkeit.
 
 ### Technische Grundlage
 
@@ -694,7 +702,6 @@ aus, kompiliert instrumentierte Tests und lädt Debug-APK sowie Berichte hoch.
 - Controller-Mapping-Test
 - Streaming-Session-Timer
 - Akku- und Temperaturüberwachung
-- VPN-Erkennung in Bewertung und Oberfläche
 - Vergleich mehrerer WLAN-Netze
 - Benachrichtigung bei instabiler Verbindung
 - optionaler Windows-Companion-Dienst

@@ -11,6 +11,7 @@ import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
+import de.thorstream.butler.core.network.ConnectionTypeResolver
 import de.thorstream.butler.core.network.NetworkCalculations
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkSnapshot
@@ -164,13 +165,12 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
             val capabilities = connectivityManager.getNetworkCapabilities(network)
                 ?: return@withContext AppResult.Failure(AppError.NoNetwork(strings.get(R.string.error_no_network)))
             val properties = connectivityManager.getLinkProperties(network)
-            val type = when {
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> ConnectionType.ETHERNET
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> ConnectionType.WIFI
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> ConnectionType.CELLULAR
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> ConnectionType.VPN
-                else -> ConnectionType.OTHER
-            }
+            val type = ConnectionTypeResolver.resolve(
+                hasVpn = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN),
+                hasEthernet = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET),
+                hasWifi = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI),
+                hasCellular = capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR),
+            )
             val wifiInfo = if (Build.VERSION.SDK_INT >= 29) capabilities.transportInfo as? WifiInfo else legacyWifiInfo(type)
             val ssid = wifiInfo?.ssid?.takeUnless { it == "<unknown ssid>" }?.trim('"')
             val localIp = properties?.linkAddresses?.firstOrNull { it.address is Inet4Address }?.address?.hostAddress

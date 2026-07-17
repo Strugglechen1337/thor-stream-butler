@@ -193,11 +193,13 @@
     <string name="eval_problem_packet_loss">Packet loss (%1$s %%)</string>
     <string name="eval_problem_light_packet_loss">Slight packet loss (%1$s %%)</string>
     <string name="eval_problem_cellular">Cellular connection</string>
+    <string name="eval_problem_vpn">Active VPN connection</string>
     <string name="eval_problem_wifi_24">2.4 GHz Wi-Fi</string>
     <string name="eval_problem_weak_signal">Very weak Wi-Fi signal (%1$d %%)</string>
     <string name="eval_problem_fair_signal">Weak Wi-Fi signal (%1$d %%)</string>
     <string name="eval_reco_wired">Connect the device via Ethernet or a stable 5/6 GHz Wi-Fi network.</string>
     <string name="eval_reco_avoid_cellular">Use Ethernet or Wi-Fi for smooth streaming whenever possible.</string>
+    <string name="eval_reco_vpn">If streaming is unstable, compare a test without the VPN or choose a lower-latency VPN route.</string>
     <string name="eval_reco_switch_band">Switch to 5 or 6 GHz Wi-Fi if possible.</string>
     <string name="eval_reco_lower_bitrate">Reduce the streaming bitrate if frames drop.</string>
     <string name="eval_reco_reduce_interference">Reduce radio interference or use a wired connection.</string>
