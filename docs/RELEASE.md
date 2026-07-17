@@ -21,6 +21,14 @@ Release-Text und halte beide Abschnitte inhaltlich gleichwertig.
 7. Test installation or update on representative Android hardware.
 8. Replace or sanitize screenshots so they contain no private network data.
 
+### Development preview exception
+
+A debug-signed APK may be published only as an explicitly marked GitHub
+**prerelease**, never as a production or stable release. Its release notes must
+identify the debug signature, explain that a later production-signed build
+requires uninstalling the preview and losing its local app data, and disclose
+when installation on physical hardware was not verified.
+
 ### GitHub release body
 
 - Keep **English first** and **Deutsch second** for a predictable structure.
@@ -48,6 +56,15 @@ Release-Text und halte beide Abschnitte inhaltlich gleichwertig.
 6. Für jede herunterladbare APK eine SHA-256-Prüfsumme erzeugen und prüfen.
 7. Installation oder Update auf repräsentativer Android-Hardware testen.
 8. Screenshots ersetzen oder bereinigen, sodass sie keine privaten Netzwerkdaten enthalten.
+
+### Ausnahme für Entwicklungsvorschauen
+
+Eine debug-signierte APK darf ausschließlich als ausdrücklich gekennzeichnetes
+GitHub-**Prerelease** veröffentlicht werden, niemals als produktives oder stabiles
+Release. Die Release Notes müssen die Debug-Signatur nennen, erklären, dass vor
+einem späteren produktiv signierten Build die Vorschau einschließlich ihrer lokalen
+App-Daten deinstalliert werden muss, und offenlegen, wenn die Installation auf
+echter Hardware nicht geprüft wurde.
 
 ### GitHub-Release-Text
 
