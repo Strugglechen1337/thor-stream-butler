@@ -10,11 +10,22 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- VPN-aware diagnostics: active VPN transports are now detected before their
+  underlying Wi-Fi, Ethernet, or cellular transport and are shown explicitly.
+- VPN connections receive a non-critical quality warning with an actionable
+  recommendation to compare routing when streaming is unstable.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- VPN-bewusste Diagnose: Aktive VPN-Transporte werden jetzt vor dem
+  darunterliegenden WLAN-, Ethernet- oder Mobilfunktransport erkannt und
+  eindeutig angezeigt.
+- VPN-Verbindungen erhalten einen nicht kritischen Qualitätshinweis mit einer
+  konkreten Empfehlung, bei instabilem Streaming die Route zu vergleichen.
 
 ## [0.2.0-alpha.1] - 2026-07-17
 

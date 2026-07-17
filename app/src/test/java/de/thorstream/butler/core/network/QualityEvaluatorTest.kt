@@ -58,5 +58,22 @@ class QualityEvaluatorTest {
         assertEquals(NetworkQuality.PROBLEMATIC, result.quality)
         assertTrue(result.recommendations.any { it.startsWith("res:${R.string.eval_reco_check_host}") })
     }
+
+    @Test
+    fun `vpn with otherwise good measurements is usable and explained`() {
+        val result = evaluator.evaluate(
+            NetworkSnapshot(
+                connectionType = ConnectionType.VPN,
+                internetValidated = true,
+                latencyMs = 18.0,
+                jitterMs = 2.0,
+                packetLossPercent = 0.0,
+            ),
+        )
+
+        assertEquals(NetworkQuality.USABLE, result.quality)
+        assertTrue(result.problems.any { it.startsWith("res:${R.string.eval_problem_vpn}") })
+        assertTrue(result.recommendations.any { it.startsWith("res:${R.string.eval_reco_vpn}") })
+    }
 }
 

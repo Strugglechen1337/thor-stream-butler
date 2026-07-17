@@ -62,6 +62,10 @@ class QualityEvaluator @Inject constructor(private val strings: StringProvider) 
             warnings += strings.get(R.string.eval_problem_cellular)
             recommendations += strings.get(R.string.eval_reco_avoid_cellular)
         }
+        if (snapshot.connectionType == ConnectionType.VPN) {
+            warnings += strings.get(R.string.eval_problem_vpn)
+            recommendations += strings.get(R.string.eval_reco_vpn)
+        }
         if (snapshot.connectionType == ConnectionType.WIFI) {
             snapshot.wifiFrequencyMhz?.let { frequency ->
                 if (frequency in 2_400..2_500) {

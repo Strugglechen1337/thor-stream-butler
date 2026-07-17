@@ -193,11 +193,13 @@
     <string name="eval_problem_packet_loss">Paketverlust (%1$s %%)</string>
     <string name="eval_problem_light_packet_loss">Leichter Paketverlust (%1$s %%)</string>
     <string name="eval_problem_cellular">Mobilfunkverbindung</string>
+    <string name="eval_problem_vpn">Aktive VPN-Verbindung</string>
     <string name="eval_problem_wifi_24">2,4-GHz-WLAN</string>
     <string name="eval_problem_weak_signal">Sehr schwaches WLAN-Signal (%1$d %%)</string>
     <string name="eval_problem_fair_signal">Schwaches WLAN-Signal (%1$d %%)</string>
     <string name="eval_reco_wired">Verbinde das Gerät per Ethernet oder mit einem stabilen 5-/6-GHz-WLAN.</string>
     <string name="eval_reco_avoid_cellular">Nutze für gleichmäßiges Streaming nach Möglichkeit Ethernet oder WLAN.</string>
+    <string name="eval_reco_vpn">Vergleiche bei instabilem Streaming einen Test ohne VPN oder wähle eine VPN-Route mit geringerer Latenz.</string>
     <string name="eval_reco_switch_band">Wechsle nach Möglichkeit auf 5- oder 6-GHz-WLAN.</string>
     <string name="eval_reco_lower_bitrate">Reduziere bei Bildaussetzern die Streaming-Bitrate.</string>
     <string name="eval_reco_reduce_interference">Verringere Funkstörungen oder verwende eine kabelgebundene Verbindung.</string>
