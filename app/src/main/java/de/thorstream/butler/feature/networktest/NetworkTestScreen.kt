@@ -48,11 +48,15 @@ import java.util.Locale
 fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val wifiPermission = if (Build.VERSION.SDK_INT >= 33) Manifest.permission.NEARBY_WIFI_DEVICES else Manifest.permission.ACCESS_FINE_LOCATION
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { viewModel.startTest() }
+    val wifiPermissions = if (Build.VERSION.SDK_INT >= 33) {
+        arrayOf(Manifest.permission.NEARBY_WIFI_DEVICES)
+    } else {
+        arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { viewModel.startTest() }
     val startWithPermission = {
-        if (ContextCompat.checkSelfPermission(context, wifiPermission) == PackageManager.PERMISSION_GRANTED) viewModel.startTest()
-        else permissionLauncher.launch(wifiPermission)
+        if (wifiPermissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) viewModel.startTest()
+        else permissionLauncher.launch(wifiPermissions)
     }
 
     Column(
@@ -137,4 +141,3 @@ private fun qualityColor(quality: NetworkQuality): Color = when (quality) {
     NetworkQuality.PROBLEMATIC -> ThorRed
     NetworkQuality.NOT_MEASURABLE -> ThorGray
 }
-

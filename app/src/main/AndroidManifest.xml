@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Required for diagnostics, reachability tests and Wake-on-LAN. -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -12,8 +13,12 @@
     <!-- Android 13+: requested only when the user asks for SSID-related diagnostics. -->
     <uses-permission
         android:name="android.permission.NEARBY_WIFI_DEVICES"
-        android:usesPermissionFlags="neverForLocation" />
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="s" />
     <!-- Android 12 and lower: SSID may require location permission. -->
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"
+        android:maxSdkVersion="32" />
     <uses-permission
         android:name="android.permission.ACCESS_FINE_LOCATION"
         android:maxSdkVersion="32" />
@@ -29,6 +34,8 @@
     <application
         android:name=".ThorStreamButlerApplication"
         android:allowBackup="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
         android:icon="@drawable/ic_thor_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"

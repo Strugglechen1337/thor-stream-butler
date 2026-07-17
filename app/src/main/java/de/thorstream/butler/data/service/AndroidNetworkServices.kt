@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
@@ -165,8 +166,8 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN) -> ConnectionType.VPN
                 else -> ConnectionType.OTHER
             }
-            val wifiInfo = (capabilities.transportInfo as? WifiInfo) ?: legacyWifiInfo(type)
-            val ssid = wifiInfo?.ssid?.takeUnless { it == WifiManager.UNKNOWN_SSID || it == "<unknown ssid>" }?.trim('"')
+            val wifiInfo = if (Build.VERSION.SDK_INT >= 29) capabilities.transportInfo as? WifiInfo else legacyWifiInfo(type)
+            val ssid = wifiInfo?.ssid?.takeUnless { it == "<unknown ssid>" }?.trim('"')
             val localIp = properties?.linkAddresses?.firstOrNull { it.address is Inet4Address }?.address?.hostAddress
             val gateway = properties?.routes?.firstOrNull { it.isDefaultRoute && it.gateway is Inet4Address }?.gateway?.hostAddress
             AppResult.Success(

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="1280" viewBox="0 0 720 1280">
+  <rect width="720" height="1280" fill="#090b11"/>
+  <text x="42" y="70" fill="#72e6ff" font-family="sans-serif" font-size="18" font-weight="700">THOR // DIAGNOSE</text>
+  <text x="42" y="124" fill="#f1f5f9" font-family="sans-serif" font-size="40" font-weight="800">Netzwerktest</text>
+  <rect x="42" y="164" width="636" height="214" rx="24" fill="#141824"/>
+  <text x="70" y="218" fill="#f1f5f9" font-family="sans-serif" font-size="24" font-weight="700">Test abgeschlossen</text>
+  <rect x="70" y="252" width="580" height="10" rx="5" fill="#72e6ff"/>
+  <rect x="70" y="292" width="232" height="54" rx="18" fill="#203846"/>
+  <text x="186" y="327" fill="#72e6ff" font-family="sans-serif" font-size="18" text-anchor="middle" font-weight="700">ERNEUT TESTEN</text>
+  <rect x="42" y="406" width="636" height="180" rx="24" fill="#141824"/>
+  <text x="70" y="462" fill="#4ade80" font-family="sans-serif" font-size="30" font-weight="800">Optimal</text>
+  <text x="70" y="504" fill="#cbd5e1" font-family="sans-serif" font-size="19">Die Verbindung ist für Gaming-Streaming</text>
+  <text x="70" y="534" fill="#cbd5e1" font-family="sans-serif" font-size="19">sehr gut geeignet.</text>
+  <g fill="#141824">
+    <rect x="42" y="616" width="302" height="116" rx="20"/><rect x="376" y="616" width="302" height="116" rx="20"/>
+    <rect x="42" y="752" width="302" height="116" rx="20"/><rect x="376" y="752" width="302" height="116" rx="20"/>
+  </g>
+  <text x="70" y="660" fill="#94a3b8" font-family="sans-serif" font-size="16">LATENZ</text><text x="70" y="704" fill="#f1f5f9" font-family="sans-serif" font-size="25" font-weight="700">18,4 ms</text>
+  <text x="404" y="660" fill="#94a3b8" font-family="sans-serif" font-size="16">JITTER</text><text x="404" y="704" fill="#f1f5f9" font-family="sans-serif" font-size="25" font-weight="700">2,1 ms</text>
+  <text x="360" y="1180" fill="#64748b" font-family="sans-serif" font-size="20" text-anchor="middle">SCREENSHOT-PLATZHALTER · PORTRAIT</text>
+</svg>
+
