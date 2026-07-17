@@ -8,7 +8,7 @@
     ·
     <a href="https://strugglechen1337.github.io/thor-stream-butler/de/"><strong>Deutsche Website</strong></a>
     ·
-    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.2.0-alpha.1"><strong>Download v0.2.0-alpha.1</strong></a>
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1"><strong>Download v0.3.0-alpha.1</strong></a>
     ·
     <a href="#build"><strong>Build guide</strong></a>
     ·
@@ -43,7 +43,7 @@ similar devices running Android 9 or newer.
 ### Alpha download
 
 The current installable development preview is available as
-[v0.2.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.2.0-alpha.1)
+[v0.3.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1)
 for Android 9 and newer. Download the APK and its SHA-256 checksum from the
 release assets. The in-app interface is fully localized in English and German:
 English is the default, German follows the system or per-app language setting
@@ -397,7 +397,7 @@ und vergleichbaren Geräten ab Android 9.
 ### Alpha-Download
 
 Die aktuelle installierbare Entwicklungsvorschau steht als
-[v0.2.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.2.0-alpha.1)
+[v0.3.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1)
 für Android 9 und neuer bereit. Lade die APK und ihre SHA-256-Prüfsumme aus den
 Release-Dateien herunter. Die App-Oberfläche ist vollständig auf Englisch und
 Deutsch lokalisiert: Englisch ist der Standard, Deutsch folgt der Systemsprache

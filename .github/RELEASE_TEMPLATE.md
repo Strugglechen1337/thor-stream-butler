@@ -26,7 +26,7 @@ wenn ein Abschnitt fehlt.
 
 ### Installation or update
 
-1. Download the signed APK attached to this release.
+1. Download the APK attached to this release and check the signature type documented above.
 2. Verify the published SHA-256 checksum.
 3. Install or update the app through Android.
 
@@ -57,7 +57,7 @@ measurements and configured hosts stay local on the device.
 
 ### Installation oder Update
 
-1. Lade die signierte APK aus diesem Release herunter.
+1. Lade die APK aus diesem Release herunter und beachte den oben dokumentierten Signaturtyp.
 2. Prüfe die veröffentlichte SHA-256-Prüfsumme.
 3. Installiere oder aktualisiere die App über Android.
 
