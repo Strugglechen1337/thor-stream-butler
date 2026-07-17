@@ -159,11 +159,19 @@
     <string name="history_clear">Clear history</string>
     <string name="history_empty_title">No measurements saved yet</string>
     <string name="history_empty_hint">Run a network test to build up a history.</string>
+    <string name="history_filter_empty">No measurements match this filter.</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_host">With host</string>
+    <string name="history_summary_title">Summary · %1$d measurements</string>
+    <string name="history_summary_metrics">Average latency %1$s · Jitter %2$s · Loss %3$s</string>
+    <string name="history_latency_trend">Latency trend · oldest to newest</string>
+    <string name="history_host_label">host test</string>
     <string name="history_metrics">Latency %1$s · Jitter %2$s · Loss %3$s</string>
     <string name="history_trend_first">First comparable measurement</string>
     <string name="history_trend_flat">Latency largely unchanged</string>
     <string name="history_trend_improved">Latency improved by %1$s ms</string>
     <string name="history_trend_worse">Latency worsened by %1$s ms</string>
+    <string name="history_trend_unavailable">No comparable latency value</string>
 
     <!-- Settings -->
     <string name="settings_kicker">THOR // CONFIGURATION</string>
@@ -189,6 +197,8 @@
     <string name="settings_download_hint">Optional HTTPS test; transfers test data and is off by default</string>
     <string name="settings_logging_title">Diagnostic log</string>
     <string name="settings_logging_hint">Technical states only, no IPs, SSIDs, or MAC addresses</string>
+    <string name="settings_logging_count">%1$d local event(s), maximum 200</string>
+    <string name="settings_logging_clear">Clear log</string>
     <string name="settings_group_appearance">Appearance and input</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_dark">Thor Dark</string>

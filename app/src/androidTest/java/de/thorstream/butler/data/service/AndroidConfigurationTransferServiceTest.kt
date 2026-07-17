@@ -15,6 +15,9 @@ import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.repository.SettingsRepository
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogEntry
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -50,7 +53,7 @@ class AndroidConfigurationTransferServiceTest {
         val hosts = RoomLocalHostRepository(database.localHostDao(), database.streamingEntryDao())
         val history = RoomNetworkHistoryRepository(database.networkMeasurementDao())
         val settings = InMemorySettingsRepository()
-        val service = AndroidConfigurationTransferService(context, entries, hosts, history, settings, TestStrings())
+        val service = AndroidConfigurationTransferService(context, entries, hosts, history, settings, TestStrings(), TestDiagnosticLogRepository())
         val hostId = hosts.save(LocalHost(name = "Gaming PC", address = "gaming-pc.local", port = 47989))
         entries.save(StreamingEntry(displayName = "Moonlight", packageName = "com.limelight", hostId = hostId))
 
@@ -73,5 +76,11 @@ class AndroidConfigurationTransferServiceTest {
 
     private class TestStrings : StringProvider {
         override fun get(resId: Int, vararg args: Any): String = "error:$resId"
+    }
+
+    private class TestDiagnosticLogRepository : DiagnosticLogRepository {
+        override suspend fun log(event: DiagnosticEvent) = Unit
+        override suspend fun read(): List<DiagnosticLogEntry> = emptyList()
+        override suspend fun clear() = Unit
     }
 }

@@ -19,6 +19,8 @@ import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.model.StreamingProfile
 import de.thorstream.butler.domain.model.StreamingType
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.LocalHostRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
@@ -80,6 +82,7 @@ class DashboardViewModel @Inject constructor(
     private val qualityEvaluator: QualityEvaluator,
     private val recommendationEngine: StreamingRecommendationEngine,
     private val wakeOnLanService: WakeOnLanService,
+    private val diagnosticLogRepository: DiagnosticLogRepository,
     private val strings: StringProvider,
 ) : ViewModel() {
     private val localState = MutableStateFlow(DashboardUiState())
@@ -140,6 +143,7 @@ class DashboardViewModel @Inject constructor(
     fun launch(entry: StreamingEntry) {
         preLaunchJob?.cancel()
         preLaunchJob = viewModelScope.launch {
+            diagnosticLogRepository.log(DiagnosticEvent.APP_LAUNCH_REQUESTED)
             val settings = settingsRepository.settings.first()
             if (!settings.preLaunchCheckEnabled) {
                 launchTarget(entry, null)
@@ -208,6 +212,7 @@ class DashboardViewModel @Inject constructor(
     private fun launchTarget(entry: StreamingEntry, quality: NetworkQuality?) {
         when (val result = installedAppsRepository.launch(entry.packageName)) {
             is AppResult.Success -> viewModelScope.launch {
+                diagnosticLogRepository.log(DiagnosticEvent.APP_LAUNCH_SUCCEEDED)
                 entriesRepository.markLaunched(entry.id, System.currentTimeMillis(), quality?.name ?: entry.lastNetworkQuality?.name)
                 localState.value = localState.value.copy(preLaunch = null)
             }
@@ -261,7 +266,10 @@ class DashboardViewModel @Inject constructor(
         }
         viewModelScope.launch {
             localState.value = when (val result = wakeOnLanService.sendMagicPacket(mac, host.broadcastAddress)) {
-                is AppResult.Success -> localState.value.copy(message = strings.get(R.string.hosts_msg_wol_sent, host.name))
+                is AppResult.Success -> {
+                    diagnosticLogRepository.log(DiagnosticEvent.WAKE_ON_LAN_SENT)
+                    localState.value.copy(message = strings.get(R.string.hosts_msg_wol_sent, host.name))
+                }
                 is AppResult.Failure -> localState.value.copy(message = result.error.message)
             }
         }

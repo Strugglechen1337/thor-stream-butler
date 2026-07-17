@@ -57,6 +57,7 @@ import java.util.Locale
 fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val transferState by viewModel.transferState.collectAsStateWithLifecycle()
+    val diagnosticLogCount by viewModel.diagnosticLogCount.collectAsStateWithLifecycle()
     var confirmClear by remember { mutableStateOf(false) }
     var confirmImport by remember { mutableStateOf(false) }
     var includeHistory by remember { mutableStateOf(false) }
@@ -119,6 +120,17 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             }
             SettingSwitch(stringResource(R.string.settings_logging_title), stringResource(R.string.settings_logging_hint), settings.diagnosticLoggingEnabled) {
                 viewModel.update { current -> current.copy(diagnosticLoggingEnabled = it) }
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.settings_logging_count, diagnosticLogCount),
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                FilledTonalButton(onClick = viewModel::clearDiagnosticLog, enabled = diagnosticLogCount > 0) {
+                    Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
+                    Text(" " + stringResource(R.string.settings_logging_clear))
+                }
             }
         }
 

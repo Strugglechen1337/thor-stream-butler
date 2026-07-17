@@ -46,3 +46,32 @@ interface SettingsRepository {
     val settings: Flow<AppSettings>
     suspend fun update(settings: AppSettings)
 }
+
+enum class DiagnosticEvent {
+    TEST_STARTED,
+    CONNECTION_READ,
+    TEST_FAILED,
+    DNS_CHECKED,
+    LATENCY_MEASURED,
+    HOST_CHECKED,
+    DOWNLOAD_MEASURED,
+    TEST_COMPLETED,
+    APP_LAUNCH_REQUESTED,
+    APP_LAUNCH_SUCCEEDED,
+    WAKE_ON_LAN_SENT,
+    HOST_DISCOVERY_STARTED,
+    HOST_DISCOVERY_COMPLETED,
+    CONFIGURATION_EXPORTED,
+    CONFIGURATION_IMPORTED,
+}
+
+data class DiagnosticLogEntry(
+    val timestamp: Long,
+    val event: DiagnosticEvent,
+)
+
+interface DiagnosticLogRepository {
+    suspend fun log(event: DiagnosticEvent)
+    suspend fun read(): List<DiagnosticLogEntry>
+    suspend fun clear()
+}

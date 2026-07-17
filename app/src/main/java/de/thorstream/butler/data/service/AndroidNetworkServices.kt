@@ -15,6 +15,8 @@ import de.thorstream.butler.core.network.ConnectionTypeResolver
 import de.thorstream.butler.core.network.NetworkCalculations
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.service.DiagnosticProgress
 import de.thorstream.butler.domain.service.DiagnosticStep
 import de.thorstream.butler.domain.service.HostDiscoveryService
@@ -154,6 +156,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
     private val pingService: PingService,
     private val speedTestService: SpeedTestService,
     private val hostDiscoveryService: HostDiscoveryService,
+    private val diagnosticLogRepository: DiagnosticLogRepository,
 ) : NetworkDiagnosticsService {
     private val connectivityManager get() = context.getSystemService(ConnectivityManager::class.java)
 
@@ -208,20 +211,24 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
         includeDownloadTest: Boolean,
         testDurationSeconds: Int,
     ): Flow<DiagnosticProgress> = flow {
+        diagnosticLogRepository.log(DiagnosticEvent.TEST_STARTED)
         emit(DiagnosticProgress(DiagnosticStep.DETECTING_CONNECTION, 0.05f))
         val base = when (val result = readConnectionSnapshot()) {
             is AppResult.Success -> result.value
             is AppResult.Failure -> {
+                diagnosticLogRepository.log(DiagnosticEvent.TEST_FAILED)
                 emit(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, errorMessage = result.error.message, completed = true))
                 return@flow
             }
         }
+        diagnosticLogRepository.log(DiagnosticEvent.CONNECTION_READ)
         emit(DiagnosticProgress(DiagnosticStep.CONNECTION_READ, 0.2f, base))
 
         val dnsReachable = withContext(Dispatchers.IO) {
             withTimeoutOrNull(2_500) { InetAddress.getByName("example.com"); true } ?: false
         }
         var snapshot = base.copy(dnsReachable = dnsReachable)
+        diagnosticLogRepository.log(DiagnosticEvent.DNS_CHECKED)
         emit(DiagnosticProgress(DiagnosticStep.DNS_CHECKED, 0.35f, snapshot))
 
         snapshot = when (val ping = pingService.ping(target, pingCount.coerceIn(1, 20))) {
@@ -232,6 +239,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
             )
             is AppResult.Failure -> snapshot
         }
+        diagnosticLogRepository.log(DiagnosticEvent.LATENCY_MEASURED)
         emit(DiagnosticProgress(DiagnosticStep.LATENCY_MEASURED, 0.68f, snapshot))
 
         if (host != null) {
@@ -240,6 +248,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
                 is AppResult.Failure -> false
             }
             snapshot = snapshot.copy(host = host, hostReachable = reachable)
+            diagnosticLogRepository.log(DiagnosticEvent.HOST_CHECKED)
             emit(DiagnosticProgress(DiagnosticStep.HOST_CHECKED, 0.82f, snapshot))
         }
 
@@ -249,8 +258,10 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
                 is AppResult.Failure -> null
             }
             snapshot = snapshot.copy(downloadMbps = speed)
+            diagnosticLogRepository.log(DiagnosticEvent.DOWNLOAD_MEASURED)
             emit(DiagnosticProgress(DiagnosticStep.DOWNLOAD_MEASURED, 0.94f, snapshot))
         }
+        diagnosticLogRepository.log(DiagnosticEvent.TEST_COMPLETED)
         emit(DiagnosticProgress(DiagnosticStep.COMPLETED, 1f, snapshot, completed = true))
     }
 }

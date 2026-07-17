@@ -159,11 +159,19 @@
     <string name="history_clear">Verlauf löschen</string>
     <string name="history_empty_title">Noch keine Messungen gespeichert</string>
     <string name="history_empty_hint">Starte einen Netzwerktest, um einen Verlauf aufzubauen.</string>
+    <string name="history_filter_empty">Keine Messungen entsprechen diesem Filter.</string>
+    <string name="history_filter_all">Alle</string>
+    <string name="history_filter_host">Mit Host</string>
+    <string name="history_summary_title">Zusammenfassung · %1$d Messungen</string>
+    <string name="history_summary_metrics">Ø Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
+    <string name="history_latency_trend">Latenzverlauf · älteste bis neueste Messung</string>
+    <string name="history_host_label">Host-Test</string>
     <string name="history_metrics">Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
     <string name="history_trend_first">Erste vergleichbare Messung</string>
     <string name="history_trend_flat">Latenz weitgehend unverändert</string>
     <string name="history_trend_improved">Latenz um %1$s ms verbessert</string>
     <string name="history_trend_worse">Latenz um %1$s ms verschlechtert</string>
+    <string name="history_trend_unavailable">Kein vergleichbarer Latenzwert</string>
 
     <!-- Settings -->
     <string name="settings_kicker">THOR // KONFIGURATION</string>
@@ -189,6 +197,8 @@
     <string name="settings_download_hint">Optionaler HTTPS-Test; überträgt Testdaten und ist standardmäßig aus</string>
     <string name="settings_logging_title">Diagnoseprotokoll</string>
     <string name="settings_logging_hint">Nur technische Zustände, keine IPs, SSIDs oder MAC-Adressen</string>
+    <string name="settings_logging_count">%1$d lokale Ereignisse, maximal 200</string>
+    <string name="settings_logging_clear">Protokoll löschen</string>
     <string name="settings_group_appearance">Darstellung und Bedienung</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_dark">Thor Dark</string>

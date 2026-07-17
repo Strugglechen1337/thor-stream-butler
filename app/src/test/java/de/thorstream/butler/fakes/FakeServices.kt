@@ -8,6 +8,9 @@ import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.repository.LocalHostRepository
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogEntry
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.service.DiagnosticProgress
@@ -71,6 +74,13 @@ class FakeHistoryRepository : NetworkHistoryRepository {
     }
     override suspend fun replaceAll(measurements: List<NetworkMeasurement>) { values.value = measurements }
     override suspend fun clear() { values.value = emptyList() }
+}
+
+class FakeDiagnosticLogRepository : DiagnosticLogRepository {
+    val values = mutableListOf<DiagnosticLogEntry>()
+    override suspend fun log(event: DiagnosticEvent) { values += DiagnosticLogEntry(System.currentTimeMillis(), event) }
+    override suspend fun read(): List<DiagnosticLogEntry> = values.toList()
+    override suspend fun clear() { values.clear() }
 }
 
 class FakeLocalHostRepository : LocalHostRepository {

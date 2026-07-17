@@ -8,6 +8,7 @@ import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.service.ConfigurationTransferService
 import javax.inject.Inject
@@ -28,10 +29,16 @@ class SettingsViewModel @Inject constructor(
     private val historyRepository: NetworkHistoryRepository,
     private val configurationTransferService: ConfigurationTransferService,
     private val strings: StringProvider,
+    private val diagnosticLogRepository: DiagnosticLogRepository,
 ) : ViewModel() {
     val settings: StateFlow<AppSettings> = repository.settings
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppSettings())
     val transferState = MutableStateFlow(TransferUiState())
+    val diagnosticLogCount = MutableStateFlow(0)
+
+    init {
+        refreshDiagnosticLogCount()
+    }
 
     fun update(transform: (AppSettings) -> AppSettings) {
         viewModelScope.launch { repository.update(transform(settings.value)) }
@@ -39,6 +46,17 @@ class SettingsViewModel @Inject constructor(
 
     fun clearHistory() {
         viewModelScope.launch { historyRepository.clear() }
+    }
+
+    fun refreshDiagnosticLogCount() {
+        viewModelScope.launch { diagnosticLogCount.value = diagnosticLogRepository.read().size }
+    }
+
+    fun clearDiagnosticLog() {
+        viewModelScope.launch {
+            diagnosticLogRepository.clear()
+            diagnosticLogCount.value = 0
+        }
     }
 
     fun exportConfiguration(documentUri: String, includeHistory: Boolean) {

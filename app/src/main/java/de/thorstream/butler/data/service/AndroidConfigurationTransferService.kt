@@ -21,6 +21,8 @@ import de.thorstream.butler.domain.model.StreamingResolution
 import de.thorstream.butler.domain.model.StreamingType
 import de.thorstream.butler.domain.model.ThemePreference
 import de.thorstream.butler.domain.repository.LocalHostRepository
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
@@ -43,6 +45,7 @@ class AndroidConfigurationTransferService @Inject constructor(
     private val historyRepository: NetworkHistoryRepository,
     private val settingsRepository: SettingsRepository,
     private val strings: StringProvider,
+    private val diagnosticLogRepository: DiagnosticLogRepository,
 ) : ConfigurationTransferService {
     override suspend fun exportTo(documentUri: String, includeHistory: Boolean): AppResult<ConfigurationTransferSummary> = withContext(Dispatchers.IO) {
         try {
@@ -62,6 +65,7 @@ class AndroidConfigurationTransferService @Inject constructor(
             context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter(Charsets.UTF_8)?.use { writer ->
                 writer.write(root.toString(2))
             } ?: throw IOException("Unable to open output document")
+            diagnosticLogRepository.log(DiagnosticEvent.CONFIGURATION_EXPORTED)
             AppResult.Success(ConfigurationTransferSummary(entries.size, hosts.size, history.size))
         } catch (error: Throwable) {
             if (error is kotlinx.coroutines.CancellationException) throw error
@@ -88,6 +92,7 @@ class AndroidConfigurationTransferService @Inject constructor(
             entriesRepository.replaceAll(entries)
             settingsRepository.update(settings)
             history?.let { historyRepository.replaceAll(it) }
+            diagnosticLogRepository.log(DiagnosticEvent.CONFIGURATION_IMPORTED)
             AppResult.Success(ConfigurationTransferSummary(entries.size, hosts.size, history?.size ?: 0))
         } catch (error: Throwable) {
             if (error is kotlinx.coroutines.CancellationException) throw error

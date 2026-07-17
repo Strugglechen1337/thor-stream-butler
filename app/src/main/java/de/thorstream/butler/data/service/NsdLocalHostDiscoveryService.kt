@@ -9,6 +9,8 @@ import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.service.DiscoveredHost
+import de.thorstream.butler.domain.repository.DiagnosticEvent
+import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.service.LocalHostDiscoveryService
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
@@ -28,16 +30,19 @@ import kotlinx.coroutines.withTimeoutOrNull
 class NsdLocalHostDiscoveryService @Inject constructor(
     @ApplicationContext context: Context,
     private val strings: StringProvider,
+    private val diagnosticLogRepository: DiagnosticLogRepository,
 ) : LocalHostDiscoveryService {
     private val nsdManager = context.getSystemService(NsdManager::class.java)
     private val resolveMutex = Mutex()
 
     override suspend fun discover(timeoutMillis: Long): AppResult<List<DiscoveredHost>> = try {
+        diagnosticLogRepository.log(DiagnosticEvent.HOST_DISCOVERY_STARTED)
         val values = withTimeoutOrNull(timeoutMillis.coerceIn(2_000, 30_000)) {
             discoveryFlow().toList()
         }.orEmpty()
             .distinctBy { "${it.address}:${it.port}" }
             .sortedBy { it.name.lowercase() }
+        diagnosticLogRepository.log(DiagnosticEvent.HOST_DISCOVERY_COMPLETED)
         AppResult.Success(values)
     } catch (error: Throwable) {
         if (error is CancellationException) throw error
