@@ -3,6 +3,7 @@ package de.thorstream.butler.data.repository
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
@@ -23,7 +24,12 @@ class AndroidInstalledAppsRepository @Inject constructor(
     override suspend fun getLaunchableApps(): AppResult<List<InstalledApp>> = withContext(Dispatchers.IO) {
         try {
             val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER)
-            val resolved = packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+            @Suppress("DEPRECATION")
+            val resolved = if (Build.VERSION.SDK_INT >= 33) {
+                packageManager.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0))
+            } else {
+                packageManager.queryIntentActivities(intent, 0)
+            }
             AppResult.Success(
                 resolved.asSequence()
                     .filter { it.activityInfo.packageName != context.packageName }
@@ -61,4 +67,3 @@ class AndroidInstalledAppsRepository @Inject constructor(
         }
     }
 }
-

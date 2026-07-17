@@ -87,5 +87,10 @@ class HostsViewModel @Inject constructor(
     fun consumeMessage() {
         localState.value = localState.value.copy(message = null)
     }
-}
 
+    fun reportLocalNetworkPermissionDenied() {
+        localState.value = localState.value.copy(
+            message = "Ohne Zugriff auf das lokale Netzwerk kann Android 17 Hosts weder testen noch aufwecken.",
+        )
+    }
+}

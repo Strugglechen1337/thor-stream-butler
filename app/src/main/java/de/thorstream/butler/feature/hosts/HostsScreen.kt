@@ -1,5 +1,9 @@
 package de.thorstream.butler.feature.hosts
 
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -46,6 +50,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.thorstream.butler.core.designsystem.ThorCyan
@@ -63,6 +69,21 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
     val snackbar = remember { SnackbarHostState() }
     var editedHost by remember { mutableStateOf<LocalHost?>(null) }
     var showEditor by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val localNetworkPermission = "android.permission.ACCESS_LOCAL_NETWORK"
+    var pendingLocalAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+    val localPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) pendingLocalAction?.invoke() else viewModel.reportLocalNetworkPermissionDenied()
+        pendingLocalAction = null
+    }
+    val withLocalNetworkPermission: (() -> Unit) -> Unit = { action ->
+        if (Build.VERSION.SDK_INT < 37 || ContextCompat.checkSelfPermission(context, localNetworkPermission) == PackageManager.PERMISSION_GRANTED) {
+            action()
+        } else {
+            pendingLocalAction = action
+            localPermissionLauncher.launch(localNetworkPermission)
+        }
+    }
 
     LaunchedEffect(state.message) {
         state.message?.let { snackbar.showSnackbar(it); viewModel.consumeMessage() }
@@ -92,8 +113,8 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
                     HostCard(
                         host = host,
                         testing = state.testingHostId == host.id,
-                        onTest = { viewModel.test(host) },
-                        onWake = { viewModel.wake(host) },
+                        onTest = { withLocalNetworkPermission { viewModel.test(host) } },
+                        onWake = { withLocalNetworkPermission { viewModel.wake(host) } },
                         onEdit = { editedHost = host; showEditor = true },
                         onDelete = { viewModel.delete(host) },
                     )
@@ -213,4 +234,3 @@ private fun HostEditorDialog(host: LocalHost?, onDismiss: () -> Unit, onSave: (L
 }
 
 private fun statusColor(reachable: Boolean?): Color = when (reachable) { true -> ThorGreen; false -> ThorRed; null -> ThorGray }
-

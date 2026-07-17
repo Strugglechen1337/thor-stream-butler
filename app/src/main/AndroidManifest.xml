@@ -7,6 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!-- Required for Wi-Fi link data. SSID access is additionally runtime-restricted. -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Android 17+: required at runtime only for explicit TCP/UDP access to local hosts. -->
+    <uses-permission android:name="android.permission.ACCESS_LOCAL_NETWORK" />
     <!-- Android 13+: requested only when the user asks for SSID-related diagnostics. -->
     <uses-permission
         android:name="android.permission.NEARBY_WIFI_DEVICES"
@@ -43,4 +45,3 @@
     </application>
 
 </manifest>
-

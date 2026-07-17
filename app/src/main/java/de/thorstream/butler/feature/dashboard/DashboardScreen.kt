@@ -157,6 +157,7 @@ private fun PreLaunchDialog(
 ) {
     val assessment = state.assessment
     val requiresDecision = assessment?.quality == NetworkQuality.PROBLEMATIC || assessment?.quality == NetworkQuality.NOT_MEASURABLE
+    val canManuallyLaunch = assessment != null && !state.autoLaunching
     AlertDialog(
         onDismissRequest = { if (!state.autoLaunching) onCancel() },
         title = { Text(if (assessment == null) "Netzwerkcheck" else assessment.quality.displayName) },
@@ -178,7 +179,9 @@ private fun PreLaunchDialog(
             }
         },
         confirmButton = {
-            if (requiresDecision) Button(onClick = onLaunchAnyway) { Text("Trotzdem starten") }
+            if (canManuallyLaunch) {
+                Button(onClick = onLaunchAnyway) { Text(if (requiresDecision) "Trotzdem starten" else "Starten") }
+            }
         },
         dismissButton = {
             if (requiresDecision) {

@@ -36,7 +36,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 @Singleton
 class AndroidPingService @Inject constructor() : PingService {
@@ -52,8 +52,8 @@ class AndroidPingService @Inject constructor() : PingService {
                     "/system/bin/ping", "-c", "1", "-W", ((timeoutMillis + 999) / 1000).toString(), host,
                 ).redirectErrorStream(true).start()
                 try {
-                    val output = withTimeout(timeoutMillis.toLong() + 750L) { process.inputStream.bufferedReader().use { it.readText() } }
-                    timeRegex.find(output)?.groupValues?.getOrNull(1)?.toDoubleOrNull()?.let(latencies::add)
+                    val output = withTimeoutOrNull(timeoutMillis.toLong() + 750L) { process.inputStream.bufferedReader().use { it.readText() } }
+                    output?.let { timeRegex.find(it)?.groupValues?.getOrNull(1)?.toDoubleOrNull() }?.let(latencies::add)
                 } finally {
                     process.destroy()
                 }
@@ -213,7 +213,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
         emit(DiagnosticProgress("Verbindungsdaten gelesen", 0.2f, base))
 
         val dnsReachable = withContext(Dispatchers.IO) {
-            runCatching { withTimeout(2_500) { InetAddress.getByName("example.com") }; true }.getOrDefault(false)
+            withTimeoutOrNull(2_500) { InetAddress.getByName("example.com"); true } ?: false
         }
         var snapshot = base.copy(dnsReachable = dnsReachable)
         emit(DiagnosticProgress("DNS geprüft", 0.35f, snapshot))

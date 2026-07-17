@@ -164,7 +164,7 @@ class DashboardViewModel @Inject constructor(
                 entriesRepository.markLaunched(entry.id, System.currentTimeMillis(), quality?.name ?: entry.lastNetworkQuality?.name)
                 localState.value = localState.value.copy(preLaunch = null)
             }
-            is AppResult.Failure -> localState.value = localState.value.copy(message = result.error.message)
+            is AppResult.Failure -> localState.value = localState.value.copy(message = result.error.message, preLaunch = null)
         }
     }
 
