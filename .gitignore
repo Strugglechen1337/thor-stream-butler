@@ -7,3 +7,6 @@ build/
 captures/
 local.properties
 app/build/
+
+# Release signing (keystore + credentials, never commit)
+signing/

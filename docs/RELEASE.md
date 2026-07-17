@@ -80,3 +80,52 @@ echter Hardware nicht geprüft wurde.
 2. Englische und deutsche Projektseite prüfen.
 3. Sicherstellen, dass Android CI und GitHub Pages grün sind.
 4. Den neuen Release-Link in der README ergänzen, sobald Downloads verfügbar sind.
+
+## Signing setup / Signing-Einrichtung
+
+### English
+
+Local signed builds read `signing/keystore.properties` (the whole `signing/`
+directory is gitignored — back up the keystore externally, otherwise future
+app updates become impossible):
+
+```properties
+storeFile=thor-stream-release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Place the keystore at `signing/thor-stream-release.jks` and run
+`./gradlew assembleRelease`. Without these values the release build stays
+unsigned; debug builds are unaffected.
+
+The `Release` workflow (`.github/workflows/release.yml`) builds and publishes a
+signed APK plus SHA-256 checksum for every `v*` tag. It requires the repository
+secrets `SIGNING_KEYSTORE_BASE64` (base64 of the keystore file),
+`SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, and `SIGNING_KEY_PASSWORD`, and
+bilingual release notes at `docs/release-notes/<tag>.md`.
+
+### Deutsch
+
+Lokale signierte Builds lesen `signing/keystore.properties` (das gesamte
+`signing/`-Verzeichnis ist gitignored — Keystore unbedingt extern sichern,
+sonst sind keine App-Updates mehr möglich):
+
+```properties
+storeFile=thor-stream-release.jks
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
+Den Keystore unter `signing/thor-stream-release.jks` ablegen und
+`./gradlew assembleRelease` ausführen. Ohne diese Werte bleibt der
+Release-Build unsigniert; Debug-Builds sind nicht betroffen.
+
+Der `Release`-Workflow (`.github/workflows/release.yml`) baut und
+veröffentlicht für jeden `v*`-Tag eine signierte APK samt SHA-256-Prüfsumme.
+Er benötigt die Repository-Secrets `SIGNING_KEYSTORE_BASE64` (Base64 der
+Keystore-Datei), `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` und
+`SIGNING_KEY_PASSWORD` sowie zweisprachige Release Notes unter
+`docs/release-notes/<tag>.md`.

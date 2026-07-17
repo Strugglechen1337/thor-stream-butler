@@ -1,0 +1,125 @@
+# Builds a signed release APK and attaches it to the GitHub release
+# whenever a version tag (v*) is pushed.
+#
+# Required repository secrets:
+#   SIGNING_KEYSTORE_BASE64   – base64 of signing/thor-stream-release.jks
+#   SIGNING_STORE_PASSWORD    – keystore password
+#   SIGNING_KEY_ALIAS         – key alias
+#   SIGNING_KEY_PASSWORD      – key password
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build, e.g. v0.2.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android 17 SDK
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x gradlew
+
+      - name: Validate signing secrets
+        run: |
+          missing=0
+          for name in SIGNING_KEYSTORE_BASE64 SIGNING_STORE_PASSWORD SIGNING_KEY_ALIAS SIGNING_KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::$name is not configured."
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Decode keystore
+        run: |
+          mkdir -p signing
+          echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > signing/thor-stream-release.jks
+        env:
+          SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
+
+      - name: Run unit tests
+        run: ./gradlew :app:testDebugUnitTest
+
+      - name: Build signed release APK
+        run: ./gradlew :app:assembleRelease
+        env:
+          SIGNING_STORE_FILE: thor-stream-release.jks
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+
+      - name: Rename APK and create checksum
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk \
+             "ThorStreamButler-${RELEASE_TAG}.apk"
+          sha256sum "ThorStreamButler-${RELEASE_TAG}.apk" > "ThorStreamButler-${RELEASE_TAG}.apk.sha256"
+
+      - name: Prepare release notes
+        run: |
+          notes_path="docs/release-notes/${RELEASE_TAG}.md"
+          if [ -f "$notes_path" ]; then
+            cp "$notes_path" release-notes.md
+          elif gh release view "$RELEASE_TAG" --json body --jq .body > release-notes.md; then
+            if [ ! -s release-notes.md ]; then
+              echo "::error::Existing release has empty notes."
+              exit 1
+            fi
+          else
+            echo "::error::Missing $notes_path. Release notes must be bilingual (EN/DE)."
+            exit 1
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          body_path: release-notes.md
+          files: |
+            ThorStreamButler-${{ env.RELEASE_TAG }}.apk
+            ThorStreamButler-${{ env.RELEASE_TAG }}.apk.sha256
+          overwrite_files: true
