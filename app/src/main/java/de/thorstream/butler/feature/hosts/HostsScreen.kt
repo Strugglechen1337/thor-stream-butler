@@ -48,13 +48,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.thorstream.butler.R
 import de.thorstream.butler.core.designsystem.ThorCyan
+import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.core.designsystem.ThorGray
 import de.thorstream.butler.core.designsystem.ThorGreen
 import de.thorstream.butler.core.designsystem.ThorRed
@@ -93,19 +96,19 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
         SnackbarHost(snackbar)
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("THOR // HOSTS", color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                Text("Lokale Streaming-Hosts", style = MaterialTheme.typography.headlineLarge)
+                Text(stringResource(R.string.hosts_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.hosts_title), style = MaterialTheme.typography.headlineLarge)
             }
             Button(onClick = { editedHost = null; showEditor = true }) {
                 Icon(Icons.Rounded.Add, contentDescription = null)
-                Text(" Host anlegen")
+                Text(" " + stringResource(R.string.hosts_create))
             }
         }
         if (state.hosts.isEmpty()) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Rounded.Router, contentDescription = null, modifier = Modifier.size(64.dp), tint = ThorGray)
-                Text("Noch kein lokaler Host", style = MaterialTheme.typography.titleLarge)
-                Text("Lege deinen Sunshine-, Moonlight- oder Remote-Play-Host an.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.hosts_empty_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.hosts_empty_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -139,28 +142,31 @@ private fun HostCard(host: LocalHost, testing: Boolean, onTest: () -> Unit, onWa
                 Icon(Icons.Rounded.Router, contentDescription = null, tint = statusColor(host.lastReachable), modifier = Modifier.size(38.dp))
                 Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
                     Text(host.name, style = MaterialTheme.typography.titleLarge)
-                    Text("${host.address}${host.port?.let { ":$it" }.orEmpty()} · ${host.streamingType.displayName}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("${host.address}${host.port?.let { ":$it" }.orEmpty()} · ${host.streamingType.label()}", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Text(
                         when (host.lastReachable) {
-                            true -> "Zuletzt erreichbar${host.lastSuccessfulTestAt?.let { " · ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))}" }.orEmpty()}"
-                            false -> "Beim letzten Test nicht erreichbar"
-                            null -> "Noch nicht getestet"
+                            true -> stringResource(
+                                R.string.hosts_last_reachable,
+                                host.lastSuccessfulTestAt?.let { " · ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))}" }.orEmpty(),
+                            )
+                            false -> stringResource(R.string.hosts_last_unreachable)
+                            null -> stringResource(R.string.hosts_never_tested)
                         },
                         color = statusColor(host.lastReachable),
                     )
                 }
-                IconButton(onClick = onEdit) { Icon(Icons.Rounded.Edit, contentDescription = "Host bearbeiten") }
-                IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = "Host löschen") }
+                IconButton(onClick = onEdit) { Icon(Icons.Rounded.Edit, contentDescription = stringResource(R.string.hosts_edit)) }
+                IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.hosts_delete)) }
             }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilledTonalButton(onClick = onTest, enabled = !testing) {
                     if (testing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Icon(Icons.Rounded.WifiFind, contentDescription = null)
-                    Text(" Verbindung testen")
+                    Text(" " + stringResource(R.string.hosts_test_connection))
                 }
                 if (host.wakeOnLanEnabled) {
                     OutlinedButton(onClick = onWake, enabled = host.macAddress != null) {
                         Icon(Icons.Rounded.Bolt, contentDescription = null)
-                        Text(" Aufwecken")
+                        Text(" " + stringResource(R.string.hosts_wake))
                     }
                 }
             }
@@ -181,32 +187,32 @@ private fun HostEditorDialog(host: LocalHost?, onDismiss: () -> Unit, onSave: (L
     var error by remember { mutableStateOf<String?>(null) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (host == null) "Host anlegen" else "Host bearbeiten") },
+        title = { Text(stringResource(if (host == null) R.string.hosts_create else R.string.hosts_edit)) },
         text = {
             LazyColumn(Modifier.heightIn(max = 480.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                item { OutlinedTextField(name, { name = it }, label = { Text("Name") }, singleLine = true) }
-                item { OutlinedTextField(address, { address = it }, label = { Text("Hostname oder IP-Adresse") }, singleLine = true) }
-                item { OutlinedTextField(port, { port = it.filter(Char::isDigit) }, label = { Text("TCP-Port (optional)") }, singleLine = true) }
+                item { OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.hosts_field_name)) }, singleLine = true) }
+                item { OutlinedTextField(address, { address = it }, label = { Text(stringResource(R.string.hosts_field_address)) }, singleLine = true) }
+                item { OutlinedTextField(port, { port = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.hosts_field_port)) }, singleLine = true) }
                 item {
                     Column {
-                        FilledTonalButton(onClick = { typeMenu = true }) { Text(type.displayName) }
+                        FilledTonalButton(onClick = { typeMenu = true }) { Text(type.label()) }
                         DropdownMenu(typeMenu, { typeMenu = false }) {
-                            StreamingType.entries.forEach { option -> DropdownMenuItem({ Text(option.displayName) }, { type = option; typeMenu = false }) }
+                            StreamingType.entries.forEach { option -> DropdownMenuItem({ Text(option.label()) }, { type = option; typeMenu = false }) }
                         }
                     }
                 }
                 item {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("Wake-on-LAN", fontWeight = FontWeight.Bold)
-                            Text("UDP Magic Packet senden", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.hosts_wol_title), fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.hosts_wol_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         Switch(wolEnabled, { wolEnabled = it })
                     }
                 }
                 if (wolEnabled) {
-                    item { OutlinedTextField(mac, { mac = it }, label = { Text("MAC-Adresse") }, singleLine = true) }
-                    item { OutlinedTextField(broadcast, { broadcast = it }, label = { Text("Broadcast-Zieladresse") }, singleLine = true) }
+                    item { OutlinedTextField(mac, { mac = it }, label = { Text(stringResource(R.string.hosts_field_mac)) }, singleLine = true) }
+                    item { OutlinedTextField(broadcast, { broadcast = it }, label = { Text(stringResource(R.string.hosts_field_broadcast)) }, singleLine = true) }
                 }
                 error?.let { item { Text(it, color = ThorRed) } }
             }
@@ -227,9 +233,9 @@ private fun HostEditorDialog(host: LocalHost?, onDismiss: () -> Unit, onSave: (L
                         lastSuccessfulTestAt = host?.lastSuccessfulTestAt,
                     ),
                 )
-            }) { Text("Speichern") }
+            }) { Text(stringResource(R.string.action_save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
 

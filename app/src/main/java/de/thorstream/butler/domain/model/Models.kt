@@ -1,6 +1,10 @@
 package de.thorstream.butler.domain.model
 
-enum class StreamingType(val displayName: String) {
+/**
+ * Streaming categories. Brand names are locale-independent; [CUSTOM] has no
+ * fixed name and is localized in the UI layer.
+ */
+enum class StreamingType(val brandName: String?) {
     GEFORCE_NOW("GeForce NOW"),
     XBOX_CLOUD("Xbox Cloud Gaming"),
     XBOX_REMOTE("Xbox Remote Play / XBPlay"),
@@ -8,23 +12,23 @@ enum class StreamingType(val displayName: String) {
     MOONLIGHT("Moonlight"),
     STEAM_LINK("Steam Link"),
     SUNSHINE_HOST("Sunshine Host"),
-    CUSTOM("Benutzerdefiniert"),
+    CUSTOM(null),
 }
 
-enum class ConnectionType(val displayName: String) {
-    ETHERNET("Ethernet"),
-    WIFI("WLAN"),
-    CELLULAR("Mobilfunk"),
-    VPN("VPN"),
-    OTHER("Andere"),
-    NONE("Keine Verbindung"),
+enum class ConnectionType {
+    ETHERNET,
+    WIFI,
+    CELLULAR,
+    VPN,
+    OTHER,
+    NONE,
 }
 
-enum class NetworkQuality(val displayName: String) {
-    OPTIMAL("Optimal"),
-    USABLE("Nutzbar"),
-    PROBLEMATIC("Problematisch"),
-    NOT_MEASURABLE("Nicht messbar"),
+enum class NetworkQuality {
+    OPTIMAL,
+    USABLE,
+    PROBLEMATIC,
+    NOT_MEASURABLE,
 }
 
 data class StreamingEntry(

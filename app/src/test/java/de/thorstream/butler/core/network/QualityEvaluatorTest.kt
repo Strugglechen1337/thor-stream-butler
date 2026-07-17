@@ -1,14 +1,16 @@
 package de.thorstream.butler.core.network
 
+import de.thorstream.butler.R
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.fakes.FakeStringProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class QualityEvaluatorTest {
-    private val evaluator = QualityEvaluator()
+    private val evaluator = QualityEvaluator(FakeStringProvider())
 
     @Test
     fun `good ethernet measurement is optimal`() {
@@ -31,7 +33,7 @@ class QualityEvaluatorTest {
             NetworkSnapshot(ConnectionType.WIFI, wifiFrequencyMhz = 5_200, signalStrengthPercent = 80, latencyMs = 45.0, jitterMs = 5.0, packetLossPercent = 0.0),
         )
         assertEquals(NetworkQuality.USABLE, result.quality)
-        assertTrue(result.problems.any { it.contains("Latenz") })
+        assertTrue(result.problems.any { it.startsWith("res:${R.string.eval_problem_elevated_latency}") })
     }
 
     @Test
@@ -54,7 +56,7 @@ class QualityEvaluatorTest {
             NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 5.0, jitterMs = 1.0, packetLossPercent = 0.0, host = "192.168.1.2", hostReachable = false),
         )
         assertEquals(NetworkQuality.PROBLEMATIC, result.quality)
-        assertTrue(result.recommendations.any { it.contains("Firewall") })
+        assertTrue(result.recommendations.any { it.startsWith("res:${R.string.eval_reco_check_host}") })
     }
 }
 

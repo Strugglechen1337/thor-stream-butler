@@ -2,6 +2,7 @@ package de.thorstream.butler.fakes
 
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.NetworkMeasurement
@@ -21,9 +22,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
+/**
+ * Deterministic [StringProvider] for unit tests: encodes the resource id and
+ * arguments so assertions can match on stable identifiers instead of
+ * localized text.
+ */
+class FakeStringProvider : StringProvider {
+    override fun get(resId: Int, vararg args: Any): String =
+        "res:$resId" + if (args.isEmpty()) "" else ":" + args.joinToString(",")
+}
+
 class FakeNetworkDiagnosticsService(
     var progress: Flow<DiagnosticProgress> = emptyFlow(),
-    var snapshotResult: AppResult<NetworkSnapshot> = AppResult.Failure(AppError.NoNetwork()),
+    var snapshotResult: AppResult<NetworkSnapshot> = AppResult.Failure(AppError.NoNetwork("no network")),
 ) : NetworkDiagnosticsService {
     override fun runDiagnostics(target: String, pingCount: Int, host: String?, port: Int?, includeDownloadTest: Boolean, testDurationSeconds: Int) = progress
     override suspend fun readConnectionSnapshot() = snapshotResult

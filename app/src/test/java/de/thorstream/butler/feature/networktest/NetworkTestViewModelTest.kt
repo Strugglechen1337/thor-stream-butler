@@ -5,9 +5,11 @@ import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.service.DiagnosticProgress
+import de.thorstream.butler.domain.service.DiagnosticStep
 import de.thorstream.butler.fakes.FakeHistoryRepository
 import de.thorstream.butler.fakes.FakeNetworkDiagnosticsService
 import de.thorstream.butler.fakes.FakeSettingsRepository
+import de.thorstream.butler.fakes.FakeStringProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
@@ -35,12 +37,12 @@ class NetworkTestViewModelTest {
         val snapshot = NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 12.0, jitterMs = 2.0, packetLossPercent = 0.0)
         val diagnostics = FakeNetworkDiagnosticsService(
             progress = flowOf(
-                DiagnosticProgress("Ping", 0.5f, snapshot),
-                DiagnosticProgress("Fertig", 1f, snapshot, completed = true),
+                DiagnosticProgress(DiagnosticStep.LATENCY_MEASURED, 0.5f, snapshot),
+                DiagnosticProgress(DiagnosticStep.COMPLETED, 1f, snapshot, completed = true),
             ),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator())
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()))
 
         viewModel.startTest()
         advanceUntilIdle()
@@ -53,15 +55,15 @@ class NetworkTestViewModelTest {
     @Test
     fun `missing network exposes error and stores no invented measurement`() = runTest(dispatcher) {
         val diagnostics = FakeNetworkDiagnosticsService(
-            progress = flowOf(DiagnosticProgress("Netzwerk nicht verfügbar", 1f, completed = true, errorMessage = "Keine aktive Netzwerkverbindung gefunden.")),
+            progress = flowOf(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, completed = true, errorMessage = "no active network")),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator())
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()))
 
         viewModel.startTest()
         advanceUntilIdle()
 
-        assertEquals("Keine aktive Netzwerkverbindung gefunden.", viewModel.uiState.value.errorMessage)
+        assertEquals("no active network", viewModel.uiState.value.errorMessage)
         assertNull(viewModel.uiState.value.snapshot)
         assertEquals(0, history.values.value.size)
     }

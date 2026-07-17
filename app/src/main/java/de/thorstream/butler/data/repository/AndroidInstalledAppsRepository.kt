@@ -5,8 +5,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
+import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import kotlinx.coroutines.CancellationException
@@ -18,6 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class AndroidInstalledAppsRepository @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val strings: StringProvider,
 ) : InstalledAppsRepository {
     private val packageManager: PackageManager get() = context.packageManager
 
@@ -46,9 +49,9 @@ class AndroidInstalledAppsRepository @Inject constructor(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: SecurityException) {
-            AppResult.Failure(AppError.Unavailable("Die installierten Apps dürfen auf diesem Gerät nicht vollständig gelesen werden."))
+            AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_apps_restricted)))
         } catch (_: RuntimeException) {
-            AppResult.Failure(AppError.Technical("Die Liste der installierten Apps konnte nicht geladen werden."))
+            AppResult.Failure(AppError.Technical(strings.get(R.string.error_apps_load)))
         }
     }
 
@@ -56,14 +59,14 @@ class AndroidInstalledAppsRepository @Inject constructor(
 
     override fun launch(packageName: String): AppResult<Unit> {
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            ?: return AppResult.Failure(AppError.Unavailable("Die App ist nicht installiert oder besitzt keinen startbaren Bildschirm."))
+            ?: return AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_app_not_launchable)))
         return try {
             context.startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             AppResult.Success(Unit)
         } catch (_: SecurityException) {
-            AppResult.Failure(AppError.Unavailable("Android hat den Start dieser App blockiert."))
+            AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_app_blocked)))
         } catch (_: RuntimeException) {
-            AppResult.Failure(AppError.Technical("Die App konnte nicht gestartet werden."))
+            AppResult.Failure(AppError.Technical(strings.get(R.string.error_app_launch)))
         }
     }
 }

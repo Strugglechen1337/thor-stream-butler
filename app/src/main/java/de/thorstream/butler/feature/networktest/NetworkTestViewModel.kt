@@ -1,8 +1,11 @@
 package de.thorstream.butler.feature.networktest
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.thorstream.butler.R
+import de.thorstream.butler.core.designsystem.labelRes
 import de.thorstream.butler.core.network.QualityEvaluator
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.model.NetworkSnapshot
@@ -20,7 +23,7 @@ import kotlinx.coroutines.launch
 
 data class NetworkTestUiState(
     val running: Boolean = false,
-    val step: String = "Bereit für den Netzwerktest",
+    @param:StringRes val stepRes: Int = R.string.nettest_step_idle,
     val progress: Float = 0f,
     val snapshot: NetworkSnapshot? = null,
     val assessment: QualityAssessment? = null,
@@ -42,7 +45,7 @@ class NetworkTestViewModel @Inject constructor(
         testJob?.cancel()
         testJob = viewModelScope.launch {
             val settings = settingsRepository.settings.first()
-            _uiState.value = NetworkTestUiState(running = true, step = "Test wird vorbereitet")
+            _uiState.value = NetworkTestUiState(running = true, stepRes = R.string.nettest_step_preparing)
             diagnosticsService.runDiagnostics(
                 target = settings.defaultTestTarget,
                 pingCount = settings.pingCount,
@@ -51,7 +54,7 @@ class NetworkTestViewModel @Inject constructor(
             ).collect { progress ->
                 _uiState.value = _uiState.value.copy(
                     running = !progress.completed,
-                    step = progress.step,
+                    stepRes = progress.step.labelRes(),
                     progress = progress.progress,
                     snapshot = progress.snapshot ?: _uiState.value.snapshot,
                     errorMessage = progress.errorMessage,
@@ -74,7 +77,7 @@ class NetworkTestViewModel @Inject constructor(
     fun cancelTest() {
         testJob?.cancel()
         testJob = null
-        _uiState.value = _uiState.value.copy(running = false, step = "Test abgebrochen")
+        _uiState.value = _uiState.value.copy(running = false, stepRes = R.string.nettest_step_cancelled)
     }
 }
 

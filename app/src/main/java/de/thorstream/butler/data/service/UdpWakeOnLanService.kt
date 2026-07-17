@@ -1,7 +1,9 @@
 package de.thorstream.butler.data.service
 
+import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.core.network.WakeOnLanPacket
 import de.thorstream.butler.domain.service.WakeOnLanService
 import java.net.DatagramPacket
@@ -14,7 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Singleton
-class UdpWakeOnLanService @Inject constructor() : WakeOnLanService {
+class UdpWakeOnLanService @Inject constructor(private val strings: StringProvider) : WakeOnLanService {
     override suspend fun sendMagicPacket(macAddress: String, broadcastAddress: String, port: Int): AppResult<Unit> = withContext(Dispatchers.IO) {
         try {
             val payload = WakeOnLanPacket.create(macAddress)
@@ -28,9 +30,9 @@ class UdpWakeOnLanService @Inject constructor() : WakeOnLanService {
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: IllegalArgumentException) {
-            AppResult.Failure(AppError.InvalidInput("Die MAC-Adresse oder der Wake-on-LAN-Port ist ungültig."))
+            AppResult.Failure(AppError.InvalidInput(strings.get(R.string.error_wol_invalid)))
         } catch (_: Exception) {
-            AppResult.Failure(AppError.Unavailable("Das Wake-on-LAN-Paket konnte nicht gesendet werden."))
+            AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_wol_failed)))
         }
     }
 }

@@ -11,8 +11,20 @@ data class PingResult(
     val receivedCount: Int get() = successfulLatenciesMs.size
 }
 
+/** Locale-independent identifier for the current phase of a diagnostics run. */
+enum class DiagnosticStep {
+    DETECTING_CONNECTION,
+    NETWORK_UNAVAILABLE,
+    CONNECTION_READ,
+    DNS_CHECKED,
+    LATENCY_MEASURED,
+    HOST_CHECKED,
+    DOWNLOAD_MEASURED,
+    COMPLETED,
+}
+
 data class DiagnosticProgress(
-    val step: String,
+    val step: DiagnosticStep,
     val progress: Float,
     val snapshot: NetworkSnapshot? = null,
     val completed: Boolean = false,

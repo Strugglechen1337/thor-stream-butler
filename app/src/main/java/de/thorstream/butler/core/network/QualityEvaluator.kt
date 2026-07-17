@@ -1,9 +1,12 @@
 package de.thorstream.butler.core.network
 
+import de.thorstream.butler.R
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.model.QualityAssessment
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -18,14 +21,14 @@ data class QualityThresholds(
 )
 
 @Singleton
-class QualityEvaluator @Inject constructor() {
+class QualityEvaluator @Inject constructor(private val strings: StringProvider) {
     fun evaluate(snapshot: NetworkSnapshot, thresholds: QualityThresholds = QualityThresholds()): QualityAssessment {
         if (snapshot.connectionType == ConnectionType.NONE) {
             return QualityAssessment(
                 quality = NetworkQuality.PROBLEMATIC,
-                summary = "Keine aktive Netzwerkverbindung. Streaming ist derzeit nicht möglich.",
-                problems = listOf("Keine aktive Verbindung"),
-                recommendations = listOf("Verbinde das Gerät per Ethernet oder mit einem stabilen 5-/6-GHz-WLAN."),
+                summary = strings.get(R.string.eval_summary_no_connection),
+                problems = listOf(strings.get(R.string.eval_problem_no_connection)),
+                recommendations = listOf(strings.get(R.string.eval_reco_wired)),
             )
         }
 
@@ -33,55 +36,55 @@ class QualityEvaluator @Inject constructor() {
         val warnings = mutableListOf<String>()
         val recommendations = mutableListOf<String>()
 
-        if (snapshot.internetValidated == false && snapshot.host == null) critical += "Kein bestätigter Internetzugang"
-        if (snapshot.hostReachable == false) critical += "Streaming-Host nicht erreichbar"
+        if (snapshot.internetValidated == false && snapshot.host == null) critical += strings.get(R.string.eval_problem_no_internet)
+        if (snapshot.hostReachable == false) critical += strings.get(R.string.eval_problem_host_unreachable)
 
         snapshot.latencyMs?.let {
             when {
-                it > thresholds.criticalLatencyMs -> critical += "Hohe Latenz (${it.rounded()} ms)"
-                it > thresholds.excellentLatencyMs -> warnings += "Erhöhte Latenz (${it.rounded()} ms)"
+                it > thresholds.criticalLatencyMs -> critical += strings.get(R.string.eval_problem_high_latency, it.rounded())
+                it > thresholds.excellentLatencyMs -> warnings += strings.get(R.string.eval_problem_elevated_latency, it.rounded())
             }
         }
         snapshot.jitterMs?.let {
             when {
-                it > thresholds.criticalJitterMs -> critical += "Starker Jitter (${it.rounded()} ms)"
-                it > thresholds.goodJitterMs -> warnings += "Erhöhter Jitter (${it.rounded()} ms)"
+                it > thresholds.criticalJitterMs -> critical += strings.get(R.string.eval_problem_high_jitter, it.rounded())
+                it > thresholds.goodJitterMs -> warnings += strings.get(R.string.eval_problem_elevated_jitter, it.rounded())
             }
         }
         snapshot.packetLossPercent?.let {
             when {
-                it > thresholds.problematicPacketLossPercent -> critical += "Paketverlust (${it.rounded()} %)"
-                it > 0.0 -> warnings += "Leichter Paketverlust (${it.rounded()} %)"
+                it > thresholds.problematicPacketLossPercent -> critical += strings.get(R.string.eval_problem_packet_loss, it.rounded())
+                it > 0.0 -> warnings += strings.get(R.string.eval_problem_light_packet_loss, it.rounded())
             }
         }
 
         if (snapshot.connectionType == ConnectionType.CELLULAR) {
-            warnings += "Mobilfunkverbindung"
-            recommendations += "Nutze für gleichmäßiges Streaming nach Möglichkeit Ethernet oder WLAN."
+            warnings += strings.get(R.string.eval_problem_cellular)
+            recommendations += strings.get(R.string.eval_reco_avoid_cellular)
         }
         if (snapshot.connectionType == ConnectionType.WIFI) {
             snapshot.wifiFrequencyMhz?.let { frequency ->
                 if (frequency in 2_400..2_500) {
-                    warnings += "2,4-GHz-WLAN"
-                    recommendations += "Wechsle nach Möglichkeit auf 5- oder 6-GHz-WLAN."
+                    warnings += strings.get(R.string.eval_problem_wifi_24)
+                    recommendations += strings.get(R.string.eval_reco_switch_band)
                 }
             }
             snapshot.signalStrengthPercent?.let { signal ->
                 when {
-                    signal < thresholds.weakWifiSignalPercent -> critical += "Sehr schwaches WLAN-Signal ($signal %)"
-                    signal < thresholds.fairWifiSignalPercent -> warnings += "Schwaches WLAN-Signal ($signal %)"
+                    signal < thresholds.weakWifiSignalPercent -> critical += strings.get(R.string.eval_problem_weak_signal, signal)
+                    signal < thresholds.fairWifiSignalPercent -> warnings += strings.get(R.string.eval_problem_fair_signal, signal)
                 }
             }
         }
 
         if (snapshot.jitterMs != null && snapshot.jitterMs > thresholds.goodJitterMs) {
-            recommendations += "Reduziere bei Bildaussetzern die Streaming-Bitrate."
+            recommendations += strings.get(R.string.eval_reco_lower_bitrate)
         }
         if (snapshot.packetLossPercent != null && snapshot.packetLossPercent > 0.0) {
-            recommendations += "Verringere Funkstörungen oder verwende eine kabelgebundene Verbindung."
+            recommendations += strings.get(R.string.eval_reco_reduce_interference)
         }
         if (snapshot.hostReachable == false) {
-            recommendations += "Prüfe Host-Adresse, Port, Firewall und ob der Streaming-Host eingeschaltet ist."
+            recommendations += strings.get(R.string.eval_reco_check_host)
         }
 
         val hasCoreMeasurement = snapshot.latencyMs != null || snapshot.packetLossPercent != null || snapshot.hostReachable != null
@@ -93,14 +96,13 @@ class QualityEvaluator @Inject constructor() {
         }
         val problems = critical + warnings
         val summary = when (quality) {
-            NetworkQuality.OPTIMAL -> "Die Verbindung ist für Gaming-Streaming sehr gut geeignet."
-            NetworkQuality.USABLE -> "Die Verbindung ist grundsätzlich geeignet. ${warnings.firstOrNull().orEmpty()} kann die Qualität beeinträchtigen."
-            NetworkQuality.PROBLEMATIC -> "Die Verbindung ist aktuell problematisch: ${critical.firstOrNull().orEmpty()}."
-            NetworkQuality.NOT_MEASURABLE -> "Die Kernwerte konnten nicht zuverlässig gemessen werden. Verfügbare Basisdaten werden trotzdem angezeigt."
+            NetworkQuality.OPTIMAL -> strings.get(R.string.eval_summary_optimal)
+            NetworkQuality.USABLE -> strings.get(R.string.eval_summary_usable, warnings.firstOrNull().orEmpty())
+            NetworkQuality.PROBLEMATIC -> strings.get(R.string.eval_summary_problematic, critical.firstOrNull().orEmpty())
+            NetworkQuality.NOT_MEASURABLE -> strings.get(R.string.eval_summary_not_measurable)
         }
         return QualityAssessment(quality, summary, problems.distinct(), recommendations.distinct())
     }
 }
 
-private fun Double.rounded(): String = String.format(java.util.Locale.GERMANY, "%.1f", this)
-
+private fun Double.rounded(): String = String.format(Locale.getDefault(), "%.1f", this)

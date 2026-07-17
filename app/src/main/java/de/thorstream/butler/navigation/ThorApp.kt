@@ -17,16 +17,19 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import de.thorstream.butler.R
 import de.thorstream.butler.core.designsystem.ThorTheme
 import de.thorstream.butler.feature.dashboard.DashboardRoute
 import de.thorstream.butler.feature.networktest.NetworkTestRoute
@@ -36,12 +39,12 @@ import de.thorstream.butler.feature.settings.SettingsRoute
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-private enum class Destination(val route: String, val title: String, val icon: ImageVector) {
-    Dashboard("dashboard", "Dashboard", Icons.Rounded.Home),
-    Network("network", "Netzwerktest", Icons.Rounded.Speed),
-    Hosts("hosts", "Hosts", Icons.Rounded.Dns),
-    History("history", "Historie", Icons.Rounded.History),
-    Settings("settings", "Einstellungen", Icons.Rounded.Settings),
+private enum class Destination(val route: String, @param:StringRes val titleRes: Int, val icon: ImageVector) {
+    Dashboard("dashboard", R.string.nav_dashboard, Icons.Rounded.Home),
+    Network("network", R.string.nav_network_test, Icons.Rounded.Speed),
+    Hosts("hosts", R.string.nav_hosts, Icons.Rounded.Dns),
+    History("history", R.string.nav_history, Icons.Rounded.History),
+    Settings("settings", R.string.nav_settings, Icons.Rounded.Settings),
 }
 
 @Composable
@@ -60,7 +63,7 @@ fun ThorApp(viewModel: ThorAppViewModel = hiltViewModel()) {
                                 selected = currentRoute == destination.route,
                                 onClick = { navController.open(destination) },
                                 icon = { Icon(destination.icon, contentDescription = null) },
-                                label = { Text(destination.title) },
+                                label = { Text(stringResource(destination.titleRes)) },
                             )
                         }
                     }
@@ -75,7 +78,7 @@ fun ThorApp(viewModel: ThorAppViewModel = hiltViewModel()) {
                                     selected = currentRoute == destination.route,
                                     onClick = { navController.open(destination) },
                                     icon = { Icon(destination.icon, contentDescription = null) },
-                                    label = { Text(destination.title) },
+                                    label = { Text(stringResource(destination.titleRes)) },
                                 )
                             }
                         }

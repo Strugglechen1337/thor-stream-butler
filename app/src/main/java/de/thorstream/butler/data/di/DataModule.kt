@@ -11,6 +11,8 @@ import dagger.hilt.components.SingletonComponent
 import de.thorstream.butler.data.database.LocalHostDao
 import de.thorstream.butler.data.database.NetworkMeasurementDao
 import de.thorstream.butler.data.database.StreamingEntryDao
+import de.thorstream.butler.core.common.StringProvider
+import de.thorstream.butler.data.common.AndroidStringProvider
 import de.thorstream.butler.data.database.ThorDatabase
 import de.thorstream.butler.data.datastore.DataStoreSettingsRepository
 import de.thorstream.butler.data.repository.AndroidInstalledAppsRepository
@@ -45,4 +47,5 @@ abstract class RepositoryModule {
     @Binds abstract fun bindHostRepository(implementation: RoomLocalHostRepository): LocalHostRepository
     @Binds abstract fun bindHistoryRepository(implementation: RoomNetworkHistoryRepository): NetworkHistoryRepository
     @Binds abstract fun bindSettingsRepository(implementation: DataStoreSettingsRepository): SettingsRepository
+    @Binds abstract fun bindStringProvider(implementation: AndroidStringProvider): StringProvider
 }

@@ -30,16 +30,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.thorstream.butler.R
 import de.thorstream.butler.core.designsystem.ThorCyan
 import de.thorstream.butler.core.designsystem.ThorGray
 import de.thorstream.butler.core.designsystem.ThorGreen
 import de.thorstream.butler.core.designsystem.ThorRed
 import de.thorstream.butler.core.designsystem.ThorYellow
+import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import java.util.Locale
@@ -63,23 +66,23 @@ fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("THOR // DIAGNOSE", color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-        Text("Netzwerktest", style = MaterialTheme.typography.headlineLarge)
-        Text("SSID und WLAN-Details können je nach Android-Version und Berechtigung nicht verfügbar sein.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(stringResource(R.string.nettest_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+        Text(stringResource(R.string.nettest_title), style = MaterialTheme.typography.headlineLarge)
+        Text(stringResource(R.string.nettest_permission_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         ElevatedCard(modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(state.step, style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(state.stepRes), style = MaterialTheme.typography.titleLarge)
                 LinearProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(onClick = startWithPermission, enabled = !state.running) {
                         Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                        Text(if (state.progress > 0f) " Erneut testen" else " Vollständigen Test starten")
+                        Text(" " + stringResource(if (state.progress > 0f) R.string.action_retry_test else R.string.nettest_start_full))
                     }
                     if (state.running) {
                         OutlinedButton(onClick = viewModel::cancelTest) {
                             Icon(Icons.Rounded.Cancel, contentDescription = null)
-                            Text(" Abbrechen")
+                            Text(" " + stringResource(R.string.action_cancel))
                         }
                     }
                 }
@@ -90,7 +93,7 @@ fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
         state.assessment?.let { assessment ->
             ElevatedCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(assessment.quality.displayName, color = qualityColor(assessment.quality), style = MaterialTheme.typography.headlineSmall)
+                    Text(assessment.quality.label(), color = qualityColor(assessment.quality), style = MaterialTheme.typography.headlineSmall)
                     Text(assessment.summary)
                     assessment.problems.forEach { Text("• $it", color = ThorYellow) }
                     assessment.recommendations.forEach { Text("→ $it", color = MaterialTheme.colorScheme.onSurfaceVariant) }
@@ -105,20 +108,20 @@ fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
 @Composable
 private fun MetricsGrid(snapshot: NetworkSnapshot) {
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        MetricCard("Verbindung", snapshot.connectionType.displayName)
-        MetricCard("Lokale IP", snapshot.localIpAddress ?: "Nicht verfügbar")
-        MetricCard("Gateway", snapshot.gateway ?: "Nicht verfügbar")
-        MetricCard("SSID", snapshot.ssid ?: "Nicht verfügbar")
-        MetricCard("WLAN-Band", snapshot.wifiFrequencyMhz?.let(::frequencyLabel) ?: "Nicht verfügbar")
-        MetricCard("Link-Speed", snapshot.linkSpeedMbps?.let { "$it Mbit/s" } ?: "Nicht verfügbar")
-        MetricCard("Signal", snapshot.signalStrengthPercent?.let { "$it %" } ?: "Nicht verfügbar")
-        MetricCard("Internet", snapshot.internetValidated.asAvailability())
-        MetricCard("DNS", snapshot.dnsReachable.asAvailability())
-        MetricCard("Latenz", snapshot.latencyMs.metric("ms"))
-        MetricCard("Jitter", snapshot.jitterMs.metric("ms"))
-        MetricCard("Paketverlust", snapshot.packetLossPercent.metric("%"))
-        MetricCard("Download", snapshot.downloadMbps.metric("Mbit/s"))
-        snapshot.host?.let { MetricCard("Host $it", snapshot.hostReachable.asAvailability()) }
+        MetricCard(stringResource(R.string.nettest_metric_connection), snapshot.connectionType.label())
+        MetricCard(stringResource(R.string.nettest_metric_local_ip), snapshot.localIpAddress ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_gateway), snapshot.gateway ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_ssid), snapshot.ssid ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_wifi_band), snapshot.wifiFrequencyMhz?.let { frequencyLabel(it) } ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_link_speed), snapshot.linkSpeedMbps?.let { stringResource(R.string.nettest_link_speed_value, it) } ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_signal), snapshot.signalStrengthPercent?.let { "$it %" } ?: stringResource(R.string.value_not_available))
+        MetricCard(stringResource(R.string.nettest_metric_internet), availabilityLabel(snapshot.internetValidated))
+        MetricCard(stringResource(R.string.nettest_metric_dns), availabilityLabel(snapshot.dnsReachable))
+        MetricCard(stringResource(R.string.nettest_metric_latency), metricValue(snapshot.latencyMs, "ms"))
+        MetricCard(stringResource(R.string.nettest_metric_jitter), metricValue(snapshot.jitterMs, "ms"))
+        MetricCard(stringResource(R.string.nettest_metric_packet_loss), metricValue(snapshot.packetLossPercent, "%"))
+        MetricCard(stringResource(R.string.nettest_metric_download), metricValue(snapshot.downloadMbps, "Mbit/s"))
+        snapshot.host?.let { MetricCard(stringResource(R.string.nettest_metric_host, it), availabilityLabel(snapshot.hostReachable)) }
     }
 }
 
@@ -132,9 +135,27 @@ private fun MetricCard(label: String, value: String) {
     }
 }
 
-private fun Boolean?.asAvailability() = when (this) { true -> "Erreichbar"; false -> "Nicht erreichbar"; null -> "Nicht messbar" }
-private fun Double?.metric(unit: String) = this?.let { String.format(Locale.GERMANY, "%.1f %s", it, unit) } ?: "Nicht gemessen"
-private fun frequencyLabel(frequency: Int) = when (frequency) { in 2400..2500 -> "2,4 GHz"; in 4900..5900 -> "5 GHz"; in 5925..7125 -> "6 GHz"; else -> "$frequency MHz" }
+@Composable
+private fun availabilityLabel(value: Boolean?): String = stringResource(
+    when (value) {
+        true -> R.string.value_reachable
+        false -> R.string.value_not_reachable
+        null -> R.string.value_not_measurable
+    },
+)
+
+@Composable
+private fun metricValue(value: Double?, unit: String): String =
+    value?.let { String.format(Locale.getDefault(), "%.1f %s", it, unit) } ?: stringResource(R.string.value_not_measured)
+
+@Composable
+private fun frequencyLabel(frequency: Int): String = when (frequency) {
+    in 2400..2500 -> stringResource(R.string.nettest_freq_24)
+    in 4900..5900 -> stringResource(R.string.nettest_freq_5)
+    in 5925..7125 -> stringResource(R.string.nettest_freq_6)
+    else -> stringResource(R.string.nettest_freq_mhz, frequency)
+}
+
 private fun qualityColor(quality: NetworkQuality): Color = when (quality) {
     NetworkQuality.OPTIMAL -> ThorGreen
     NetworkQuality.USABLE -> ThorYellow

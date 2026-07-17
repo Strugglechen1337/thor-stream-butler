@@ -1,0 +1,221 @@
+<resources>
+    <string name="app_name">Thor Stream Butler</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_network_test">Netzwerktest</string>
+    <string name="nav_hosts">Hosts</string>
+    <string name="nav_history">Historie</string>
+    <string name="nav_settings">Einstellungen</string>
+
+    <!-- Shared actions and values -->
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_back">Zurück</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_retry_test">Erneut testen</string>
+    <string name="value_not_available">Nicht verfügbar</string>
+    <string name="value_reachable">Erreichbar</string>
+    <string name="value_not_reachable">Nicht erreichbar</string>
+    <string name="value_not_measurable">Nicht messbar</string>
+    <string name="value_not_measured">Nicht gemessen</string>
+
+    <!-- Connection types -->
+    <string name="conn_ethernet">Ethernet</string>
+    <string name="conn_wifi">WLAN</string>
+    <string name="conn_cellular">Mobilfunk</string>
+    <string name="conn_vpn">VPN</string>
+    <string name="conn_other">Andere</string>
+    <string name="conn_none">Keine Verbindung</string>
+
+    <!-- Network quality -->
+    <string name="quality_optimal">Optimal</string>
+    <string name="quality_usable">Nutzbar</string>
+    <string name="quality_problematic">Problematisch</string>
+    <string name="quality_not_measurable">Nicht messbar</string>
+
+    <string name="streaming_type_custom">Benutzerdefiniert</string>
+
+    <!-- Diagnostic steps -->
+    <string name="step_detecting_connection">Verbindung wird erkannt</string>
+    <string name="step_network_unavailable">Netzwerk nicht verfügbar</string>
+    <string name="step_connection_read">Verbindungsdaten gelesen</string>
+    <string name="step_dns_checked">DNS geprüft</string>
+    <string name="step_latency_measured">Latenz, Jitter und Paketverlust gemessen</string>
+    <string name="step_host_checked">Streaming-Host geprüft</string>
+    <string name="step_download_measured">Downloadgeschwindigkeit gemessen</string>
+    <string name="step_completed">Test abgeschlossen</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_kicker">THOR // STREAM BUTLER</string>
+    <string name="dashboard_title">Deine Streams</string>
+    <string name="dashboard_add_app">App hinzufügen</string>
+    <string name="dashboard_empty_title">Noch keine Streaming-Apps eingerichtet</string>
+    <string name="dashboard_empty_action">Erste App auswählen</string>
+    <string name="dashboard_remove_tile">Kachel entfernen</string>
+    <string name="dashboard_last_used">Zuletzt %1$s</string>
+    <string name="dashboard_ready">Bereit</string>
+    <string name="dashboard_not_installed">Nicht installiert</string>
+    <string name="dashboard_launch">Starten</string>
+    <string name="dashboard_unavailable">Nicht verfügbar</string>
+    <string name="dashboard_app_added">%1$s wurde zum Dashboard hinzugefügt.</string>
+    <string name="dashboard_picker_choose">Installierte App wählen</string>
+    <string name="dashboard_picker_configure">Kachel konfigurieren</string>
+    <string name="dashboard_picker_custom_name">Eigener Name (optional)</string>
+    <string name="dashboard_check_title">Netzwerkcheck</string>
+    <string name="dashboard_check_preparing">Kurzer Netzwerkcheck wird vorbereitet</string>
+    <string name="dashboard_check_launching">App wird gleich gestartet</string>
+    <string name="dashboard_check_finished">Prüfung abgeschlossen</string>
+    <string name="dashboard_launch_anyway">Trotzdem starten</string>
+
+    <!-- Network test -->
+    <string name="nettest_kicker">THOR // DIAGNOSE</string>
+    <string name="nettest_title">Netzwerktest</string>
+    <string name="nettest_permission_hint">SSID und WLAN-Details können je nach Android-Version und Berechtigung nicht verfügbar sein.</string>
+    <string name="nettest_step_idle">Bereit für den Netzwerktest</string>
+    <string name="nettest_step_preparing">Test wird vorbereitet</string>
+    <string name="nettest_step_cancelled">Test abgebrochen</string>
+    <string name="nettest_start_full">Vollständigen Test starten</string>
+    <string name="nettest_metric_connection">Verbindung</string>
+    <string name="nettest_metric_local_ip">Lokale IP</string>
+    <string name="nettest_metric_gateway">Gateway</string>
+    <string name="nettest_metric_ssid">SSID</string>
+    <string name="nettest_metric_wifi_band">WLAN-Band</string>
+    <string name="nettest_metric_link_speed">Link-Speed</string>
+    <string name="nettest_metric_signal">Signal</string>
+    <string name="nettest_metric_internet">Internet</string>
+    <string name="nettest_metric_dns">DNS</string>
+    <string name="nettest_metric_latency">Latenz</string>
+    <string name="nettest_metric_jitter">Jitter</string>
+    <string name="nettest_metric_packet_loss">Paketverlust</string>
+    <string name="nettest_metric_download">Download</string>
+    <string name="nettest_metric_host">Host %1$s</string>
+    <string name="nettest_link_speed_value">%1$d Mbit/s</string>
+    <string name="nettest_freq_24">2,4 GHz</string>
+    <string name="nettest_freq_5">5 GHz</string>
+    <string name="nettest_freq_6">6 GHz</string>
+    <string name="nettest_freq_mhz">%1$d MHz</string>
+
+    <!-- Hosts -->
+    <string name="hosts_kicker">THOR // HOSTS</string>
+    <string name="hosts_title">Lokale Streaming-Hosts</string>
+    <string name="hosts_create">Host anlegen</string>
+    <string name="hosts_empty_title">Noch kein lokaler Host</string>
+    <string name="hosts_empty_hint">Lege deinen Sunshine-, Moonlight- oder Remote-Play-Host an.</string>
+    <string name="hosts_edit">Host bearbeiten</string>
+    <string name="hosts_delete">Host löschen</string>
+    <string name="hosts_test_connection">Verbindung testen</string>
+    <string name="hosts_wake">Aufwecken</string>
+    <string name="hosts_last_reachable">Zuletzt erreichbar%1$s</string>
+    <string name="hosts_last_unreachable">Beim letzten Test nicht erreichbar</string>
+    <string name="hosts_never_tested">Noch nicht getestet</string>
+    <string name="hosts_field_name">Name</string>
+    <string name="hosts_field_address">Hostname oder IP-Adresse</string>
+    <string name="hosts_field_port">TCP-Port (optional)</string>
+    <string name="hosts_field_mac">MAC-Adresse</string>
+    <string name="hosts_field_broadcast">Broadcast-Zieladresse</string>
+    <string name="hosts_wol_title">Wake-on-LAN</string>
+    <string name="hosts_wol_hint">UDP Magic Packet senden</string>
+    <string name="hosts_error_name">Bitte gib einen Namen ein.</string>
+    <string name="hosts_error_address">Hostname oder IP-Adresse ist ungültig.</string>
+    <string name="hosts_error_port">Der Port muss zwischen 1 und 65535 liegen.</string>
+    <string name="hosts_error_mac">Die MAC-Adresse ist ungültig.</string>
+    <string name="hosts_error_broadcast">Die Broadcast-Zieladresse ist ungültig.</string>
+    <string name="hosts_msg_reachable">%1$s ist erreichbar.</string>
+    <string name="hosts_msg_unreachable">%1$s ist nicht erreichbar. Prüfe Adresse, Port und Firewall.</string>
+    <string name="hosts_msg_wol_sent">Wake-on-LAN-Paket an %1$s gesendet.</string>
+    <string name="hosts_msg_no_mac">Für %1$s ist keine MAC-Adresse gespeichert.</string>
+    <string name="hosts_msg_local_permission">Ohne Zugriff auf das lokale Netzwerk kann Android 17 Hosts weder testen noch aufwecken.</string>
+
+    <!-- History -->
+    <string name="history_kicker">THOR // VERLAUF</string>
+    <string name="history_title">Messhistorie</string>
+    <string name="history_clear">Verlauf löschen</string>
+    <string name="history_empty_title">Noch keine Messungen gespeichert</string>
+    <string name="history_empty_hint">Starte einen Netzwerktest, um einen Verlauf aufzubauen.</string>
+    <string name="history_metrics">Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
+    <string name="history_trend_first">Erste vergleichbare Messung</string>
+    <string name="history_trend_flat">Latenz weitgehend unverändert</string>
+    <string name="history_trend_improved">Latenz um %1$s ms verbessert</string>
+    <string name="history_trend_worse">Latenz um %1$s ms verschlechtert</string>
+
+    <!-- Settings -->
+    <string name="settings_kicker">THOR // KONFIGURATION</string>
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_group_launch">Startablauf</string>
+    <string name="settings_prelaunch_title">Netzwerkcheck vor App-Start</string>
+    <string name="settings_prelaunch_hint">Kurzen Test vor jeder Streaming-App ausführen</string>
+    <string name="settings_auto_green_title">Automatischer Start bei Grün</string>
+    <string name="settings_auto_green_hint">Nach kurzer Ergebnisanzeige direkt starten</string>
+    <string name="settings_warn_yellow_title">Hinweis bei Gelb</string>
+    <string name="settings_warn_yellow_hint">Auf mögliche Qualitätseinbußen hinweisen</string>
+    <string name="settings_confirm_red_title">Rückfrage bei Rot</string>
+    <string name="settings_confirm_red_hint">Starten, erneut testen oder abbrechen lassen</string>
+    <string name="settings_group_diagnostics">Diagnose</string>
+    <string name="settings_test_target">Standard-Testziel</string>
+    <string name="settings_test_target_error">Bitte gültigen Host oder IPv4-Adresse eingeben</string>
+    <string name="settings_test_target_hint">Nur für Ping-/Erreichbarkeitstests</string>
+    <string name="settings_ping_count">Ping-Messungen</string>
+    <string name="settings_test_duration">Testdauer</string>
+    <string name="settings_unit_measurements">Messungen</string>
+    <string name="settings_unit_seconds">Sekunden</string>
+    <string name="settings_download_title">Downloadtest</string>
+    <string name="settings_download_hint">Optionaler HTTPS-Test; überträgt Testdaten und ist standardmäßig aus</string>
+    <string name="settings_logging_title">Diagnoseprotokoll</string>
+    <string name="settings_logging_hint">Nur technische Zustände, keine IPs, SSIDs oder MAC-Adressen</string>
+    <string name="settings_group_appearance">Darstellung und Bedienung</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_dark">Thor Dark</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_dark_short">Dunkel</string>
+    <string name="settings_focus_title">Controller-Fokusanimationen</string>
+    <string name="settings_focus_hint">Kacheln beim Fokussieren leicht vergrößern</string>
+    <string name="settings_group_data">Lokale Daten</string>
+    <string name="settings_clear_history">Messhistorie löschen</string>
+    <string name="settings_local_only">Alle Einstellungen, Hosts und Messdaten bleiben ausschließlich auf diesem Gerät.</string>
+    <string name="settings_clear_confirm_title">Messhistorie löschen?</string>
+    <string name="settings_clear_confirm_text">Dieser Vorgang entfernt alle gespeicherten Netzwerkprüfungen dauerhaft.</string>
+    <string name="settings_clear_confirm_action">Löschen</string>
+
+    <!-- Quality evaluation -->
+    <string name="eval_summary_no_connection">Keine aktive Netzwerkverbindung. Streaming ist derzeit nicht möglich.</string>
+    <string name="eval_summary_optimal">Die Verbindung ist für Gaming-Streaming sehr gut geeignet.</string>
+    <string name="eval_summary_usable">Die Verbindung ist grundsätzlich geeignet. %1$s kann die Qualität beeinträchtigen.</string>
+    <string name="eval_summary_problematic">Die Verbindung ist aktuell problematisch: %1$s.</string>
+    <string name="eval_summary_not_measurable">Die Kernwerte konnten nicht zuverlässig gemessen werden. Verfügbare Basisdaten werden trotzdem angezeigt.</string>
+    <string name="eval_problem_no_connection">Keine aktive Verbindung</string>
+    <string name="eval_problem_no_internet">Kein bestätigter Internetzugang</string>
+    <string name="eval_problem_host_unreachable">Streaming-Host nicht erreichbar</string>
+    <string name="eval_problem_high_latency">Hohe Latenz (%1$s ms)</string>
+    <string name="eval_problem_elevated_latency">Erhöhte Latenz (%1$s ms)</string>
+    <string name="eval_problem_high_jitter">Starker Jitter (%1$s ms)</string>
+    <string name="eval_problem_elevated_jitter">Erhöhter Jitter (%1$s ms)</string>
+    <string name="eval_problem_packet_loss">Paketverlust (%1$s %%)</string>
+    <string name="eval_problem_light_packet_loss">Leichter Paketverlust (%1$s %%)</string>
+    <string name="eval_problem_cellular">Mobilfunkverbindung</string>
+    <string name="eval_problem_wifi_24">2,4-GHz-WLAN</string>
+    <string name="eval_problem_weak_signal">Sehr schwaches WLAN-Signal (%1$d %%)</string>
+    <string name="eval_problem_fair_signal">Schwaches WLAN-Signal (%1$d %%)</string>
+    <string name="eval_reco_wired">Verbinde das Gerät per Ethernet oder mit einem stabilen 5-/6-GHz-WLAN.</string>
+    <string name="eval_reco_avoid_cellular">Nutze für gleichmäßiges Streaming nach Möglichkeit Ethernet oder WLAN.</string>
+    <string name="eval_reco_switch_band">Wechsle nach Möglichkeit auf 5- oder 6-GHz-WLAN.</string>
+    <string name="eval_reco_lower_bitrate">Reduziere bei Bildaussetzern die Streaming-Bitrate.</string>
+    <string name="eval_reco_reduce_interference">Verringere Funkstörungen oder verwende eine kabelgebundene Verbindung.</string>
+    <string name="eval_reco_check_host">Prüfe Host-Adresse, Port, Firewall und ob der Streaming-Host eingeschaltet ist.</string>
+
+    <!-- Errors -->
+    <string name="error_no_network">Keine aktive Netzwerkverbindung gefunden.</string>
+    <string name="error_technical">Die Funktion konnte nicht ausgeführt werden.</string>
+    <string name="error_ping_unreachable">Das Ping-Ziel konnte nicht erreicht oder aufgelöst werden.</string>
+    <string name="error_download_no_data">Der Downloadtest lieferte keine Messdaten.</string>
+    <string name="error_download_unavailable">Der optionale Downloadtest ist derzeit nicht erreichbar.</string>
+    <string name="error_wol_invalid">Die MAC-Adresse oder der Wake-on-LAN-Port ist ungültig.</string>
+    <string name="error_wol_failed">Das Wake-on-LAN-Paket konnte nicht gesendet werden.</string>
+    <string name="error_network_permission">Netzwerkdetails sind ohne die zugehörige Android-Berechtigung nur eingeschränkt verfügbar.</string>
+    <string name="error_network_read">Die aktiven Netzwerkdaten konnten nicht gelesen werden.</string>
+    <string name="error_apps_restricted">Die installierten Apps dürfen auf diesem Gerät nicht vollständig gelesen werden.</string>
+    <string name="error_apps_load">Die Liste der installierten Apps konnte nicht geladen werden.</string>
+    <string name="error_app_not_launchable">Die App ist nicht installiert oder besitzt keinen startbaren Bildschirm.</string>
+    <string name="error_app_blocked">Android hat den Start dieser App blockiert.</string>
+    <string name="error_app_launch">Die App konnte nicht gestartet werden.</string>
+</resources>

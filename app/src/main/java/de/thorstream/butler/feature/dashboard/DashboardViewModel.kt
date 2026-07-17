@@ -1,9 +1,13 @@
 package de.thorstream.butler.feature.dashboard
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.StringProvider
+import de.thorstream.butler.core.designsystem.labelRes
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkMeasurement
@@ -19,6 +23,7 @@ import de.thorstream.butler.domain.repository.StreamingEntryRepository
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.core.network.QualityEvaluator
 import javax.inject.Inject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,6 +31,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -42,11 +48,12 @@ data class DashboardUiState(
 
 data class PreLaunchUiState(
     val entry: StreamingEntry,
-    val step: String,
+    @param:StringRes val stepRes: Int,
     val progress: Float,
     val snapshot: NetworkSnapshot? = null,
     val assessment: QualityAssessment? = null,
     val autoLaunching: Boolean = false,
+    val errorMessage: String? = null,
 )
 
 @HiltViewModel
@@ -57,6 +64,7 @@ class DashboardViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val historyRepository: NetworkHistoryRepository,
     private val qualityEvaluator: QualityEvaluator,
+    private val strings: StringProvider,
 ) : ViewModel() {
     private val localState = MutableStateFlow(DashboardUiState())
     private var preLaunchJob: Job? = null
@@ -70,7 +78,8 @@ class DashboardViewModel @Inject constructor(
             items = entries.map { DashboardItem(it, installedAppsRepository.canLaunch(it.packageName)) },
             focusAnimationsEnabled = settings.focusAnimationsEnabled,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
+        // canLaunch queries the PackageManager per entry; keep that off the main thread.
+    }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
 
     init {
         viewModelScope.launch { entriesRepository.ensureDemoEntries() }
@@ -100,7 +109,7 @@ class DashboardViewModel @Inject constructor(
                     sortOrder = nextOrder,
                 ),
             )
-            localState.value = localState.value.copy(message = "${app.label} wurde zum Dashboard hinzugefügt.")
+            localState.value = localState.value.copy(message = strings.get(R.string.dashboard_app_added, app.label))
         }
     }
 
@@ -113,7 +122,7 @@ class DashboardViewModel @Inject constructor(
                 return@launch
             }
             localState.value = localState.value.copy(
-                preLaunch = PreLaunchUiState(entry, "Kurzer Netzwerkcheck wird vorbereitet", 0f),
+                preLaunch = PreLaunchUiState(entry, R.string.dashboard_check_preparing, 0f),
             )
             diagnosticsService.runDiagnostics(
                 target = settings.defaultTestTarget,
@@ -122,15 +131,19 @@ class DashboardViewModel @Inject constructor(
             ).collect { progress ->
                 localState.value = localState.value.copy(
                     preLaunch = localState.value.preLaunch?.copy(
-                        step = progress.step,
+                        stepRes = progress.step.labelRes(),
                         progress = progress.progress,
                         snapshot = progress.snapshot ?: localState.value.preLaunch?.snapshot,
+                        errorMessage = progress.errorMessage,
                     ),
                 )
                 if (progress.completed) {
                     val snapshot = progress.snapshot ?: NetworkSnapshot(ConnectionType.NONE)
                     val assessment = qualityEvaluator.evaluate(snapshot)
-                    historyRepository.save(NetworkMeasurement(timestamp = System.currentTimeMillis(), snapshot = snapshot, assessment = assessment))
+                    // Only persist real measurements; a failed check must not invent history entries.
+                    if (progress.snapshot != null) {
+                        historyRepository.save(NetworkMeasurement(timestamp = System.currentTimeMillis(), snapshot = snapshot, assessment = assessment))
+                    }
                     val autoLaunch = when (assessment.quality) {
                         NetworkQuality.OPTIMAL -> settings.autoLaunchOnGreen
                         NetworkQuality.USABLE -> true
@@ -139,7 +152,7 @@ class DashboardViewModel @Inject constructor(
                     }
                     localState.value = localState.value.copy(
                         preLaunch = localState.value.preLaunch?.copy(
-                            step = if (autoLaunch) "App wird gleich gestartet" else "Prüfung abgeschlossen",
+                            stepRes = if (autoLaunch) R.string.dashboard_check_launching else R.string.dashboard_check_finished,
                             progress = 1f,
                             snapshot = snapshot,
                             assessment = assessment,

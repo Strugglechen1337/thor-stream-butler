@@ -18,15 +18,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.thorstream.butler.R
 import de.thorstream.butler.core.designsystem.ThorCyan
+import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.core.designsystem.ThorGray
 import de.thorstream.butler.core.designsystem.ThorGreen
 import de.thorstream.butler.core.designsystem.ThorRed
@@ -44,18 +48,18 @@ fun HistoryRoute(viewModel: HistoryViewModel = hiltViewModel()) {
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text("THOR // VERLAUF", color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                Text("Messhistorie", style = MaterialTheme.typography.headlineLarge)
+                Text(stringResource(R.string.history_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+                Text(stringResource(R.string.history_title), style = MaterialTheme.typography.headlineLarge)
             }
             OutlinedButton(onClick = viewModel::clear, enabled = history.isNotEmpty()) {
                 Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
-                Text(" Verlauf löschen")
+                Text(" " + stringResource(R.string.history_clear))
             }
         }
         if (history.isEmpty()) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("Noch keine Messungen gespeichert", style = MaterialTheme.typography.titleLarge)
-                Text("Starte einen Netzwerktest, um einen Verlauf aufzubauen.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.history_empty_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.history_empty_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -79,34 +83,44 @@ private fun HistoryCard(item: NetworkMeasurement, older: NetworkMeasurement?) {
             )
             Column(Modifier.weight(1f)) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text(item.assessment.quality.displayName, color = qualityColor(item.assessment.quality), style = MaterialTheme.typography.titleLarge)
+                    Text(item.assessment.quality.label(), color = qualityColor(item.assessment.quality), style = MaterialTheme.typography.titleLarge)
                     Text(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(item.timestamp)), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text("${item.snapshot.connectionType.displayName}${item.snapshot.ssid?.let { " · $it" }.orEmpty()}")
+                Text("${item.snapshot.connectionType.label()}${item.snapshot.ssid?.let { " · $it" }.orEmpty()}")
                 Text(
-                    "Latenz ${item.snapshot.latencyMs.value("ms")} · Jitter ${item.snapshot.jitterMs.value("ms")} · Verlust ${item.snapshot.packetLossPercent.value("%")}",
+                    stringResource(
+                        R.string.history_metrics,
+                        item.snapshot.latencyMs.value("ms"),
+                        item.snapshot.jitterMs.value("ms"),
+                        item.snapshot.packetLossPercent.value("%"),
+                    ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                if (trend.label != null) Text(trend.label, color = if (trend.direction < 0) ThorGreen else if (trend.direction > 0) ThorRed else ThorGray)
+                trend.labelRes?.let { labelRes ->
+                    Text(
+                        trend.arg?.let { stringResource(labelRes, it) } ?: stringResource(labelRes),
+                        color = if (trend.direction < 0) ThorGreen else if (trend.direction > 0) ThorRed else ThorGray,
+                    )
+                }
                 item.assessment.problems.firstOrNull()?.let { Text(it, color = ThorYellow) }
             }
         }
     }
 }
 
-private data class Trend(val direction: Int, val label: String?)
+private data class Trend(val direction: Int, @param:StringRes val labelRes: Int?, val arg: String? = null)
 
 private fun latencyTrend(newer: NetworkMeasurement, older: NetworkMeasurement?): Trend {
     val current = newer.snapshot.latencyMs ?: return Trend(0, null)
-    val previous = older?.snapshot?.latencyMs ?: return Trend(0, "Erste vergleichbare Messung")
+    val previous = older?.snapshot?.latencyMs ?: return Trend(0, R.string.history_trend_first)
     val difference = current - previous
-    if (abs(difference) < 2.0) return Trend(0, "Latenz weitgehend unverändert")
-    return if (difference < 0) Trend(-1, "Latenz um ${abs(difference).format()} ms verbessert")
-    else Trend(1, "Latenz um ${difference.format()} ms verschlechtert")
+    if (abs(difference) < 2.0) return Trend(0, R.string.history_trend_flat)
+    return if (difference < 0) Trend(-1, R.string.history_trend_improved, abs(difference).format())
+    else Trend(1, R.string.history_trend_worse, difference.format())
 }
 
 private fun Double?.value(unit: String) = this?.let { "${it.format()} $unit" } ?: "–"
-private fun Double.format() = String.format(Locale.GERMANY, "%.1f", this)
+private fun Double.format() = String.format(Locale.getDefault(), "%.1f", this)
 private fun qualityColor(quality: NetworkQuality): Color = when (quality) {
     NetworkQuality.OPTIMAL -> ThorGreen
     NetworkQuality.USABLE -> ThorYellow

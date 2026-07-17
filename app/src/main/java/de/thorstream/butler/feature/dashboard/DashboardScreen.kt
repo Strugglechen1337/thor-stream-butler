@@ -4,6 +4,7 @@ import android.graphics.drawable.Drawable
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
@@ -23,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
@@ -62,17 +64,20 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.thorstream.butler.R
 import de.thorstream.butler.core.designsystem.ThorCyan
 import de.thorstream.butler.core.designsystem.ThorGray
 import de.thorstream.butler.core.designsystem.ThorGreen
 import de.thorstream.butler.core.designsystem.ThorRed
 import de.thorstream.butler.core.designsystem.ThorYellow
+import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.StreamingType
@@ -99,13 +104,13 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
         ) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text("THOR // STREAM BUTLER", color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                    Text("Deine Streams", style = MaterialTheme.typography.headlineLarge)
+                    Text(stringResource(R.string.dashboard_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.headlineLarge)
                 }
                 Button(onClick = { viewModel.loadInstalledApps(); showPicker = true }) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                     Spacer(Modifier.size(8.dp))
-                    Text("App hinzufügen")
+                    Text(stringResource(R.string.dashboard_add_app))
                 }
             }
             if (state.items.isEmpty()) {
@@ -160,12 +165,13 @@ private fun PreLaunchDialog(
     val canManuallyLaunch = assessment != null && !state.autoLaunching
     AlertDialog(
         onDismissRequest = { if (!state.autoLaunching) onCancel() },
-        title = { Text(if (assessment == null) "Netzwerkcheck" else assessment.quality.displayName) },
+        title = { Text(if (assessment == null) stringResource(R.string.dashboard_check_title) else assessment.quality.label()) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(state.entry.displayName, color = ThorCyan, fontWeight = FontWeight.Bold)
                 LinearProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
-                Text(state.step)
+                Text(stringResource(state.stepRes))
+                state.errorMessage?.let { Text(it, color = ThorRed, fontWeight = FontWeight.Bold) }
                 assessment?.let {
                     Text(it.summary, color = when (it.quality) {
                         NetworkQuality.OPTIMAL -> ThorGreen
@@ -180,17 +186,17 @@ private fun PreLaunchDialog(
         },
         confirmButton = {
             if (canManuallyLaunch) {
-                Button(onClick = onLaunchAnyway) { Text(if (requiresDecision) "Trotzdem starten" else "Starten") }
+                Button(onClick = onLaunchAnyway) { Text(stringResource(if (requiresDecision) R.string.dashboard_launch_anyway else R.string.dashboard_launch)) }
             }
         },
         dismissButton = {
             if (requiresDecision) {
                 Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    TextButton(onClick = onRetry) { Text("Erneut testen") }
-                    TextButton(onClick = onCancel) { Text("Abbrechen") }
+                    TextButton(onClick = onRetry) { Text(stringResource(R.string.action_retry_test)) }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.action_cancel)) }
                 }
             } else if (!state.autoLaunching) {
-                TextButton(onClick = onCancel) { Text("Abbrechen") }
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.action_cancel)) }
             }
         },
     )
@@ -205,8 +211,8 @@ private fun EmptyDashboard(onAdd: () -> Unit) {
     ) {
         Icon(Icons.Rounded.Gamepad, contentDescription = null, modifier = Modifier.size(64.dp), tint = ThorGray)
         Spacer(Modifier.height(12.dp))
-        Text("Noch keine Streaming-Apps eingerichtet", style = MaterialTheme.typography.titleLarge)
-        TextButton(onClick = onAdd) { Text("Erste App auswählen") }
+        Text(stringResource(R.string.dashboard_empty_title), style = MaterialTheme.typography.titleLarge)
+        TextButton(onClick = onAdd) { Text(stringResource(R.string.dashboard_empty_action)) }
     }
 }
 
@@ -237,16 +243,16 @@ private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, 
                 Spacer(Modifier.size(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(item.entry.displayName, style = MaterialTheme.typography.titleLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(item.entry.streamingType.displayName, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(item.entry.streamingType.label(), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
-                IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = "Kachel entfernen") }
+                IconButton(onClick = onDelete) { Icon(Icons.Rounded.Delete, contentDescription = stringResource(R.string.dashboard_remove_tile)) }
             }
             Column {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     QualityDot(item.entry.lastNetworkQuality)
                     Text(
-                        item.entry.lastUsedAt?.let { "Zuletzt ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))}" }
-                            ?: if (item.isInstalled) "Bereit" else "Nicht installiert",
+                        item.entry.lastUsedAt?.let { stringResource(R.string.dashboard_last_used, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))) }
+                            ?: stringResource(if (item.isInstalled) R.string.dashboard_ready else R.string.dashboard_not_installed),
                         color = if (item.isInstalled) MaterialTheme.colorScheme.onSurfaceVariant else ThorRed,
                         maxLines = 1,
                     )
@@ -254,7 +260,7 @@ private fun StreamingTile(item: DashboardItem, focusAnimationsEnabled: Boolean, 
                 Spacer(Modifier.height(10.dp))
                 FilledTonalButton(onClick = onLaunch, enabled = item.isInstalled, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Rounded.PlayArrow, contentDescription = null)
-                    Text(if (item.isInstalled) " Starten" else " Nicht verfügbar")
+                    Text(" " + stringResource(if (item.isInstalled) R.string.dashboard_launch else R.string.dashboard_unavailable))
                 }
             }
         }
@@ -269,7 +275,7 @@ private fun QualityDot(quality: NetworkQuality?) {
         NetworkQuality.PROBLEMATIC -> ThorRed
         else -> ThorGray
     }
-    Box(Modifier.size(10.dp).clip(RoundedCornerShape(50)).border(5.dp, color, RoundedCornerShape(50)))
+    Box(Modifier.size(10.dp).clip(CircleShape).background(color))
 }
 
 @Composable
@@ -302,7 +308,7 @@ private fun AppPickerDialog(
     var typeMenuOpen by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (selectedApp == null) "Installierte App wählen" else "Kachel konfigurieren") },
+        title = { Text(stringResource(if (selectedApp == null) R.string.dashboard_picker_choose else R.string.dashboard_picker_configure)) },
         text = {
             if (loading) {
                 Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -329,15 +335,15 @@ private fun AppPickerDialog(
                     OutlinedTextField(
                         value = customName,
                         onValueChange = { customName = it },
-                        label = { Text("Eigener Name (optional)") },
+                        label = { Text(stringResource(R.string.dashboard_picker_custom_name)) },
                         singleLine = true,
                     )
                     Box {
-                        FilledTonalButton(onClick = { typeMenuOpen = true }) { Text(selectedType.displayName) }
+                        FilledTonalButton(onClick = { typeMenuOpen = true }) { Text(selectedType.label()) }
                         DropdownMenu(expanded = typeMenuOpen, onDismissRequest = { typeMenuOpen = false }) {
                             StreamingType.entries.forEach { type ->
                                 DropdownMenuItem(
-                                    text = { Text(type.displayName) },
+                                    text = { Text(type.label()) },
                                     onClick = { selectedType = type; typeMenuOpen = false },
                                 )
                             }
@@ -348,12 +354,12 @@ private fun AppPickerDialog(
         },
         confirmButton = {
             if (selectedApp != null) {
-                Button(onClick = { onAdd(selectedApp!!, selectedType, customName) }) { Text("Hinzufügen") }
+                Button(onClick = { onAdd(selectedApp!!, selectedType, customName) }) { Text(stringResource(R.string.action_add)) }
             }
         },
         dismissButton = {
             TextButton(onClick = { if (selectedApp == null) onDismiss() else selectedApp = null }) {
-                Text(if (selectedApp == null) "Abbrechen" else "Zurück")
+                Text(stringResource(if (selectedApp == null) R.string.action_cancel else R.string.action_back))
             }
         },
     )

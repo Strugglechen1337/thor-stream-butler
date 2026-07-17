@@ -7,12 +7,15 @@ import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
 import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
+import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.core.network.NetworkCalculations
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.service.DiagnosticProgress
+import de.thorstream.butler.domain.service.DiagnosticStep
 import de.thorstream.butler.domain.service.HostDiscoveryService
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.domain.service.PingResult
@@ -40,7 +43,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 
 @Singleton
-class AndroidPingService @Inject constructor() : PingService {
+class AndroidPingService @Inject constructor(private val strings: StringProvider) : PingService {
     private val timeRegex = Regex("time[=<]([0-9.]+) ?ms", RegexOption.IGNORE_CASE)
 
     override suspend fun ping(host: String, count: Int, timeoutMillis: Int): AppResult<PingResult> = withContext(Dispatchers.IO) {
@@ -83,7 +86,7 @@ class AndroidPingService @Inject constructor() : PingService {
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {
-            AppResult.Failure(AppError.Unavailable("Das Ping-Ziel konnte nicht erreicht oder aufgelöst werden."))
+            AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_ping_unreachable)))
         }
     }
 }
@@ -107,7 +110,7 @@ class TcpHostDiscoveryService @Inject constructor() : HostDiscoveryService {
 }
 
 @Singleton
-class HttpsSpeedTestService @Inject constructor() : SpeedTestService {
+class HttpsSpeedTestService @Inject constructor(private val strings: StringProvider) : SpeedTestService {
     override suspend fun measureDownloadMbps(testDurationSeconds: Int): AppResult<Double> = withContext(Dispatchers.IO) {
         var connection: HttpURLConnection? = null
         try {
@@ -131,12 +134,12 @@ class HttpsSpeedTestService @Inject constructor() : SpeedTestService {
                 }
             }
             val seconds = (System.nanoTime() - started) / 1_000_000_000.0
-            if (bytes == 0L || seconds <= 0.0) AppResult.Failure(AppError.Unavailable("Der Downloadtest lieferte keine Messdaten."))
+            if (bytes == 0L || seconds <= 0.0) AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_download_no_data)))
             else AppResult.Success(bytes * 8.0 / seconds / 1_000_000.0)
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: Exception) {
-            AppResult.Failure(AppError.Unavailable("Der optionale Downloadtest ist derzeit nicht erreichbar."))
+            AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_download_unavailable)))
         } finally {
             connection?.disconnect()
         }
@@ -146,6 +149,7 @@ class HttpsSpeedTestService @Inject constructor() : SpeedTestService {
 @Singleton
 class AndroidNetworkDiagnosticsService @Inject constructor(
     @param:ApplicationContext private val context: Context,
+    private val strings: StringProvider,
     private val pingService: PingService,
     private val speedTestService: SpeedTestService,
     private val hostDiscoveryService: HostDiscoveryService,
@@ -155,9 +159,10 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
     @Suppress("DEPRECATION")
     override suspend fun readConnectionSnapshot(): AppResult<NetworkSnapshot> = withContext(Dispatchers.IO) {
         try {
-            val network = connectivityManager.activeNetwork ?: return@withContext AppResult.Failure(AppError.NoNetwork())
+            val network = connectivityManager.activeNetwork
+                ?: return@withContext AppResult.Failure(AppError.NoNetwork(strings.get(R.string.error_no_network)))
             val capabilities = connectivityManager.getNetworkCapabilities(network)
-                ?: return@withContext AppResult.Failure(AppError.NoNetwork())
+                ?: return@withContext AppResult.Failure(AppError.NoNetwork(strings.get(R.string.error_no_network)))
             val properties = connectivityManager.getLinkProperties(network)
             val type = when {
                 capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> ConnectionType.ETHERNET
@@ -185,9 +190,9 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
         } catch (cancelled: CancellationException) {
             throw cancelled
         } catch (_: SecurityException) {
-            AppResult.Failure(AppError.MissingPermission("Netzwerkdetails sind ohne die zugehörige Android-Berechtigung nur eingeschränkt verfügbar."))
+            AppResult.Failure(AppError.MissingPermission(strings.get(R.string.error_network_permission)))
         } catch (_: RuntimeException) {
-            AppResult.Failure(AppError.Technical("Die aktiven Netzwerkdaten konnten nicht gelesen werden."))
+            AppResult.Failure(AppError.Technical(strings.get(R.string.error_network_read)))
         }
     }
 
@@ -203,21 +208,21 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
         includeDownloadTest: Boolean,
         testDurationSeconds: Int,
     ): Flow<DiagnosticProgress> = flow {
-        emit(DiagnosticProgress("Verbindung wird erkannt", 0.05f))
+        emit(DiagnosticProgress(DiagnosticStep.DETECTING_CONNECTION, 0.05f))
         val base = when (val result = readConnectionSnapshot()) {
             is AppResult.Success -> result.value
             is AppResult.Failure -> {
-                emit(DiagnosticProgress("Netzwerk nicht verfügbar", 1f, errorMessage = result.error.message, completed = true))
+                emit(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, errorMessage = result.error.message, completed = true))
                 return@flow
             }
         }
-        emit(DiagnosticProgress("Verbindungsdaten gelesen", 0.2f, base))
+        emit(DiagnosticProgress(DiagnosticStep.CONNECTION_READ, 0.2f, base))
 
         val dnsReachable = withContext(Dispatchers.IO) {
             withTimeoutOrNull(2_500) { InetAddress.getByName("example.com"); true } ?: false
         }
         var snapshot = base.copy(dnsReachable = dnsReachable)
-        emit(DiagnosticProgress("DNS geprüft", 0.35f, snapshot))
+        emit(DiagnosticProgress(DiagnosticStep.DNS_CHECKED, 0.35f, snapshot))
 
         snapshot = when (val ping = pingService.ping(target, pingCount.coerceIn(1, 20))) {
             is AppResult.Success -> snapshot.copy(
@@ -227,7 +232,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
             )
             is AppResult.Failure -> snapshot
         }
-        emit(DiagnosticProgress("Latenz, Jitter und Paketverlust gemessen", 0.68f, snapshot))
+        emit(DiagnosticProgress(DiagnosticStep.LATENCY_MEASURED, 0.68f, snapshot))
 
         if (host != null) {
             val reachable = when (val result = hostDiscoveryService.isReachable(host, port)) {
@@ -235,7 +240,7 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
                 is AppResult.Failure -> false
             }
             snapshot = snapshot.copy(host = host, hostReachable = reachable)
-            emit(DiagnosticProgress("Streaming-Host geprüft", 0.82f, snapshot))
+            emit(DiagnosticProgress(DiagnosticStep.HOST_CHECKED, 0.82f, snapshot))
         }
 
         if (includeDownloadTest) {
@@ -244,8 +249,8 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
                 is AppResult.Failure -> null
             }
             snapshot = snapshot.copy(downloadMbps = speed)
-            emit(DiagnosticProgress("Downloadgeschwindigkeit gemessen", 0.94f, snapshot))
+            emit(DiagnosticProgress(DiagnosticStep.DOWNLOAD_MEASURED, 0.94f, snapshot))
         }
-        emit(DiagnosticProgress("Test abgeschlossen", 1f, snapshot, completed = true))
+        emit(DiagnosticProgress(DiagnosticStep.COMPLETED, 1f, snapshot, completed = true))
     }
 }
