@@ -5,15 +5,27 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.domain.model.InstalledApp
+import de.thorstream.butler.domain.model.ConnectionType
+import de.thorstream.butler.domain.model.NetworkMeasurement
+import de.thorstream.butler.domain.model.NetworkQuality
+import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.domain.model.QualityAssessment
 import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.model.StreamingType
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
+import de.thorstream.butler.domain.repository.NetworkHistoryRepository
+import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
+import de.thorstream.butler.domain.service.NetworkDiagnosticsService
+import de.thorstream.butler.core.network.QualityEvaluator
 import javax.inject.Inject
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -24,14 +36,29 @@ data class DashboardUiState(
     val installedApps: List<InstalledApp> = emptyList(),
     val isLoadingApps: Boolean = false,
     val message: String? = null,
+    val preLaunch: PreLaunchUiState? = null,
+)
+
+data class PreLaunchUiState(
+    val entry: StreamingEntry,
+    val step: String,
+    val progress: Float,
+    val snapshot: NetworkSnapshot? = null,
+    val assessment: QualityAssessment? = null,
+    val autoLaunching: Boolean = false,
 )
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val entriesRepository: StreamingEntryRepository,
     private val installedAppsRepository: InstalledAppsRepository,
+    private val diagnosticsService: NetworkDiagnosticsService,
+    private val settingsRepository: SettingsRepository,
+    private val historyRepository: NetworkHistoryRepository,
+    private val qualityEvaluator: QualityEvaluator,
 ) : ViewModel() {
     private val localState = MutableStateFlow(DashboardUiState())
+    private var preLaunchJob: Job? = null
 
     val uiState: StateFlow<DashboardUiState> = combine(
         entriesRepository.observeEntries(),
@@ -73,12 +100,84 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun launch(entry: StreamingEntry) {
+        preLaunchJob?.cancel()
+        preLaunchJob = viewModelScope.launch {
+            val settings = settingsRepository.settings.first()
+            if (!settings.preLaunchCheckEnabled) {
+                launchTarget(entry, null)
+                return@launch
+            }
+            localState.value = localState.value.copy(
+                preLaunch = PreLaunchUiState(entry, "Kurzer Netzwerkcheck wird vorbereitet", 0f),
+            )
+            diagnosticsService.runDiagnostics(
+                target = settings.defaultTestTarget,
+                pingCount = settings.pingCount.coerceAtMost(5),
+                includeDownloadTest = false,
+            ).collect { progress ->
+                localState.value = localState.value.copy(
+                    preLaunch = localState.value.preLaunch?.copy(
+                        step = progress.step,
+                        progress = progress.progress,
+                        snapshot = progress.snapshot ?: localState.value.preLaunch?.snapshot,
+                    ),
+                )
+                if (progress.completed) {
+                    val snapshot = progress.snapshot ?: NetworkSnapshot(ConnectionType.NONE)
+                    val assessment = qualityEvaluator.evaluate(snapshot)
+                    historyRepository.save(NetworkMeasurement(timestamp = System.currentTimeMillis(), snapshot = snapshot, assessment = assessment))
+                    val autoLaunch = when (assessment.quality) {
+                        NetworkQuality.OPTIMAL -> settings.autoLaunchOnGreen
+                        NetworkQuality.USABLE -> true
+                        NetworkQuality.PROBLEMATIC -> !settings.confirmOnRed
+                        NetworkQuality.NOT_MEASURABLE -> false
+                    }
+                    localState.value = localState.value.copy(
+                        preLaunch = localState.value.preLaunch?.copy(
+                            step = if (autoLaunch) "App wird gleich gestartet" else "Prüfung abgeschlossen",
+                            progress = 1f,
+                            snapshot = snapshot,
+                            assessment = assessment,
+                            autoLaunching = autoLaunch,
+                        ),
+                    )
+                    if (autoLaunch) {
+                        if (assessment.quality == NetworkQuality.USABLE && settings.warnOnYellow) {
+                            localState.value = localState.value.copy(message = assessment.summary)
+                        }
+                        delay(1_800)
+                        launchTarget(entry, assessment.quality)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun launchTarget(entry: StreamingEntry, quality: NetworkQuality?) {
         when (val result = installedAppsRepository.launch(entry.packageName)) {
             is AppResult.Success -> viewModelScope.launch {
-                entriesRepository.markLaunched(entry.id, System.currentTimeMillis(), entry.lastNetworkQuality?.name)
+                entriesRepository.markLaunched(entry.id, System.currentTimeMillis(), quality?.name ?: entry.lastNetworkQuality?.name)
+                localState.value = localState.value.copy(preLaunch = null)
             }
             is AppResult.Failure -> localState.value = localState.value.copy(message = result.error.message)
         }
+    }
+
+    fun launchAnyway() {
+        val state = localState.value.preLaunch ?: return
+        preLaunchJob?.cancel()
+        launchTarget(state.entry, state.assessment?.quality)
+    }
+
+    fun retryPreLaunch() {
+        val entry = localState.value.preLaunch?.entry ?: return
+        launch(entry)
+    }
+
+    fun cancelPreLaunch() {
+        preLaunchJob?.cancel()
+        preLaunchJob = null
+        localState.value = localState.value.copy(preLaunch = null)
     }
 
     fun delete(entry: StreamingEntry) {
@@ -89,4 +188,3 @@ class DashboardViewModel @Inject constructor(
         localState.value = localState.value.copy(message = null)
     }
 }
-

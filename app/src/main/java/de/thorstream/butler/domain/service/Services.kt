@@ -20,7 +20,14 @@ data class DiagnosticProgress(
 )
 
 interface NetworkDiagnosticsService {
-    fun runDiagnostics(target: String, pingCount: Int, host: String? = null, port: Int? = null): Flow<DiagnosticProgress>
+    fun runDiagnostics(
+        target: String,
+        pingCount: Int,
+        host: String? = null,
+        port: Int? = null,
+        includeDownloadTest: Boolean = false,
+        testDurationSeconds: Int = 5,
+    ): Flow<DiagnosticProgress>
     suspend fun readConnectionSnapshot(): AppResult<NetworkSnapshot>
 }
 
@@ -39,4 +46,3 @@ interface HostDiscoveryService {
 interface WakeOnLanService {
     suspend fun sendMagicPacket(macAddress: String, broadcastAddress: String, port: Int = 9): AppResult<Unit>
 }
-

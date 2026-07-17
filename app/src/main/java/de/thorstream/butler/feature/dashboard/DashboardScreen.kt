@@ -47,6 +47,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -136,6 +137,59 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             onAdd = { app, type, name -> viewModel.addApp(app, type, name); showPicker = false },
         )
     }
+    state.preLaunch?.let { preLaunch ->
+        PreLaunchDialog(
+            state = preLaunch,
+            onCancel = viewModel::cancelPreLaunch,
+            onRetry = viewModel::retryPreLaunch,
+            onLaunchAnyway = viewModel::launchAnyway,
+        )
+    }
+}
+
+@Composable
+private fun PreLaunchDialog(
+    state: PreLaunchUiState,
+    onCancel: () -> Unit,
+    onRetry: () -> Unit,
+    onLaunchAnyway: () -> Unit,
+) {
+    val assessment = state.assessment
+    val requiresDecision = assessment?.quality == NetworkQuality.PROBLEMATIC || assessment?.quality == NetworkQuality.NOT_MEASURABLE
+    AlertDialog(
+        onDismissRequest = { if (!state.autoLaunching) onCancel() },
+        title = { Text(if (assessment == null) "Netzwerkcheck" else assessment.quality.displayName) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(state.entry.displayName, color = ThorCyan, fontWeight = FontWeight.Bold)
+                LinearProgressIndicator(progress = { state.progress }, modifier = Modifier.fillMaxWidth())
+                Text(state.step)
+                assessment?.let {
+                    Text(it.summary, color = when (it.quality) {
+                        NetworkQuality.OPTIMAL -> ThorGreen
+                        NetworkQuality.USABLE -> ThorYellow
+                        NetworkQuality.PROBLEMATIC -> ThorRed
+                        NetworkQuality.NOT_MEASURABLE -> ThorGray
+                    })
+                    it.problems.take(3).forEach { problem -> Text("• $problem") }
+                    it.recommendations.firstOrNull()?.let { recommendation -> Text("→ $recommendation", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+            }
+        },
+        confirmButton = {
+            if (requiresDecision) Button(onClick = onLaunchAnyway) { Text("Trotzdem starten") }
+        },
+        dismissButton = {
+            if (requiresDecision) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    TextButton(onClick = onRetry) { Text("Erneut testen") }
+                    TextButton(onClick = onCancel) { Text("Abbrechen") }
+                }
+            } else if (!state.autoLaunching) {
+                TextButton(onClick = onCancel) { Text("Abbrechen") }
+            }
+        },
+    )
 }
 
 @Composable
@@ -300,4 +354,3 @@ private fun AppPickerDialog(
         },
     )
 }
-

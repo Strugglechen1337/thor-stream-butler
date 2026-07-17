@@ -26,6 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import de.thorstream.butler.core.designsystem.ThorTheme
 import de.thorstream.butler.feature.dashboard.DashboardRoute
+import de.thorstream.butler.feature.networktest.NetworkTestRoute
+import de.thorstream.butler.feature.history.HistoryRoute
 
 private enum class Destination(val route: String, val title: String, val icon: ImageVector) {
     Dashboard("dashboard", "Dashboard", Icons.Rounded.Home),
@@ -65,7 +67,9 @@ fun ThorApp() = ThorTheme {
             modifier = Modifier.padding(padding),
         ) {
             composable(Destination.Dashboard.route) { DashboardRoute() }
-            Destination.entries.filterNot { it == Destination.Dashboard }.forEach { destination ->
+            composable(Destination.Network.route) { NetworkTestRoute() }
+            composable(Destination.History.route) { HistoryRoute() }
+            Destination.entries.filterNot { it == Destination.Dashboard || it == Destination.Network || it == Destination.History }.forEach { destination ->
                 composable(destination.route) { InitialScreen(destination.title) }
             }
         }
