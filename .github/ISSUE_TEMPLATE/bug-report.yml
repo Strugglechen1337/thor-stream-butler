@@ -1,63 +1,63 @@
-name: Report a bug
-description: Report a reproducible problem in the app, diagnostics, or project website
+name: Report a bug / Fehler melden
+description: Report a reproducible problem / Melde ein reproduzierbares Problem
 title: "[Bug]: "
 labels: [bug, triage]
 body:
   - type: markdown
     attributes:
-      value: Thank you for the report. Remove IP addresses, SSIDs, MAC addresses, hostnames, and credentials from screenshots and logs.
+      value: "EN: Thank you for the report. Remove private network data from screenshots and logs. DE: Danke für den Bericht. Entferne private Netzwerkdaten aus Screenshots und Logs."
   - type: dropdown
     id: area
     attributes:
-      label: Area
+      label: Area / Bereich
       options:
-        - Dashboard / app launch
-        - Network diagnostics
+        - Dashboard / app launch / App-Start
+        - Network diagnostics / Netzwerkdiagnose
         - Hosts / Wake-on-LAN
-        - Settings / history
-        - Controller / focus
-        - Project website
-        - Build / tests
+        - Settings / history / Einstellungen / Historie
+        - Controller / focus / Fokus
+        - Project website / Projektwebsite
+        - Build / tests / Tests
     validations:
       required: true
   - type: textarea
     id: description
     attributes:
-      label: Problem description
-      description: What happened, and what did you expect instead?
+      label: Problem description / Problembeschreibung
+      description: What happened and what did you expect? / Was ist passiert und was wurde erwartet?
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
+      label: Steps to reproduce / Schritte zur Reproduktion
       placeholder: |
-        1. Open …
-        2. Select …
-        3. Observe …
+        1. Open / Öffne …
+        2. Select / Wähle …
+        3. Observe / Beobachte …
     validations:
       required: true
   - type: input
     id: device
     attributes:
-      label: Device and Android version
-      placeholder: For example, AYN Odin 2 on Android 13
+      label: Device and Android version / Gerät und Android-Version
+      placeholder: For example / Zum Beispiel, AYN Odin 2 on Android 13
     validations:
       required: true
   - type: input
     id: version
     attributes:
-      label: App version or commit
-      placeholder: For example, 0.1.0 or 6622918
+      label: App version or commit / App-Version oder Commit
+      placeholder: For example / Zum Beispiel, 0.1.0 or 6622918
   - type: textarea
     id: context
     attributes:
-      label: Additional context
-      description: Sanitized logs or screenshots without private network data.
+      label: Additional context / Zusätzlicher Kontext
+      description: Sanitized logs or screenshots / Bereinigte Logs oder Screenshots.
   - type: checkboxes
     id: privacy
     attributes:
-      label: Privacy check
+      label: Privacy check / Datenschutzprüfung
       options:
-        - label: I removed IP addresses, SSIDs, MAC addresses, hostnames, credentials, and other private data.
+        - label: I removed private data. / Ich habe private Daten entfernt.
           required: true

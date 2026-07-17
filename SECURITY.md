@@ -1,10 +1,14 @@
 # Security policy
 
-## Supported version
+**English** | [Deutsch](#deutsch)
+
+## English
+
+### Supported version
 
 During the MVP phase, only the current version on the default branch is supported.
 
-## Reporting a vulnerability
+### Reporting a vulnerability
 
 Please report security vulnerabilities privately through
 [GitHub Security Advisories](https://github.com/Strugglechen1337/thor-stream-butler/security/advisories/new).
@@ -21,7 +25,7 @@ A useful report includes:
 Remove IP addresses, SSIDs, MAC addresses, hostnames, account data, and other
 personal information from reports, logs, and attachments.
 
-## Security principles
+### Security principles
 
 - No credentials or accounts in the MVP
 - No cloud, tracking, analytics, or telemetry services
@@ -30,3 +34,38 @@ personal information from reports, logs, and attachments.
 - No diagnostic data stored outside the private app sandbox
 - Timeouts and cancellation for network operations
 - No sensitive network identifiers in logs
+
+---
+
+## Deutsch
+
+### Unterstützte Version
+
+Während der MVP-Phase wird nur die aktuelle Version auf dem Standardbranch unterstützt.
+
+### Sicherheitslücke melden
+
+Bitte melde Sicherheitslücken vertraulich über
+[GitHub Security Advisories](https://github.com/Strugglechen1337/thor-stream-butler/security/advisories/new).
+Erstelle für eine Sicherheitslücke kein öffentliches Issue.
+
+Ein hilfreicher Bericht enthält:
+
+- betroffene Version oder Commit-ID
+- reproduzierbare Schritte
+- erwartete und tatsächliche Auswirkung
+- Android-Version und Geräteklasse
+- eine mögliche Abhilfemaßnahme, falls bekannt
+
+Entferne IP-Adressen, SSIDs, MAC-Adressen, Hostnamen, Kontodaten und andere
+persönliche Informationen aus Berichten, Logs und Anhängen.
+
+### Sicherheitsprinzipien
+
+- keine Zugangsdaten oder Konten im MVP
+- keine Cloud-, Tracking-, Analyse- oder Telemetriedienste
+- lokale Netzwerkberechtigungen nur für explizite Hostaktionen
+- keine versteckten Android-APIs und kein Root-Zugriff
+- keine Diagnosedaten außerhalb der privaten App-Sandbox
+- Timeouts und Cancellation für Netzwerkoperationen
+- keine sensiblen Netzwerkkennungen in Logs

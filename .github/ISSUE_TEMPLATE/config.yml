@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Report a vulnerability privately
+  - name: Report a vulnerability privately / Sicherheitslücke vertraulich melden
     url: https://github.com/Strugglechen1337/thor-stream-butler/security/advisories/new
-    about: Do not report security vulnerabilities as public issues.
+    about: Do not report vulnerabilities publicly. / Sicherheitslücken nicht öffentlich melden.
