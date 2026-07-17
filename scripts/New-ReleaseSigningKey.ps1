@@ -49,13 +49,17 @@ try {
     }
 
     New-Item -ItemType Directory -Path $signingDirectory | Out-Null
+    # Keep passwords out of the process command line. keytool reads these two
+    # task-specific environment variables only for the lifetime of this script.
+    $env:THOR_KEYTOOL_STORE_PASSWORD = $storePassword
+    $env:THOR_KEYTOOL_KEY_PASSWORD = $keyPassword
     $arguments = @(
         "-genkeypair",
         "-keystore", $keystorePath,
         "-storetype", "JKS",
-        "-storepass", $storePassword,
+        "-storepass:env", "THOR_KEYTOOL_STORE_PASSWORD",
         "-alias", $KeyAlias,
-        "-keypass", $keyPassword,
+        "-keypass:env", "THOR_KEYTOOL_KEY_PASSWORD",
         "-keyalg", "RSA",
         "-keysize", "4096",
         "-sigalg", "SHA256withRSA",
@@ -76,11 +80,18 @@ try {
 
     if ($ConfigureGitHubSecrets) {
         $null = Get-Command gh -ErrorAction Stop
-        [Convert]::ToBase64String([IO.File]::ReadAllBytes($keystorePath)) | gh secret set SIGNING_KEYSTORE_BASE64
-        $storePassword | gh secret set SIGNING_STORE_PASSWORD
-        $KeyAlias | gh secret set SIGNING_KEY_ALIAS
-        $keyPassword | gh secret set SIGNING_KEY_PASSWORD
-        if ($LASTEXITCODE -ne 0) { throw "GitHub secret setup failed / GitHub-Secret-Einrichtung fehlgeschlagen." }
+        $secretValues = [ordered]@{
+            SIGNING_KEYSTORE_BASE64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes($keystorePath))
+            SIGNING_STORE_PASSWORD = $storePassword
+            SIGNING_KEY_ALIAS = $KeyAlias
+            SIGNING_KEY_PASSWORD = $keyPassword
+        }
+        foreach ($secret in $secretValues.GetEnumerator()) {
+            $secret.Value | gh secret set $secret.Key
+            if ($LASTEXITCODE -ne 0) {
+                throw "GitHub secret setup failed for $($secret.Key) / GitHub-Secret-Einrichtung für $($secret.Key) fehlgeschlagen."
+            }
+        }
         Write-Host "GitHub signing secrets configured. / GitHub-Signing-Secrets eingerichtet."
     }
 
@@ -88,6 +99,7 @@ try {
     Write-Host "Release-Signing in signing/ erstellt. Sichere JKS und Passwörter jetzt getrennt."
     Write-Host "Verification / Prüfung: .\gradlew.bat :app:assembleRelease"
 } finally {
+    Remove-Item Env:\THOR_KEYTOOL_STORE_PASSWORD, Env:\THOR_KEYTOOL_KEY_PASSWORD -ErrorAction SilentlyContinue
     if ($storePointer -ne [IntPtr]::Zero) { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($storePointer) }
     if ($keyPointer -ne [IntPtr]::Zero -and $keyPointer -ne $storePointer) { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($keyPointer) }
     Remove-Variable storePassword, keyPassword -ErrorAction SilentlyContinue

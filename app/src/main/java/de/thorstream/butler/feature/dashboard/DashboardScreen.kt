@@ -15,13 +15,14 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -79,6 +80,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.content.ContextCompat
@@ -144,22 +146,12 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 20.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(stringResource(R.string.dashboard_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                    Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.headlineLarge)
-                }
-                Button(onClick = { viewModel.loadInstalledApps(); showPicker = true }) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.dashboard_add_app))
-                }
-            }
+            DashboardHeader(onAdd = { viewModel.loadInstalledApps(); showPicker = true })
             if (state.items.isEmpty()) {
                 EmptyDashboard(onAdd = { viewModel.loadInstalledApps(); showPicker = true })
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 230.dp),
+                    columns = GridCells.Adaptive(minSize = 280.dp),
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp),
                     modifier = Modifier.fillMaxSize().focusRestorer().focusGroup(),
@@ -221,6 +213,36 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             onLaunchAnyway = viewModel::launchAnyway,
             onWake = { withLocalNetworkPermission(true, viewModel::wakeLinkedHost) },
         )
+    }
+}
+
+@Composable
+private fun DashboardHeader(onAdd: () -> Unit) {
+    val title: @Composable () -> Unit = {
+        Column {
+            Text(stringResource(R.string.dashboard_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.dashboard_title), style = MaterialTheme.typography.headlineLarge)
+        }
+    }
+    val action: @Composable () -> Unit = {
+        Button(onClick = onAdd) {
+            Icon(Icons.Rounded.Add, contentDescription = null)
+            Spacer(Modifier.size(8.dp))
+            Text(stringResource(R.string.dashboard_add_app))
+        }
+    }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth < 520.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                title()
+                action()
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { title() }
+                action()
+            }
+        }
     }
 }
 
@@ -323,8 +345,9 @@ private fun StreamingTile(
     val shape = RoundedCornerShape(20.dp)
     ElevatedCard(
         modifier = modifier
+            .testTag("dashboard-tile-${item.entry.sortOrder}")
             .fillMaxWidth()
-            .aspectRatio(1.25f)
+            .heightIn(min = 280.dp)
             .scale(scale)
             .border(3.dp, borderColor, shape)
             .clip(shape)
@@ -364,12 +387,22 @@ private fun StreamingTile(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     QualityDot(item.entry.lastNetworkQuality)
-                    Text(
-                        item.entry.lastUsedAt?.let { stringResource(R.string.dashboard_last_used, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(it))) }
-                            ?: stringResource(if (item.isInstalled) R.string.dashboard_ready else R.string.dashboard_not_installed),
-                        color = if (item.isInstalled) MaterialTheme.colorScheme.onSurfaceVariant else ThorRed,
-                        maxLines = 1,
-                    )
+                    Column {
+                        Text(
+                            item.entry.lastNetworkQuality?.label()
+                                ?: stringResource(if (item.isInstalled) R.string.dashboard_ready else R.string.dashboard_not_installed),
+                            color = if (item.isInstalled) MaterialTheme.colorScheme.onSurfaceVariant else ThorRed,
+                            maxLines = 1,
+                        )
+                        item.entry.lastUsedAt?.let { timestamp ->
+                            Text(
+                                stringResource(R.string.dashboard_last_used, DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(timestamp))),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -510,17 +543,27 @@ private fun AppPickerDialog(
     var selectedType by remember { mutableStateOf(StreamingType.CUSTOM) }
     var customName by remember { mutableStateOf("") }
     var typeMenuOpen by remember { mutableStateOf(false) }
+    val configuredApp = selectedApp
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (selectedApp == null) R.string.dashboard_picker_choose else R.string.dashboard_picker_configure)) },
         text = {
             if (loading) {
                 Box(Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
-            } else if (selectedApp == null) {
+            } else if (configuredApp == null) {
                 LazyColumn(modifier = Modifier.height(360.dp)) {
                     items(apps, key = { it.packageName }) { app ->
+                        var focused by remember(app.packageName) { mutableStateOf(false) }
+                        val shape = RoundedCornerShape(12.dp)
                         Row(
-                            modifier = Modifier.fillMaxWidth().clickable { selectedApp = app }.padding(vertical = 10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onFocusChanged { focused = it.hasFocus }
+                                .border(2.dp, if (focused) ThorCyan else Color.Transparent, shape)
+                                .background(if (focused) ThorCyan.copy(alpha = 0.08f) else Color.Transparent, shape)
+                                .clip(shape)
+                                .clickable { selectedApp = app }
+                                .padding(horizontal = 8.dp, vertical = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             PackageIcon(app.packageName, Modifier.size(42.dp))
@@ -535,10 +578,10 @@ private fun AppPickerDialog(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(selectedApp!!.label, fontWeight = FontWeight.Bold)
+                    Text(configuredApp.label, fontWeight = FontWeight.Bold)
                     OutlinedTextField(
                         value = customName,
-                        onValueChange = { customName = it },
+                        onValueChange = { customName = it.take(120) },
                         label = { Text(stringResource(R.string.dashboard_picker_custom_name)) },
                         singleLine = true,
                     )
@@ -557,8 +600,8 @@ private fun AppPickerDialog(
             }
         },
         confirmButton = {
-            if (selectedApp != null) {
-                Button(onClick = { onAdd(selectedApp!!, selectedType, customName) }) { Text(stringResource(R.string.action_add)) }
+            configuredApp?.let { app ->
+                Button(onClick = { onAdd(app, selectedType, customName) }) { Text(stringResource(R.string.action_add)) }
             }
         },
         dismissButton = {

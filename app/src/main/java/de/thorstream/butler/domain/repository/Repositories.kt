@@ -28,6 +28,7 @@ interface StreamingEntryRepository {
 interface NetworkHistoryRepository {
     fun observeHistory(): Flow<List<NetworkMeasurement>>
     suspend fun getHistory(): List<NetworkMeasurement>
+    suspend fun getAllHistory(): List<NetworkMeasurement>
     suspend fun save(measurement: NetworkMeasurement): Long
     suspend fun replaceAll(measurements: List<NetworkMeasurement>)
     suspend fun clear()

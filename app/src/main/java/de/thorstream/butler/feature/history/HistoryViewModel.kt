@@ -3,15 +3,19 @@ package de.thorstream.butler.feature.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.thorstream.butler.R
+import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import javax.inject.Inject
 import kotlin.math.abs
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -36,21 +40,30 @@ data class HistoryUiState(
     val allMeasurements: List<NetworkMeasurement> = emptyList(),
     val items: List<HistoryItem> = emptyList(),
     val summary: HistorySummary = HistorySummary(),
+    val message: String? = null,
 )
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val repository: NetworkHistoryRepository,
+    private val strings: StringProvider,
 ) : ViewModel() {
     private val filter = MutableStateFlow(HistoryFilter.ALL)
+    private val message = MutableStateFlow<String?>(null)
 
-    val uiState: StateFlow<HistoryUiState> = combine(repository.observeHistory(), filter) { history, selectedFilter ->
+    private val history = repository.observeHistory().catch {
+        message.value = strings.get(R.string.error_local_data_failed)
+        emit(emptyList())
+    }
+
+    val uiState: StateFlow<HistoryUiState> = combine(history, filter, message) { history, selectedFilter, currentMessage ->
         val filtered = history.filter { it.matches(selectedFilter) }
         HistoryUiState(
             filter = selectedFilter,
             allMeasurements = history,
             items = buildHistoryItems(filtered),
             summary = filtered.toSummary(),
+            message = currentMessage,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistoryUiState())
 
@@ -59,7 +72,19 @@ class HistoryViewModel @Inject constructor(
     }
 
     fun clear() {
-        viewModelScope.launch { repository.clear() }
+        viewModelScope.launch {
+            try {
+                repository.clear()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                message.value = strings.get(R.string.error_local_data_failed)
+            }
+        }
+    }
+
+    fun consumeMessage() {
+        message.value = null
     }
 }
 

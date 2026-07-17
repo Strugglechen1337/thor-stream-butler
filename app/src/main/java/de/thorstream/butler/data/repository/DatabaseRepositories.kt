@@ -1,11 +1,13 @@
 package de.thorstream.butler.data.repository
 
+import androidx.room.withTransaction
 import de.thorstream.butler.data.database.LocalHostDao
 import de.thorstream.butler.data.database.LocalHostEntity
 import de.thorstream.butler.data.database.NetworkMeasurementDao
 import de.thorstream.butler.data.database.NetworkMeasurementEntity
 import de.thorstream.butler.data.database.StreamingEntryDao
 import de.thorstream.butler.data.database.StreamingEntryEntity
+import de.thorstream.butler.data.database.ThorDatabase
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.NetworkMeasurement
@@ -33,9 +35,7 @@ class RoomStreamingEntryRepository @Inject constructor(
     override suspend fun save(entry: StreamingEntry): Long = dao.upsert(entry.toEntity())
     override suspend fun delete(entry: StreamingEntry) = dao.delete(entry.toEntity())
     override suspend fun markLaunched(id: Long, timestamp: Long, quality: String?) = dao.markLaunched(id, timestamp, quality)
-    override suspend fun updateSortOrders(entries: List<StreamingEntry>) {
-        entries.forEachIndexed { index, entry -> dao.updateSortOrder(entry.id, index) }
-    }
+    override suspend fun updateSortOrders(entries: List<StreamingEntry>) = dao.updateSortOrders(entries.map { it.toEntity() })
     override suspend fun replaceAll(entries: List<StreamingEntry>) = dao.replaceAll(entries.map { it.toEntity() })
 
     override suspend fun ensureDemoEntries() {
@@ -52,13 +52,16 @@ class RoomStreamingEntryRepository @Inject constructor(
 class RoomLocalHostRepository @Inject constructor(
     private val dao: LocalHostDao,
     private val streamingEntryDao: StreamingEntryDao,
+    private val database: ThorDatabase,
 ) : LocalHostRepository {
     override fun observeHosts(): Flow<List<LocalHost>> = dao.observeAll().map { values -> values.map { it.toDomain() } }
     override suspend fun getHosts(): List<LocalHost> = dao.getAll().map { it.toDomain() }
     override suspend fun save(host: LocalHost): Long = dao.upsert(host.toEntity())
     override suspend fun delete(host: LocalHost) {
-        streamingEntryDao.clearHostAssignments(host.id)
-        dao.delete(host.toEntity())
+        database.withTransaction {
+            streamingEntryDao.clearHostAssignments(host.id)
+            dao.delete(host.toEntity())
+        }
     }
     override suspend fun replaceAll(hosts: List<LocalHost>) = dao.replaceAll(hosts.map { it.toEntity() })
     override suspend fun updateTestResult(id: Long, reachable: Boolean, testedAt: Long) = dao.updateTestResult(id, reachable, testedAt)
@@ -68,9 +71,14 @@ class RoomLocalHostRepository @Inject constructor(
 class RoomNetworkHistoryRepository @Inject constructor(private val dao: NetworkMeasurementDao) : NetworkHistoryRepository {
     override fun observeHistory(): Flow<List<NetworkMeasurement>> = dao.observeRecent().map { values -> values.map { it.toDomain() } }
     override suspend fun getHistory(): List<NetworkMeasurement> = dao.getRecent().map { it.toDomain() }
-    override suspend fun save(measurement: NetworkMeasurement): Long = dao.insert(measurement.toEntity())
+    override suspend fun getAllHistory(): List<NetworkMeasurement> = dao.getAll().map { it.toDomain() }
+    override suspend fun save(measurement: NetworkMeasurement): Long = dao.insertAndTrim(measurement.toEntity(), MAX_HISTORY_ENTRIES)
     override suspend fun replaceAll(measurements: List<NetworkMeasurement>) = dao.replaceAll(measurements.map { it.toEntity() })
     override suspend fun clear() = dao.clear()
+
+    private companion object {
+        const val MAX_HISTORY_ENTRIES = 100
+    }
 }
 
 private fun StreamingEntry.toEntity() = StreamingEntryEntity(

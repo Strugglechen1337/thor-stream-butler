@@ -7,6 +7,7 @@ import de.thorstream.butler.domain.repository.DiagnosticLogEntry
 import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import java.io.File
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -62,7 +63,9 @@ class FileDiagnosticLogRepository @Inject constructor(
     }
 
     override suspend fun clear() = withContext(Dispatchers.IO) {
-        mutex.withLock { if (file.exists()) file.delete() }
+        mutex.withLock {
+            if (file.exists() && !file.delete()) throw IOException("Unable to delete diagnostic log")
+        }
     }
 
     private companion object {

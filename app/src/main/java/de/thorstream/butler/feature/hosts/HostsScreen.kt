@@ -6,6 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -73,6 +75,7 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
     val snackbar = remember { SnackbarHostState() }
     var editedHost by remember { mutableStateOf<LocalHost?>(null) }
     var showEditor by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<LocalHost?>(null) }
     val context = LocalContext.current
     val localNetworkPermission = "android.permission.ACCESS_LOCAL_NETWORK"
     var pendingLocalAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -95,23 +98,38 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
 
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
         SnackbarHost(snackbar)
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.hosts_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                Text(stringResource(R.string.hosts_title), style = MaterialTheme.typography.headlineLarge)
-            }
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilledTonalButton(
-                    onClick = { withLocalNetworkPermission { viewModel.discoverLocalHosts() } },
-                    enabled = !state.isDiscovering,
-                ) {
-                    if (state.isDiscovering) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
-                    else Icon(Icons.Rounded.WifiFind, contentDescription = null)
-                    Text(" " + stringResource(R.string.hosts_discover))
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val title: @Composable () -> Unit = {
+                Column {
+                    Text(stringResource(R.string.hosts_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.hosts_title), style = MaterialTheme.typography.headlineLarge)
                 }
-                Button(onClick = { editedHost = null; showEditor = true }) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
-                    Text(" " + stringResource(R.string.hosts_create))
+            }
+            val actions: @Composable () -> Unit = {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FilledTonalButton(
+                        onClick = { withLocalNetworkPermission { viewModel.discoverLocalHosts() } },
+                        enabled = !state.isDiscovering,
+                    ) {
+                        if (state.isDiscovering) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        else Icon(Icons.Rounded.WifiFind, contentDescription = null)
+                        Text(" " + stringResource(R.string.hosts_discover))
+                    }
+                    Button(onClick = { editedHost = null; showEditor = true }) {
+                        Icon(Icons.Rounded.Add, contentDescription = null)
+                        Text(" " + stringResource(R.string.hosts_create))
+                    }
+                }
+            }
+            if (maxWidth < 680.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    title()
+                    actions()
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f)) { title() }
+                    actions()
                 }
             }
         }
@@ -155,7 +173,7 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
                         onTest = { withLocalNetworkPermission { viewModel.test(host) } },
                         onWake = { withLocalNetworkPermission { viewModel.wake(host) } },
                         onEdit = { editedHost = host; showEditor = true },
-                        onDelete = { viewModel.delete(host) },
+                        onDelete = { pendingDelete = host },
                     )
                 }
             }
@@ -166,6 +184,21 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
             host = editedHost,
             onDismiss = { showEditor = false },
             onSave = { host -> viewModel.save(host).also { if (it == null) showEditor = false } },
+        )
+    }
+    pendingDelete?.let { host ->
+        AlertDialog(
+            onDismissRequest = { pendingDelete = null },
+            title = { Text(stringResource(R.string.hosts_delete_confirm_title)) },
+            text = { Text(stringResource(R.string.hosts_delete_confirm_text, host.name)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.delete(host); pendingDelete = null }) {
+                    Text(stringResource(R.string.hosts_delete_confirm_action))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.action_cancel)) }
+            },
         )
     }
 }
@@ -238,14 +271,15 @@ private fun HostEditorDialog(host: LocalHost?, onDismiss: () -> Unit, onSave: (L
     var wolEnabled by remember(host) { mutableStateOf(host?.wakeOnLanEnabled ?: false) }
     var typeMenu by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    val invalidPortMessage = stringResource(R.string.hosts_error_port)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(if (host == null) R.string.hosts_create else R.string.hosts_edit)) },
         text = {
             LazyColumn(Modifier.heightIn(max = 480.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                item { OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.hosts_field_name)) }, singleLine = true) }
-                item { OutlinedTextField(address, { address = it }, label = { Text(stringResource(R.string.hosts_field_address)) }, singleLine = true) }
-                item { OutlinedTextField(port, { port = it.filter(Char::isDigit) }, label = { Text(stringResource(R.string.hosts_field_port)) }, singleLine = true) }
+                item { OutlinedTextField(name, { name = it.take(120) }, label = { Text(stringResource(R.string.hosts_field_name)) }, singleLine = true) }
+                item { OutlinedTextField(address, { address = it.take(253) }, label = { Text(stringResource(R.string.hosts_field_address)) }, singleLine = true) }
+                item { OutlinedTextField(port, { port = it.filter(Char::isDigit).take(5) }, label = { Text(stringResource(R.string.hosts_field_port)) }, singleLine = true) }
                 item {
                     Column {
                         FilledTonalButton(onClick = { typeMenu = true }) { Text(type.label()) }
@@ -264,28 +298,33 @@ private fun HostEditorDialog(host: LocalHost?, onDismiss: () -> Unit, onSave: (L
                     }
                 }
                 if (wolEnabled) {
-                    item { OutlinedTextField(mac, { mac = it }, label = { Text(stringResource(R.string.hosts_field_mac)) }, singleLine = true) }
-                    item { OutlinedTextField(broadcast, { broadcast = it }, label = { Text(stringResource(R.string.hosts_field_broadcast)) }, singleLine = true) }
+                    item { OutlinedTextField(mac, { mac = it.take(20) }, label = { Text(stringResource(R.string.hosts_field_mac)) }, singleLine = true) }
+                    item { OutlinedTextField(broadcast, { broadcast = it.take(253) }, label = { Text(stringResource(R.string.hosts_field_broadcast)) }, singleLine = true) }
                 }
                 error?.let { item { Text(it, color = ThorRed) } }
             }
         },
         confirmButton = {
             Button(onClick = {
-                error = onSave(
-                    LocalHost(
-                        id = host?.id ?: 0,
-                        name = name,
-                        address = address,
-                        macAddress = mac.takeIf { it.isNotBlank() },
-                        port = port.toIntOrNull(),
-                        streamingType = type,
-                        wakeOnLanEnabled = wolEnabled,
-                        broadcastAddress = broadcast,
-                        lastReachable = host?.lastReachable,
-                        lastSuccessfulTestAt = host?.lastSuccessfulTestAt,
-                    ),
-                )
+                val parsedPort = port.toIntOrNull()
+                error = if (port.isNotBlank() && parsedPort == null) {
+                    invalidPortMessage
+                } else {
+                    onSave(
+                        LocalHost(
+                            id = host?.id ?: 0,
+                            name = name,
+                            address = address,
+                            macAddress = mac.takeIf { it.isNotBlank() },
+                            port = parsedPort,
+                            streamingType = type,
+                            wakeOnLanEnabled = wolEnabled,
+                            broadcastAddress = broadcast,
+                            lastReachable = host?.lastReachable,
+                            lastSuccessfulTestAt = host?.lastSuccessfulTestAt,
+                        ),
+                    )
+                }
             }) { Text(stringResource(R.string.action_save)) }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },

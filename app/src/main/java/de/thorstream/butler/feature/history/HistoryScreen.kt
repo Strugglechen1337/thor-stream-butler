@@ -4,6 +4,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,14 +20,22 @@ import androidx.compose.material.icons.automirrored.rounded.TrendingFlat
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,15 +59,39 @@ import java.util.Locale
 @Composable
 fun HistoryRoute(viewModel: HistoryViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    var confirmClear by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    LaunchedEffect(state.message) {
+        state.message?.let {
+            snackbar.showSnackbar(it)
+            viewModel.consumeMessage()
+        }
+    }
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(stringResource(R.string.history_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
-                Text(stringResource(R.string.history_title), style = MaterialTheme.typography.headlineLarge)
+        SnackbarHost(snackbar)
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val title: @Composable () -> Unit = {
+                Column {
+                    Text(stringResource(R.string.history_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
+                    Text(stringResource(R.string.history_title), style = MaterialTheme.typography.headlineLarge)
+                }
             }
-            OutlinedButton(onClick = viewModel::clear, enabled = state.allMeasurements.isNotEmpty()) {
-                Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
-                Text(" " + stringResource(R.string.history_clear))
+            val action: @Composable () -> Unit = {
+                OutlinedButton(onClick = { confirmClear = true }, enabled = state.allMeasurements.isNotEmpty()) {
+                    Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
+                    Text(" " + stringResource(R.string.history_clear))
+                }
+            }
+            if (maxWidth < 520.dp) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    title()
+                    action()
+                }
+            } else {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.weight(1f)) { title() }
+                    action()
+                }
             }
         }
         if (state.allMeasurements.isNotEmpty()) {
@@ -80,6 +114,19 @@ fun HistoryRoute(viewModel: HistoryViewModel = hiltViewModel()) {
                 }
             }
         }
+    }
+    if (confirmClear) {
+        AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            title = { Text(stringResource(R.string.history_clear_confirm_title)) },
+            text = { Text(stringResource(R.string.history_clear_confirm_text)) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clear(); confirmClear = false }) {
+                    Text(stringResource(R.string.history_clear_confirm_action))
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
     }
 }
 

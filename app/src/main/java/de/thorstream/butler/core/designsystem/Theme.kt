@@ -1,15 +1,19 @@
 package de.thorstream.butler.core.designsystem
 
+import android.app.Activity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import androidx.core.view.WindowCompat
 import de.thorstream.butler.domain.model.ThemePreference
 
 val ThorCyan = Color(0xFF72E6FF)
@@ -52,6 +56,16 @@ private val ThorLightColors = lightColorScheme(
 @Composable
 fun ThorTheme(themePreference: ThemePreference = ThemePreference.DARK, content: @Composable () -> Unit) {
     val useDarkColors = themePreference == ThemePreference.DARK || isSystemInDarkTheme()
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as? Activity)?.window ?: return@SideEffect
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !useDarkColors
+                isAppearanceLightNavigationBars = !useDarkColors
+            }
+        }
+    }
     MaterialTheme(
         colorScheme = if (useDarkColors) ThorColors else ThorLightColors,
         typography = MaterialTheme.typography.copy(

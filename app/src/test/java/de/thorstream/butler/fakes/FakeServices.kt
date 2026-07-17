@@ -19,6 +19,8 @@ import de.thorstream.butler.domain.repository.StreamingEntryRepository
 import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.service.DiagnosticProgress
 import de.thorstream.butler.domain.service.HostDiscoveryService
+import de.thorstream.butler.domain.service.LocalHostDiscoveryService
+import de.thorstream.butler.domain.service.DiscoveredHost
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.domain.service.PingResult
 import de.thorstream.butler.domain.service.PingService
@@ -61,8 +63,15 @@ class FakeSpeedTestService(var result: AppResult<Double>) : SpeedTestService {
     override suspend fun measureDownloadMbps(testDurationSeconds: Int) = result
 }
 
-class FakeHostDiscoveryService(var reachable: Boolean = true) : HostDiscoveryService {
-    override suspend fun isReachable(host: String, port: Int?, timeoutMillis: Int) = AppResult.Success(reachable)
+class FakeHostDiscoveryService(var result: AppResult<Boolean> = AppResult.Success(true)) : HostDiscoveryService {
+    constructor(reachable: Boolean) : this(AppResult.Success(reachable))
+    override suspend fun isReachable(host: String, port: Int?, timeoutMillis: Int) = result
+}
+
+class FakeLocalHostDiscoveryService(
+    var result: AppResult<List<DiscoveredHost>> = AppResult.Success(emptyList()),
+) : LocalHostDiscoveryService {
+    override suspend fun discover(timeoutMillis: Long) = result
 }
 
 class FakeWakeOnLanService(var result: AppResult<Unit> = AppResult.Success(Unit)) : WakeOnLanService {
@@ -76,14 +85,21 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings()) : SettingsRep
 
 class FakeHistoryRepository : NetworkHistoryRepository {
     val values = MutableStateFlow<List<NetworkMeasurement>>(emptyList())
+    var saveFailure: Throwable? = null
+    var clearFailure: Throwable? = null
     override fun observeHistory() = values
     override suspend fun getHistory() = values.value
+    override suspend fun getAllHistory() = values.value
     override suspend fun save(measurement: NetworkMeasurement): Long {
+        saveFailure?.let { throw it }
         values.value = listOf(measurement.copy(id = (values.value.size + 1).toLong())) + values.value
         return values.value.first().id
     }
     override suspend fun replaceAll(measurements: List<NetworkMeasurement>) { values.value = measurements }
-    override suspend fun clear() { values.value = emptyList() }
+    override suspend fun clear() {
+        clearFailure?.let { throw it }
+        values.value = emptyList()
+    }
 }
 
 class FakeInstalledAppsRepository : InstalledAppsRepository {
@@ -120,7 +136,11 @@ class FakeStreamingEntryRepository : StreamingEntryRepository {
 
 class FakeDiagnosticLogRepository : DiagnosticLogRepository {
     val values = mutableListOf<DiagnosticLogEntry>()
-    override suspend fun log(event: DiagnosticEvent) { values += DiagnosticLogEntry(System.currentTimeMillis(), event) }
+    var logFailure: Throwable? = null
+    override suspend fun log(event: DiagnosticEvent) {
+        logFailure?.let { throw it }
+        values += DiagnosticLogEntry(System.currentTimeMillis(), event)
+    }
     override suspend fun read(): List<DiagnosticLogEntry> = values.toList()
     override suspend fun clear() { values.clear() }
 }

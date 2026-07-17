@@ -35,6 +35,11 @@ interface StreamingEntryDao {
     @Query("UPDATE streaming_entries SET sortOrder = :sortOrder WHERE id = :id")
     suspend fun updateSortOrder(id: Long, sortOrder: Int)
 
+    @Transaction
+    suspend fun updateSortOrders(entities: List<StreamingEntryEntity>) {
+        entities.forEachIndexed { index, entity -> updateSortOrder(entity.id, index) }
+    }
+
     @Query("UPDATE streaming_entries SET hostId = NULL WHERE hostId = :hostId")
     suspend fun clearHostAssignments(hostId: Long)
 
@@ -89,8 +94,21 @@ interface NetworkMeasurementDao {
     @Insert
     suspend fun insert(entity: NetworkMeasurementEntity): Long
 
+    @Query("DELETE FROM network_measurements WHERE id NOT IN (SELECT id FROM network_measurements ORDER BY timestamp DESC, id DESC LIMIT :limit)")
+    suspend fun trimToLatest(limit: Int)
+
+    @Transaction
+    suspend fun insertAndTrim(entity: NetworkMeasurementEntity, limit: Int): Long {
+        val id = insert(entity)
+        trimToLatest(limit)
+        return id
+    }
+
     @Query("SELECT * FROM network_measurements ORDER BY timestamp DESC LIMIT 100")
     suspend fun getRecent(): List<NetworkMeasurementEntity>
+
+    @Query("SELECT * FROM network_measurements ORDER BY timestamp DESC, id DESC")
+    suspend fun getAll(): List<NetworkMeasurementEntity>
 
     @Insert
     suspend fun insertAll(entities: List<NetworkMeasurementEntity>)

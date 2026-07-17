@@ -45,6 +45,29 @@ class QualityEvaluatorTest {
     }
 
     @Test
+    fun `measured low download is considered without making download mandatory`() {
+        val slow = evaluator.evaluate(
+            NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 12.0, jitterMs = 2.0, packetLossPercent = 0.0, downloadMbps = 8.0),
+        )
+        val notMeasured = evaluator.evaluate(
+            NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 12.0, jitterMs = 2.0, packetLossPercent = 0.0),
+        )
+
+        assertEquals(NetworkQuality.PROBLEMATIC, slow.quality)
+        assertEquals(NetworkQuality.OPTIMAL, notMeasured.quality)
+    }
+
+    @Test
+    fun `weak wifi link speed produces a usable warning`() {
+        val result = evaluator.evaluate(
+            NetworkSnapshot(ConnectionType.WIFI, wifiFrequencyMhz = 5_200, signalStrengthPercent = 80, linkSpeedMbps = 72, latencyMs = 18.0, jitterMs = 2.0, packetLossPercent = 0.0),
+        )
+
+        assertEquals(NetworkQuality.USABLE, result.quality)
+        assertTrue(result.problems.any { it.startsWith("res:${R.string.eval_problem_limited_link_speed}") })
+    }
+
+    @Test
     fun `available transport without core measurements is gray`() {
         val result = evaluator.evaluate(NetworkSnapshot(ConnectionType.ETHERNET, internetValidated = true))
         assertEquals(NetworkQuality.NOT_MEASURABLE, result.quality)

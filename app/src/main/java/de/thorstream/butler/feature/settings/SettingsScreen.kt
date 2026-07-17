@@ -4,6 +4,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Code
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
@@ -38,12 +41,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import de.thorstream.butler.R
+import de.thorstream.butler.BuildConfig
 import de.thorstream.butler.core.designsystem.ThorCyan
 import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.AppSettings
@@ -64,7 +69,16 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     var targetText by remember(settings.defaultTestTarget) { mutableStateOf(settings.defaultTestTarget) }
     var targetError by remember { mutableStateOf(false) }
     var themeMenu by remember { mutableStateOf(false) }
+    var showPrivacy by remember { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
+    val uriHandler = LocalUriHandler.current
+    val openExternalLink: (String) -> Unit = { url ->
+        try {
+            uriHandler.openUri(url)
+        } catch (_: Exception) {
+            viewModel.reportLinkFailure()
+        }
+    }
     val exportDocument = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         uri?.let { viewModel.exportConfiguration(it.toString(), includeHistory) }
     }
@@ -103,9 +117,11 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             OutlinedTextField(
                 value = targetText,
                 onValueChange = {
-                    targetText = it.trim()
-                    targetError = !NetworkValidators.isValidHostnameOrIpv4(targetText)
-                    if (!targetError) viewModel.update { current -> current.copy(defaultTestTarget = targetText) }
+                    targetText = it.trim().take(253)
+                    targetError = !NetworkValidators.isValidHostnameOrIp(targetText)
+                    if (!targetError) viewModel.update { current ->
+                        current.copy(defaultTestTarget = NetworkValidators.normalizeHost(targetText))
+                    }
                 },
                 label = { Text(stringResource(R.string.settings_test_target)) },
                 supportingText = { Text(stringResource(if (targetError) R.string.settings_test_target_error else R.string.settings_test_target_hint)) },
@@ -162,7 +178,7 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                 includeHistory,
                 enabled = !transferState.inProgress,
             ) { includeHistory = it }
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 FilledTonalButton(
                     onClick = {
                         val date = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date())
@@ -184,6 +200,24 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
                 Text(" " + stringResource(R.string.settings_clear_history))
             }
             Text(stringResource(R.string.settings_local_only), color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+
+        SettingsGroup(stringResource(R.string.settings_group_about)) {
+            Text(stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME), fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.settings_about_privacy_summary), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                FilledTonalButton(onClick = { showPrivacy = true }) {
+                    Icon(Icons.Rounded.Info, contentDescription = null)
+                    Text(" " + stringResource(R.string.settings_about_privacy_action))
+                }
+                FilledTonalButton(onClick = { openExternalLink(SOURCE_URL) }) {
+                    Icon(Icons.Rounded.Code, contentDescription = null)
+                    Text(" " + stringResource(R.string.settings_about_source_action))
+                }
+                FilledTonalButton(onClick = { openExternalLink("$SOURCE_URL/blob/main/LICENSE") }) {
+                    Text(stringResource(R.string.settings_about_license_action))
+                }
+            }
         }
     }
 
@@ -210,7 +244,28 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             dismissButton = { TextButton(onClick = { confirmImport = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
+    if (showPrivacy) {
+        AlertDialog(
+            onDismissRequest = { showPrivacy = false },
+            title = { Text(stringResource(R.string.settings_about_privacy_title)) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(stringResource(R.string.settings_about_privacy_body))
+                    TextButton(onClick = {
+                        val path = if (Locale.getDefault().language == "de") "de/datenschutz/" else "privacy/"
+                        openExternalLink("$PAGES_URL$path")
+                    }) { Text(stringResource(R.string.settings_about_privacy_web)) }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showPrivacy = false }) { Text(stringResource(R.string.action_close)) }
+            },
+        )
+    }
 }
+
+private const val SOURCE_URL = "https://github.com/Strugglechen1337/thor-stream-butler"
+private const val PAGES_URL = "https://strugglechen1337.github.io/thor-stream-butler/"
 
 @Composable
 private fun SettingsGroup(title: String, content: @Composable () -> Unit) {

@@ -13,6 +13,7 @@ import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.core.network.ConnectionTypeResolver
 import de.thorstream.butler.core.network.NetworkCalculations
+import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.repository.DiagnosticEvent
@@ -118,11 +119,16 @@ class HttpsSpeedTestService @Inject constructor(private val strings: StringProvi
         var connection: HttpURLConnection? = null
         try {
             val duration = testDurationSeconds.coerceIn(1, 15)
-            connection = (URL("https://speed.cloudflare.com/__down?bytes=10000000").openConnection() as HttpURLConnection).apply {
+            connection = (URL("https://speed.cloudflare.com/__down?bytes=100000000").openConnection() as HttpURLConnection).apply {
                 connectTimeout = 3_000
                 readTimeout = duration * 1_000 + 2_000
                 useCaches = false
+                instanceFollowRedirects = false
                 requestMethod = "GET"
+                setRequestProperty("Accept-Encoding", "identity")
+            }
+            if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                return@withContext AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_download_unavailable)))
             }
             val started = System.nanoTime()
             var bytes = 0L
@@ -176,8 +182,10 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
             )
             val wifiInfo = if (Build.VERSION.SDK_INT >= 29) capabilities.transportInfo as? WifiInfo else legacyWifiInfo(type)
             val ssid = wifiInfo?.ssid?.takeUnless { it == "<unknown ssid>" }?.trim('"')
-            val localIp = properties?.linkAddresses?.firstOrNull { it.address is Inet4Address }?.address?.hostAddress
-            val gateway = properties?.routes?.firstOrNull { it.isDefaultRoute && it.gateway is Inet4Address }?.gateway?.hostAddress
+            val localAddresses = properties?.linkAddresses.orEmpty().map { it.address }.filterNot { it.isLoopbackAddress }
+            val localIp = (localAddresses.firstOrNull { it is Inet4Address } ?: localAddresses.firstOrNull())?.hostAddress
+            val defaultGateways = properties?.routes.orEmpty().filter { it.isDefaultRoute }.mapNotNull { it.gateway }
+            val gateway = (defaultGateways.firstOrNull { it is Inet4Address } ?: defaultGateways.firstOrNull())?.hostAddress
             AppResult.Success(
                 NetworkSnapshot(
                     connectionType = type,
@@ -211,57 +219,101 @@ class AndroidNetworkDiagnosticsService @Inject constructor(
         includeDownloadTest: Boolean,
         testDurationSeconds: Int,
     ): Flow<DiagnosticProgress> = flow {
-        diagnosticLogRepository.log(DiagnosticEvent.TEST_STARTED)
-        emit(DiagnosticProgress(DiagnosticStep.DETECTING_CONNECTION, 0.05f))
-        val base = when (val result = readConnectionSnapshot()) {
-            is AppResult.Success -> result.value
-            is AppResult.Failure -> {
-                diagnosticLogRepository.log(DiagnosticEvent.TEST_FAILED)
-                emit(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, errorMessage = result.error.message, completed = true))
-                return@flow
+        var latestSnapshot: NetworkSnapshot? = null
+        try {
+            logSafely(DiagnosticEvent.TEST_STARTED)
+            emit(DiagnosticProgress(DiagnosticStep.DETECTING_CONNECTION, 0.05f))
+            val base = when (val result = readConnectionSnapshot()) {
+                is AppResult.Success -> result.value
+                is AppResult.Failure -> {
+                    logSafely(DiagnosticEvent.TEST_FAILED)
+                    emit(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, errorMessage = result.error.message, completed = true))
+                    return@flow
+                }
             }
-        }
-        diagnosticLogRepository.log(DiagnosticEvent.CONNECTION_READ)
-        emit(DiagnosticProgress(DiagnosticStep.CONNECTION_READ, 0.2f, base))
+            latestSnapshot = base
+            logSafely(DiagnosticEvent.CONNECTION_READ)
+            emit(DiagnosticProgress(DiagnosticStep.CONNECTION_READ, 0.2f, base))
 
-        val dnsReachable = withContext(Dispatchers.IO) {
-            withTimeoutOrNull(2_500) { InetAddress.getByName("example.com"); true } ?: false
-        }
-        var snapshot = base.copy(dnsReachable = dnsReachable)
-        diagnosticLogRepository.log(DiagnosticEvent.DNS_CHECKED)
-        emit(DiagnosticProgress(DiagnosticStep.DNS_CHECKED, 0.35f, snapshot))
+            val dnsProbe = target.takeUnless { NetworkValidators.isValidIpv4(it) || NetworkValidators.isValidIpv6(it) }
+                ?: DNS_PROBE_HOST
+            val dnsReachable = withContext(Dispatchers.IO) {
+                withTimeoutOrNull(2_500) {
+                    try {
+                        InetAddress.getByName(dnsProbe)
+                        true
+                    } catch (_: Exception) {
+                        false
+                    }
+                } ?: false
+            }
+            var snapshot = base.copy(dnsReachable = dnsReachable)
+            latestSnapshot = snapshot
+            logSafely(DiagnosticEvent.DNS_CHECKED)
+            emit(DiagnosticProgress(DiagnosticStep.DNS_CHECKED, 0.35f, snapshot))
 
-        snapshot = when (val ping = pingService.ping(target, pingCount.coerceIn(1, 20))) {
-            is AppResult.Success -> snapshot.copy(
-                latencyMs = ping.value.successfulLatenciesMs.takeIf { it.isNotEmpty() }?.average(),
-                jitterMs = NetworkCalculations.jitterMs(ping.value.successfulLatenciesMs),
-                packetLossPercent = NetworkCalculations.packetLossPercent(ping.value.sentCount, ping.value.receivedCount),
+            snapshot = when (val ping = pingService.ping(target, pingCount.coerceIn(1, 20))) {
+                is AppResult.Success -> snapshot.copy(
+                    latencyMs = ping.value.successfulLatenciesMs.takeIf { it.isNotEmpty() }?.average(),
+                    jitterMs = NetworkCalculations.jitterMs(ping.value.successfulLatenciesMs),
+                    packetLossPercent = NetworkCalculations.packetLossPercent(ping.value.sentCount, ping.value.receivedCount),
+                )
+                is AppResult.Failure -> snapshot
+            }
+            latestSnapshot = snapshot
+            logSafely(DiagnosticEvent.LATENCY_MEASURED)
+            emit(DiagnosticProgress(DiagnosticStep.LATENCY_MEASURED, 0.68f, snapshot))
+
+            if (host != null) {
+                val reachable = when (val result = hostDiscoveryService.isReachable(host, port)) {
+                    is AppResult.Success -> result.value
+                    is AppResult.Failure -> false
+                }
+                snapshot = snapshot.copy(host = host, hostReachable = reachable)
+                latestSnapshot = snapshot
+                logSafely(DiagnosticEvent.HOST_CHECKED)
+                emit(DiagnosticProgress(DiagnosticStep.HOST_CHECKED, 0.82f, snapshot))
+            }
+
+            if (includeDownloadTest) {
+                val speed = when (val result = speedTestService.measureDownloadMbps(testDurationSeconds)) {
+                    is AppResult.Success -> result.value
+                    is AppResult.Failure -> null
+                }
+                snapshot = snapshot.copy(downloadMbps = speed)
+                latestSnapshot = snapshot
+                logSafely(DiagnosticEvent.DOWNLOAD_MEASURED)
+                emit(DiagnosticProgress(DiagnosticStep.DOWNLOAD_MEASURED, 0.94f, snapshot))
+            }
+            logSafely(DiagnosticEvent.TEST_COMPLETED)
+            emit(DiagnosticProgress(DiagnosticStep.COMPLETED, 1f, snapshot, completed = true))
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            logSafely(DiagnosticEvent.TEST_FAILED)
+            emit(
+                DiagnosticProgress(
+                    step = DiagnosticStep.COMPLETED,
+                    progress = 1f,
+                    snapshot = latestSnapshot,
+                    completed = true,
+                    errorMessage = strings.get(R.string.error_diagnostics_failed),
+                ),
             )
-            is AppResult.Failure -> snapshot
         }
-        diagnosticLogRepository.log(DiagnosticEvent.LATENCY_MEASURED)
-        emit(DiagnosticProgress(DiagnosticStep.LATENCY_MEASURED, 0.68f, snapshot))
+    }
 
-        if (host != null) {
-            val reachable = when (val result = hostDiscoveryService.isReachable(host, port)) {
-                is AppResult.Success -> result.value
-                is AppResult.Failure -> false
-            }
-            snapshot = snapshot.copy(host = host, hostReachable = reachable)
-            diagnosticLogRepository.log(DiagnosticEvent.HOST_CHECKED)
-            emit(DiagnosticProgress(DiagnosticStep.HOST_CHECKED, 0.82f, snapshot))
+    private suspend fun logSafely(event: DiagnosticEvent) {
+        try {
+            diagnosticLogRepository.log(event)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Optional local logging must never change the diagnostic result.
         }
+    }
 
-        if (includeDownloadTest) {
-            val speed = when (val result = speedTestService.measureDownloadMbps(testDurationSeconds)) {
-                is AppResult.Success -> result.value
-                is AppResult.Failure -> null
-            }
-            snapshot = snapshot.copy(downloadMbps = speed)
-            diagnosticLogRepository.log(DiagnosticEvent.DOWNLOAD_MEASURED)
-            emit(DiagnosticProgress(DiagnosticStep.DOWNLOAD_MEASURED, 0.94f, snapshot))
-        }
-        diagnosticLogRepository.log(DiagnosticEvent.TEST_COMPLETED)
-        emit(DiagnosticProgress(DiagnosticStep.COMPLETED, 1f, snapshot, completed = true))
+    private companion object {
+        const val DNS_PROBE_HOST = "example.com"
     }
 }

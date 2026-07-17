@@ -13,6 +13,7 @@ import de.thorstream.butler.fakes.FakeStringProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -42,7 +43,7 @@ class NetworkTestViewModelTest {
             ),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()))
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider())
 
         viewModel.startTest()
         advanceUntilIdle()
@@ -58,7 +59,7 @@ class NetworkTestViewModelTest {
             progress = flowOf(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, completed = true, errorMessage = "no active network")),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()))
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider())
 
         viewModel.startTest()
         advanceUntilIdle()
@@ -66,6 +67,54 @@ class NetworkTestViewModelTest {
         assertEquals("no active network", viewModel.uiState.value.errorMessage)
         assertNull(viewModel.uiState.value.snapshot)
         assertEquals(0, history.values.value.size)
+    }
+
+    @Test
+    fun `unexpected diagnostics failure never leaves test running`() = runTest(dispatcher) {
+        val diagnostics = FakeNetworkDiagnosticsService(progress = flow { error("simulated failure") })
+        val viewModel = NetworkTestViewModel(
+            diagnostics,
+            FakeSettingsRepository(),
+            FakeHistoryRepository(),
+            QualityEvaluator(FakeStringProvider()),
+            FakeStringProvider(),
+        )
+
+        viewModel.startTest()
+        advanceUntilIdle()
+
+        assertFalse(viewModel.uiState.value.running)
+        assertEquals("res:${de.thorstream.butler.R.string.error_diagnostics_failed}", viewModel.uiState.value.errorMessage)
+    }
+
+    @Test
+    fun `partial completed diagnostic is stored as not measurable`() = runTest(dispatcher) {
+        val snapshot = NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 8.0, jitterMs = 1.0, packetLossPercent = 0.0)
+        val history = FakeHistoryRepository()
+        val diagnostics = FakeNetworkDiagnosticsService(
+            progress = flowOf(
+                DiagnosticProgress(
+                    DiagnosticStep.COMPLETED,
+                    1f,
+                    snapshot,
+                    completed = true,
+                    errorMessage = "diagnostic interrupted",
+                ),
+            ),
+        )
+        val viewModel = NetworkTestViewModel(
+            diagnostics,
+            FakeSettingsRepository(),
+            history,
+            QualityEvaluator(FakeStringProvider()),
+            FakeStringProvider(),
+        )
+
+        viewModel.startTest()
+        advanceUntilIdle()
+
+        assertEquals(NetworkQuality.NOT_MEASURABLE, viewModel.uiState.value.assessment?.quality)
+        assertEquals(NetworkQuality.NOT_MEASURABLE, history.values.value.single().assessment.quality)
     }
 }
 

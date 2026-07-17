@@ -6,6 +6,7 @@ import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.ConnectionType
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.repository.DiagnosticEvent
 import de.thorstream.butler.domain.service.DiagnosticProgress
@@ -21,8 +22,12 @@ import de.thorstream.butler.fakes.FakeStringProvider
 import de.thorstream.butler.fakes.FakeWakeOnLanService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -85,6 +90,80 @@ class DashboardViewModelTest {
 
         assertEquals(listOf(entry.packageName), installedApps.launchedPackages)
         assertTrue(log.values.any { it.event == DiagnosticEvent.APP_LAUNCH_SUCCEEDED })
+    }
+
+    @Test
+    fun `unexpected diagnostic failure finishes with not measurable decision`() = runTest(dispatcher) {
+        val entry = StreamingEntry(id = 1, displayName = "Moonlight", packageName = "com.limelight")
+        val diagnostics = FakeNetworkDiagnosticsService(
+            progress = flow { throw IllegalStateException("unexpected") },
+        )
+        val viewModel = createViewModel(
+            entries = FakeStreamingEntryRepository().apply { values.value = listOf(entry) },
+            diagnostics = diagnostics,
+        )
+        val completedState = async(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.first { it.preLaunch?.assessment != null }
+        }
+
+        viewModel.launch(entry)
+        advanceUntilIdle()
+
+        val preLaunch = completedState.await().preLaunch
+        assertEquals(1f, preLaunch?.progress)
+        assertEquals(NetworkQuality.NOT_MEASURABLE, preLaunch?.assessment?.quality)
+    }
+
+    @Test
+    fun `completed partial diagnostic error never auto launches`() = runTest(dispatcher) {
+        val entry = StreamingEntry(id = 1, displayName = "Moonlight", packageName = "com.limelight")
+        val snapshot = NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = 8.0, jitterMs = 1.0, packetLossPercent = 0.0)
+        val installedApps = FakeInstalledAppsRepository()
+        val diagnostics = FakeNetworkDiagnosticsService(
+            progress = flowOf(
+                DiagnosticProgress(
+                    DiagnosticStep.COMPLETED,
+                    1f,
+                    snapshot,
+                    completed = true,
+                    errorMessage = "diagnostic interrupted",
+                ),
+            ),
+        )
+        val viewModel = createViewModel(
+            entries = FakeStreamingEntryRepository().apply { values.value = listOf(entry) },
+            installedApps = installedApps,
+            diagnostics = diagnostics,
+        )
+        val completedState = async(UnconfinedTestDispatcher(testScheduler)) {
+            viewModel.uiState.first { it.preLaunch?.assessment != null }
+        }
+
+        viewModel.launch(entry)
+        advanceUntilIdle()
+
+        assertEquals(NetworkQuality.NOT_MEASURABLE, completedState.await().preLaunch?.assessment?.quality)
+        assertTrue(installedApps.launchedPackages.isEmpty())
+    }
+
+    @Test
+    fun `optional logging failure does not block target launch`() = runTest(dispatcher) {
+        val entry = StreamingEntry(id = 1, displayName = "Steam Link", packageName = "com.valvesoftware.steamlink")
+        val entries = FakeStreamingEntryRepository().apply { values.value = listOf(entry) }
+        val installedApps = FakeInstalledAppsRepository()
+        val log = FakeDiagnosticLogRepository().apply { logFailure = IllegalStateException("disk unavailable") }
+        val viewModel = createViewModel(
+            entries = entries,
+            installedApps = installedApps,
+            settings = FakeSettingsRepository(AppSettings(preLaunchCheckEnabled = false)),
+            log = log,
+        )
+
+        viewModel.launch(entry)
+        advanceUntilIdle()
+
+        assertEquals(listOf(entry.packageName), installedApps.launchedPackages)
+        assertTrue(entries.values.value.single().lastUsedAt != null)
     }
 
     private fun createViewModel(

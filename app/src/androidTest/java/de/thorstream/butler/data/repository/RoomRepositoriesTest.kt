@@ -42,7 +42,7 @@ class RoomRepositoriesTest {
 
     @Test
     fun hostsCanBePersistedUpdatedAndDeleted() = runTest {
-        val repository = RoomLocalHostRepository(database.localHostDao(), database.streamingEntryDao())
+        val repository = RoomLocalHostRepository(database.localHostDao(), database.streamingEntryDao(), database)
         val id = repository.save(LocalHost(name = "Gaming-PC", address = "192.168.1.10", port = 47984))
         repository.updateTestResult(id, true, 1234L)
         val host = repository.observeHosts().first().single()
@@ -64,5 +64,25 @@ class RoomRepositoriesTest {
         assertEquals(listOf("Hohe Latenz"), repository.observeHistory().first().single().assessment.problems)
         repository.clear()
         assertTrue(repository.observeHistory().first().isEmpty())
+    }
+
+    @Test
+    fun historyRetentionKeepsOnlyLatestHundredMeasurements() = runTest {
+        val repository = RoomNetworkHistoryRepository(database.networkMeasurementDao())
+        repeat(105) { index ->
+            repository.save(
+                NetworkMeasurement(
+                    timestamp = index.toLong() + 1,
+                    snapshot = NetworkSnapshot(ConnectionType.ETHERNET, latencyMs = index.toDouble()),
+                    assessment = QualityAssessment(NetworkQuality.OPTIMAL, "OK"),
+                ),
+            )
+        }
+
+        val stored = repository.getAllHistory()
+
+        assertEquals(100, stored.size)
+        assertEquals(105L, stored.first().timestamp)
+        assertEquals(6L, stored.last().timestamp)
     }
 }

@@ -36,13 +36,13 @@ class NsdLocalHostDiscoveryService @Inject constructor(
     private val resolveMutex = Mutex()
 
     override suspend fun discover(timeoutMillis: Long): AppResult<List<DiscoveredHost>> = try {
-        diagnosticLogRepository.log(DiagnosticEvent.HOST_DISCOVERY_STARTED)
+        logSafely(DiagnosticEvent.HOST_DISCOVERY_STARTED)
         val values = withTimeoutOrNull(timeoutMillis.coerceIn(2_000, 30_000)) {
             discoveryFlow().toList()
         }.orEmpty()
             .distinctBy { "${it.address}:${it.port}" }
             .sortedBy { it.name.lowercase() }
-        diagnosticLogRepository.log(DiagnosticEvent.HOST_DISCOVERY_COMPLETED)
+        logSafely(DiagnosticEvent.HOST_DISCOVERY_COMPLETED)
         AppResult.Success(values)
     } catch (error: Throwable) {
         if (error is CancellationException) throw error
@@ -58,7 +58,7 @@ class NsdLocalHostDiscoveryService @Inject constructor(
                 if (!serviceInfo.serviceType.contains("_nvstream._tcp", ignoreCase = true)) return
                 launch {
                     resolveMutex.withLock {
-                        resolve(serviceInfo)?.let { trySend(it) }
+                        withTimeoutOrNull(RESOLVE_TIMEOUT_MILLIS) { resolve(serviceInfo) }?.let { trySend(it) }
                     }
                 }
             }
@@ -105,8 +105,19 @@ class NsdLocalHostDiscoveryService @Inject constructor(
         })
     }
 
+    private suspend fun logSafely(event: DiagnosticEvent) {
+        try {
+            diagnosticLogRepository.log(event)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (_: Exception) {
+            // Optional local logging must never change discovery behavior.
+        }
+    }
+
     private companion object {
         const val SERVICE_TYPE = "_nvstream._tcp."
         const val DEFAULT_PORT = 47989
+        const val RESOLVE_TIMEOUT_MILLIS = 3_000L
     }
 }

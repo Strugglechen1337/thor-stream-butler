@@ -133,6 +133,9 @@
     <string name="hosts_empty_hint">Add your Sunshine, Moonlight, or remote-play host.</string>
     <string name="hosts_edit">Edit host</string>
     <string name="hosts_delete">Delete host</string>
+    <string name="hosts_delete_confirm_title">Delete local host?</string>
+    <string name="hosts_delete_confirm_text">Delete %1$s? Dashboard tiles linked to this host will keep their app but lose the host assignment.</string>
+    <string name="hosts_delete_confirm_action">Delete host</string>
     <string name="hosts_test_connection">Test connection</string>
     <string name="hosts_wake">Wake up</string>
     <string name="hosts_last_reachable">Last reachable%1$s</string>
@@ -160,6 +163,9 @@
     <string name="history_kicker">THOR // TIMELINE</string>
     <string name="history_title">Measurement history</string>
     <string name="history_clear">Clear history</string>
+    <string name="history_clear_confirm_title">Clear measurement history?</string>
+    <string name="history_clear_confirm_text">This permanently removes all locally stored network checks from this device.</string>
+    <string name="history_clear_confirm_action">Clear history</string>
     <string name="history_empty_title">No measurements saved yet</string>
     <string name="history_empty_hint">Run a network test to build up a history.</string>
     <string name="history_filter_empty">No measurements match this filter.</string>
@@ -224,6 +230,16 @@
     <string name="settings_transfer_invalid">This is not a valid or supported Thor Stream Butler configuration.</string>
     <string name="settings_clear_history">Clear measurement history</string>
     <string name="settings_local_only">All settings, hosts, and measurements stay on this device only.</string>
+    <string name="settings_group_about">About and privacy</string>
+    <string name="settings_about_version">Thor Stream Butler %1$s</string>
+    <string name="settings_about_privacy_summary">No account, advertising, tracking, or telemetry. Network and host data stay in local app storage unless you explicitly export a backup.</string>
+    <string name="settings_about_privacy_action">Privacy details</string>
+    <string name="settings_about_source_action">Source code</string>
+    <string name="settings_about_license_action">MIT license</string>
+    <string name="settings_about_privacy_title">Privacy in Thor Stream Butler</string>
+    <string name="settings_about_privacy_body">The app reads active network details only for diagnostics you start or enable before launch. Saved checks, hosts, settings, and app tiles stay on this device. The optional download test contacts Cloudflare only when enabled. Host discovery uses the local network. Export files may contain private network identifiers and should be stored securely. The app contains no account system, advertising SDK, analytics, crash reporting, tracking, or telemetry.</string>
+    <string name="settings_about_privacy_web">Open full privacy policy</string>
+    <string name="settings_about_link_failed">No compatible browser could open this link.</string>
     <string name="settings_clear_confirm_title">Clear measurement history?</string>
     <string name="settings_clear_confirm_text">This permanently removes all saved network checks.</string>
     <string name="settings_clear_confirm_action">Clear</string>
@@ -236,6 +252,7 @@
     <string name="eval_summary_not_measurable">The core values could not be measured reliably. Available basic data is still shown.</string>
     <string name="eval_problem_no_connection">No active connection</string>
     <string name="eval_problem_no_internet">No confirmed internet access</string>
+    <string name="eval_problem_dns_unreachable">DNS resolution is not reachable</string>
     <string name="eval_problem_host_unreachable">Streaming host not reachable</string>
     <string name="eval_problem_high_latency">High latency (%1$s ms)</string>
     <string name="eval_problem_elevated_latency">Elevated latency (%1$s ms)</string>
@@ -243,6 +260,10 @@
     <string name="eval_problem_elevated_jitter">Elevated jitter (%1$s ms)</string>
     <string name="eval_problem_packet_loss">Packet loss (%1$s %%)</string>
     <string name="eval_problem_light_packet_loss">Slight packet loss (%1$s %%)</string>
+    <string name="eval_problem_low_download">Very low download rate (%1$s Mbit/s)</string>
+    <string name="eval_problem_limited_download">Limited download rate (%1$s Mbit/s)</string>
+    <string name="eval_problem_low_link_speed" tools:ignore="PluralsCandidate">Very low Wi-Fi link speed (%1$d Mbit/s)</string>
+    <string name="eval_problem_limited_link_speed" tools:ignore="PluralsCandidate">Limited Wi-Fi link speed (%1$d Mbit/s)</string>
     <string name="eval_problem_cellular">Cellular connection</string>
     <string name="eval_problem_vpn">Active VPN connection</string>
     <string name="eval_problem_wifi_24">2.4 GHz Wi-Fi</string>
@@ -265,6 +286,10 @@
     <string name="error_wol_failed">The Wake-on-LAN packet could not be sent.</string>
     <string name="error_network_permission">Network details are only partially available without the corresponding Android permission.</string>
     <string name="error_network_read">The active network data could not be read.</string>
+    <string name="error_diagnostics_failed">The network test could not be completed. Available partial results are still shown.</string>
+    <string name="error_history_save_failed">The result is visible, but it could not be added to local history.</string>
+    <string name="error_local_data_failed">The local change could not be saved. No cloud copy exists, so please try again.</string>
+    <string name="error_app_launch_failed">The target app could not be started.</string>
     <string name="error_apps_restricted">The installed apps cannot be fully read on this device.</string>
     <string name="error_apps_load">The list of installed apps could not be loaded.</string>
     <string name="error_app_not_launchable">The app is not installed or has no launchable screen.</string>

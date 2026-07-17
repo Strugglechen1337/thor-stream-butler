@@ -21,10 +21,27 @@ class NetworkValidatorsTest {
     }
 
     @Test
+    fun `IPv6 addresses including scoped and bracketed forms are accepted`() {
+        assertTrue(NetworkValidators.isValidIpv6("2001:db8::1"))
+        assertTrue(NetworkValidators.isValidIpv6("[fd00::4798]"))
+        assertTrue(NetworkValidators.isValidIpv6("fe80::1%wlan0"))
+        assertTrue(NetworkValidators.isValidHostnameOrIp("2001:db8::1"))
+        assertEquals("fd00::4798", NetworkValidators.normalizeHost("[fd00::4798]"))
+    }
+
+    @Test
+    fun `malformed IPv6 addresses and zones are rejected`() {
+        assertFalse(NetworkValidators.isValidIpv6("2001:db8:::1"))
+        assertFalse(NetworkValidators.isValidIpv6("fe80::1%bad zone"))
+        assertFalse(NetworkValidators.isValidIpv6("example.com"))
+        assertFalse(NetworkValidators.isValidHostnameOrIp("[2001:db8::1"))
+        assertFalse(NetworkValidators.isValidHostnameOrIp("2001:db8::1]"))
+    }
+
+    @Test
     fun `MAC formats are normalized`() {
         assertTrue(NetworkValidators.isValidMac("01-23-45-67-89-ab"))
         assertEquals("01:23:45:67:89:AB", NetworkValidators.normalizeMac("0123.4567.89ab"))
         assertFalse(NetworkValidators.isValidMac("01:23:45"))
     }
 }
-

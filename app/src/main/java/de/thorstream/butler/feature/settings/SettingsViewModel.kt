@@ -12,6 +12,7 @@ import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.service.ConfigurationTransferService
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,36 +42,76 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun update(transform: (AppSettings) -> AppSettings) {
-        viewModelScope.launch { repository.update(transform(settings.value)) }
+        viewModelScope.launch {
+            try {
+                repository.update(transform(settings.value))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                transferState.value = TransferUiState(message = strings.get(R.string.error_local_data_failed))
+            }
+        }
     }
 
     fun clearHistory() {
-        viewModelScope.launch { historyRepository.clear() }
+        viewModelScope.launch {
+            try {
+                historyRepository.clear()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                transferState.value = TransferUiState(message = strings.get(R.string.error_local_data_failed))
+            }
+        }
     }
 
     fun refreshDiagnosticLogCount() {
-        viewModelScope.launch { diagnosticLogCount.value = diagnosticLogRepository.read().size }
+        viewModelScope.launch {
+            try {
+                diagnosticLogCount.value = diagnosticLogRepository.read().size
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                diagnosticLogCount.value = 0
+            }
+        }
     }
 
     fun clearDiagnosticLog() {
         viewModelScope.launch {
-            diagnosticLogRepository.clear()
-            diagnosticLogCount.value = 0
+            try {
+                diagnosticLogRepository.clear()
+                diagnosticLogCount.value = 0
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                transferState.value = TransferUiState(message = strings.get(R.string.error_local_data_failed))
+            }
         }
+    }
+
+    fun reportLinkFailure() {
+        transferState.value = TransferUiState(message = strings.get(R.string.settings_about_link_failed))
     }
 
     fun exportConfiguration(documentUri: String, includeHistory: Boolean) {
         if (transferState.value.inProgress) return
         viewModelScope.launch {
             transferState.value = TransferUiState(inProgress = true)
-            transferState.value = when (val result = configurationTransferService.exportTo(documentUri, includeHistory)) {
-                is AppResult.Success -> TransferUiState(message = strings.get(
-                    R.string.settings_transfer_export_success,
-                    result.value.streamingEntries,
-                    result.value.localHosts,
-                    result.value.historyMeasurements,
-                ))
-                is AppResult.Failure -> TransferUiState(message = result.error.message)
+            try {
+                transferState.value = when (val result = configurationTransferService.exportTo(documentUri, includeHistory)) {
+                    is AppResult.Success -> TransferUiState(message = strings.get(
+                        R.string.settings_transfer_export_success,
+                        result.value.streamingEntries,
+                        result.value.localHosts,
+                        result.value.historyMeasurements,
+                    ))
+                    is AppResult.Failure -> TransferUiState(message = result.error.message)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                transferState.value = TransferUiState(message = strings.get(R.string.settings_transfer_export_failed))
             }
         }
     }
@@ -79,14 +120,20 @@ class SettingsViewModel @Inject constructor(
         if (transferState.value.inProgress) return
         viewModelScope.launch {
             transferState.value = TransferUiState(inProgress = true)
-            transferState.value = when (val result = configurationTransferService.importFrom(documentUri)) {
-                is AppResult.Success -> TransferUiState(message = strings.get(
-                    R.string.settings_transfer_import_success,
-                    result.value.streamingEntries,
-                    result.value.localHosts,
-                    result.value.historyMeasurements,
-                ))
-                is AppResult.Failure -> TransferUiState(message = result.error.message)
+            try {
+                transferState.value = when (val result = configurationTransferService.importFrom(documentUri)) {
+                    is AppResult.Success -> TransferUiState(message = strings.get(
+                        R.string.settings_transfer_import_success,
+                        result.value.streamingEntries,
+                        result.value.localHosts,
+                        result.value.historyMeasurements,
+                    ))
+                    is AppResult.Failure -> TransferUiState(message = result.error.message)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                transferState.value = TransferUiState(message = strings.get(R.string.settings_transfer_invalid))
             }
         }
     }

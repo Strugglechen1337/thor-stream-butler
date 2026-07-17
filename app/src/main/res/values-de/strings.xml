@@ -133,6 +133,9 @@
     <string name="hosts_empty_hint">Lege deinen Sunshine-, Moonlight- oder Remote-Play-Host an.</string>
     <string name="hosts_edit">Host bearbeiten</string>
     <string name="hosts_delete">Host löschen</string>
+    <string name="hosts_delete_confirm_title">Lokalen Host löschen?</string>
+    <string name="hosts_delete_confirm_text">%1$s löschen? Verknüpfte Dashboard-Kacheln behalten ihre App, verlieren aber die Host-Zuordnung.</string>
+    <string name="hosts_delete_confirm_action">Host löschen</string>
     <string name="hosts_test_connection">Verbindung testen</string>
     <string name="hosts_wake">Aufwecken</string>
     <string name="hosts_last_reachable">Zuletzt erreichbar%1$s</string>
@@ -160,6 +163,9 @@
     <string name="history_kicker">THOR // VERLAUF</string>
     <string name="history_title">Messhistorie</string>
     <string name="history_clear">Verlauf löschen</string>
+    <string name="history_clear_confirm_title">Messhistorie löschen?</string>
+    <string name="history_clear_confirm_text">Dadurch werden alle lokal gespeicherten Netzwerkprüfungen dauerhaft von diesem Gerät entfernt.</string>
+    <string name="history_clear_confirm_action">Verlauf löschen</string>
     <string name="history_empty_title">Noch keine Messungen gespeichert</string>
     <string name="history_empty_hint">Starte einen Netzwerktest, um einen Verlauf aufzubauen.</string>
     <string name="history_filter_empty">Keine Messungen entsprechen diesem Filter.</string>
@@ -224,6 +230,16 @@
     <string name="settings_transfer_invalid">Dies ist keine gültige oder unterstützte Thor-Stream-Butler-Konfiguration.</string>
     <string name="settings_clear_history">Messhistorie löschen</string>
     <string name="settings_local_only">Alle Einstellungen, Hosts und Messdaten bleiben ausschließlich auf diesem Gerät.</string>
+    <string name="settings_group_about">Über die App und Datenschutz</string>
+    <string name="settings_about_version">Thor Stream Butler %1$s</string>
+    <string name="settings_about_privacy_summary">Kein Konto, keine Werbung, kein Tracking und keine Telemetrie. Netzwerk- und Hostdaten bleiben lokal, sofern du nicht ausdrücklich eine Sicherung exportierst.</string>
+    <string name="settings_about_privacy_action">Datenschutzdetails</string>
+    <string name="settings_about_source_action">Quellcode</string>
+    <string name="settings_about_license_action">MIT-Lizenz</string>
+    <string name="settings_about_privacy_title">Datenschutz in Thor Stream Butler</string>
+    <string name="settings_about_privacy_body">Die App liest aktive Netzwerkdetails nur für von dir gestartete Diagnosen oder für den aktivierten Startcheck. Gespeicherte Prüfungen, Hosts, Einstellungen und App-Kacheln bleiben auf diesem Gerät. Der optionale Downloadtest kontaktiert Cloudflare nur, wenn er aktiviert ist. Die Hostsuche verwendet das lokale Netzwerk. Exportdateien können private Netzwerkkennungen enthalten und sollten sicher aufbewahrt werden. Die App enthält kein Kontosystem, keine Werbung, keine Analysedienste, keine Absturzberichte, kein Tracking und keine Telemetrie.</string>
+    <string name="settings_about_privacy_web">Vollständige Datenschutzerklärung öffnen</string>
+    <string name="settings_about_link_failed">Kein kompatibler Browser konnte diesen Link öffnen.</string>
     <string name="settings_clear_confirm_title">Messhistorie löschen?</string>
     <string name="settings_clear_confirm_text">Dieser Vorgang entfernt alle gespeicherten Netzwerkprüfungen dauerhaft.</string>
     <string name="settings_clear_confirm_action">Löschen</string>
@@ -236,6 +252,7 @@
     <string name="eval_summary_not_measurable">Die Kernwerte konnten nicht zuverlässig gemessen werden. Verfügbare Basisdaten werden trotzdem angezeigt.</string>
     <string name="eval_problem_no_connection">Keine aktive Verbindung</string>
     <string name="eval_problem_no_internet">Kein bestätigter Internetzugang</string>
+    <string name="eval_problem_dns_unreachable">DNS-Auflösung ist nicht erreichbar</string>
     <string name="eval_problem_host_unreachable">Streaming-Host nicht erreichbar</string>
     <string name="eval_problem_high_latency">Hohe Latenz (%1$s ms)</string>
     <string name="eval_problem_elevated_latency">Erhöhte Latenz (%1$s ms)</string>
@@ -243,6 +260,10 @@
     <string name="eval_problem_elevated_jitter">Erhöhter Jitter (%1$s ms)</string>
     <string name="eval_problem_packet_loss">Paketverlust (%1$s %%)</string>
     <string name="eval_problem_light_packet_loss">Leichter Paketverlust (%1$s %%)</string>
+    <string name="eval_problem_low_download">Sehr niedrige Downloadrate (%1$s Mbit/s)</string>
+    <string name="eval_problem_limited_download">Begrenzte Downloadrate (%1$s Mbit/s)</string>
+    <string name="eval_problem_low_link_speed">Sehr niedrige WLAN-Linkrate (%1$d Mbit/s)</string>
+    <string name="eval_problem_limited_link_speed">Begrenzte WLAN-Linkrate (%1$d Mbit/s)</string>
     <string name="eval_problem_cellular">Mobilfunkverbindung</string>
     <string name="eval_problem_vpn">Aktive VPN-Verbindung</string>
     <string name="eval_problem_wifi_24">2,4-GHz-WLAN</string>
@@ -265,6 +286,10 @@
     <string name="error_wol_failed">Das Wake-on-LAN-Paket konnte nicht gesendet werden.</string>
     <string name="error_network_permission">Netzwerkdetails sind ohne die zugehörige Android-Berechtigung nur eingeschränkt verfügbar.</string>
     <string name="error_network_read">Die aktiven Netzwerkdaten konnten nicht gelesen werden.</string>
+    <string name="error_diagnostics_failed">Der Netzwerktest konnte nicht vollständig abgeschlossen werden. Verfügbare Teilergebnisse werden weiterhin angezeigt.</string>
+    <string name="error_history_save_failed">Das Ergebnis ist sichtbar, konnte aber nicht in der lokalen Historie gespeichert werden.</string>
+    <string name="error_local_data_failed">Die lokale Änderung konnte nicht gespeichert werden. Es gibt keine Cloud-Kopie; bitte versuche es erneut.</string>
+    <string name="error_app_launch_failed">Die Ziel-App konnte nicht gestartet werden.</string>
     <string name="error_apps_restricted">Die installierten Apps dürfen auf diesem Gerät nicht vollständig gelesen werden.</string>
     <string name="error_apps_load">Die Liste der installierten Apps konnte nicht geladen werden.</string>
     <string name="error_app_not_launchable">Die App ist nicht installiert oder besitzt keinen startbaren Bildschirm.</string>
