@@ -10,6 +10,16 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
+No unreleased changes.
+
+### Deutsch
+
+Keine unveröffentlichten Änderungen.
+
+## [0.2.0-alpha.1] - 2026-07-17
+
+### English
+
 #### Added
 
 - Full bilingual in-app interface: English is the new default language, German
@@ -33,6 +43,15 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
   connection" measurement in the history; the error is now shown directly in
   the launch dialog instead.
 - Installed-app lookups for dashboard tiles no longer run on the main thread.
+
+#### Known limitations
+
+- The downloadable APK is still a debug-signed alpha preview. It cannot update
+  v0.1.0-alpha.1 in place; uninstall the previous alpha first, which removes
+  its local settings, hosts, and measurement history.
+- Installation on physical handheld hardware was not available during this
+  release run.
+- Automatic Sunshine and Moonlight host discovery is not implemented yet.
 
 ### Deutsch
 
@@ -61,6 +80,16 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
   stattdessen direkt im Start-Dialog angezeigt.
 - Die Abfrage installierter Apps für Dashboard-Kacheln läuft nicht mehr auf dem
   Main-Thread.
+
+#### Bekannte Einschränkungen
+
+- Die herunterladbare APK ist weiterhin eine debug-signierte Alpha-Vorschau.
+  Sie kann v0.1.0-alpha.1 nicht direkt aktualisieren; deinstalliere die
+  vorherige Alpha zuerst, wodurch deren lokale Einstellungen, Hosts und
+  Messhistorie entfernt werden.
+- Eine Installation auf physischer Handheld-Hardware stand für diesen
+  Release-Lauf nicht zur Verfügung.
+- Automatische Sunshine- und Moonlight-Host-Erkennung ist noch nicht umgesetzt.
 
 ## [0.1.0-alpha.1] - 2026-07-17
 

@@ -10,3 +10,6 @@ app/build/
 
 # Release signing (keystore + credentials, never commit)
 signing/
+
+# Local release packaging output
+dist/
