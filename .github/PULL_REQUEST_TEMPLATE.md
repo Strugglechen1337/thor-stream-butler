@@ -1,20 +1,22 @@
-## Was ändert sich?
+## What changed?
 
-<!-- Kurze, konkrete Zusammenfassung. -->
+<!-- Provide a short, concrete summary. -->
 
-## Warum?
+## Why?
 
-<!-- Nutzerproblem, technischer Grund oder verknüpftes Issue. -->
+<!-- Describe the user problem, technical reason, or linked issue. -->
 
-## Verifikation
+## Verification
 
 - [ ] `:app:testDebugUnitTest`
 - [ ] `:app:lintDebug`
 - [ ] `:app:assembleDebug`
-- [ ] Controller-/D-Pad-Fokus geprüft, falls UI betroffen
-- [ ] Keine IPs, SSIDs, MAC-Adressen oder Zugangsdaten in Logs/Screenshots
+- [ ] `:app:assembleDebugAndroidTest`
+- [ ] Controller and D-pad focus checked when UI is affected
+- [ ] Portrait and landscape checked when UI is affected
+- [ ] No IPs, SSIDs, MAC addresses, credentials, or private data in logs/screenshots
+- [ ] English documentation updated when behavior or permissions changed
 
 ## Screenshots
 
-<!-- Bei UI-Änderungen: Portrait und Landscape, sofern relevant. -->
-
+<!-- For UI changes, include sanitized portrait and landscape captures when relevant. -->

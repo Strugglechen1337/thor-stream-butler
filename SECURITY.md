@@ -1,28 +1,32 @@
-# Sicherheitsrichtlinie
+# Security policy
 
-## Unterstützte Version
+## Supported version
 
-Während der MVP-Phase wird ausschließlich die aktuelle Version auf dem Standardbranch unterstützt.
+During the MVP phase, only the current version on the default branch is supported.
 
-## Sicherheitsproblem melden
+## Reporting a vulnerability
 
-Bitte melde Sicherheitslücken vertraulich über [GitHub Security Advisories](https://github.com/Strugglechen1337/thor-stream-butler/security/advisories/new). Erstelle dafür kein öffentliches Issue.
+Please report security vulnerabilities privately through
+[GitHub Security Advisories](https://github.com/Strugglechen1337/thor-stream-butler/security/advisories/new).
+Do not open a public issue for a vulnerability.
 
-Ein hilfreicher Bericht enthält:
+A useful report includes:
 
-- betroffene Version oder Commit-ID
-- reproduzierbare Schritte
-- erwartete und tatsächliche Auswirkung
-- Android-Version und Geräteklasse
-- mögliche Abhilfemaßnahme, falls bekannt
+- affected version or commit ID
+- reproducible steps
+- expected and actual impact
+- Android version and device class
+- a possible mitigation, if known
 
-Entferne IP-Adressen, SSIDs, MAC-Adressen, Hostnamen und andere persönliche Daten aus Berichten und Anhängen.
+Remove IP addresses, SSIDs, MAC addresses, hostnames, account data, and other
+personal information from reports, logs, and attachments.
 
-## Sicherheitsprinzipien
+## Security principles
 
-- keine Zugangsdaten oder Konten im MVP
-- keine Cloud-, Tracking- oder Telemetriedienste
-- lokale Netzwerkberechtigungen nur bei expliziten Hostaktionen
-- keine versteckten Android-APIs und kein Root-Zugriff
-- keine Speicherung von Diagnoseinhalten außerhalb der privaten App-Sandbox
-
+- No credentials or accounts in the MVP
+- No cloud, tracking, analytics, or telemetry services
+- Local-network permissions only for explicit host actions
+- No hidden Android APIs and no root access
+- No diagnostic data stored outside the private app sandbox
+- Timeouts and cancellation for network operations
+- No sensitive network identifiers in logs
