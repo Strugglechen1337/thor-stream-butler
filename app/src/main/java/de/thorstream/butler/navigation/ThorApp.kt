@@ -28,6 +28,7 @@ import de.thorstream.butler.core.designsystem.ThorTheme
 import de.thorstream.butler.feature.dashboard.DashboardRoute
 import de.thorstream.butler.feature.networktest.NetworkTestRoute
 import de.thorstream.butler.feature.history.HistoryRoute
+import de.thorstream.butler.feature.hosts.HostsRoute
 
 private enum class Destination(val route: String, val title: String, val icon: ImageVector) {
     Dashboard("dashboard", "Dashboard", Icons.Rounded.Home),
@@ -69,7 +70,8 @@ fun ThorApp() = ThorTheme {
             composable(Destination.Dashboard.route) { DashboardRoute() }
             composable(Destination.Network.route) { NetworkTestRoute() }
             composable(Destination.History.route) { HistoryRoute() }
-            Destination.entries.filterNot { it == Destination.Dashboard || it == Destination.Network || it == Destination.History }.forEach { destination ->
+            composable(Destination.Hosts.route) { HostsRoute() }
+            Destination.entries.filterNot { it == Destination.Dashboard || it == Destination.Network || it == Destination.History || it == Destination.Hosts }.forEach { destination ->
                 composable(destination.route) { InitialScreen(destination.title) }
             }
         }
