@@ -1,5 +1,7 @@
 package de.thorstream.butler.feature.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteSweep
+import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Upload
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -18,12 +22,16 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,19 +49,37 @@ import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.ThemePreference
 import kotlin.math.roundToInt
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val transferState by viewModel.transferState.collectAsStateWithLifecycle()
     var confirmClear by remember { mutableStateOf(false) }
+    var confirmImport by remember { mutableStateOf(false) }
+    var includeHistory by remember { mutableStateOf(false) }
     var targetText by remember(settings.defaultTestTarget) { mutableStateOf(settings.defaultTestTarget) }
     var targetError by remember { mutableStateOf(false) }
     var themeMenu by remember { mutableStateOf(false) }
+    val snackbar = remember { SnackbarHostState() }
+    val exportDocument = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+        uri?.let { viewModel.exportConfiguration(it.toString(), includeHistory) }
+    }
+    val importDocument = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.importConfiguration(it.toString()) }
+    }
+
+    LaunchedEffect(transferState.message) {
+        transferState.message?.let { snackbar.showSnackbar(it); viewModel.consumeTransferMessage() }
+    }
 
     Column(
         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
+        SnackbarHost(snackbar)
         Text(stringResource(R.string.settings_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
         Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineLarge)
 
@@ -116,6 +142,31 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
         }
 
         SettingsGroup(stringResource(R.string.settings_group_data)) {
+            Text(stringResource(R.string.settings_transfer_title), fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.settings_transfer_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+            SettingSwitch(
+                stringResource(R.string.settings_transfer_history_title),
+                stringResource(R.string.settings_transfer_history_hint),
+                includeHistory,
+                enabled = !transferState.inProgress,
+            ) { includeHistory = it }
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                FilledTonalButton(
+                    onClick = {
+                        val date = SimpleDateFormat("yyyy-MM-dd", Locale.ROOT).format(Date())
+                        exportDocument.launch("thor-stream-butler-$date.json")
+                    },
+                    enabled = !transferState.inProgress,
+                ) {
+                    Icon(Icons.Rounded.Upload, contentDescription = null)
+                    Text(" " + stringResource(R.string.settings_transfer_export))
+                }
+                FilledTonalButton(onClick = { confirmImport = true }, enabled = !transferState.inProgress) {
+                    Icon(Icons.Rounded.Download, contentDescription = null)
+                    Text(" " + stringResource(R.string.settings_transfer_import))
+                }
+                if (transferState.inProgress) CircularProgressIndicator()
+            }
             FilledTonalButton(onClick = { confirmClear = true }) {
                 Icon(Icons.Rounded.DeleteSweep, contentDescription = null)
                 Text(" " + stringResource(R.string.settings_clear_history))
@@ -131,6 +182,20 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             text = { Text(stringResource(R.string.settings_clear_confirm_text)) },
             confirmButton = { TextButton(onClick = { viewModel.clearHistory(); confirmClear = false }) { Text(stringResource(R.string.settings_clear_confirm_action)) } },
             dismissButton = { TextButton(onClick = { confirmClear = false }) { Text(stringResource(R.string.action_cancel)) } },
+        )
+    }
+    if (confirmImport) {
+        AlertDialog(
+            onDismissRequest = { confirmImport = false },
+            title = { Text(stringResource(R.string.settings_transfer_import_confirm_title)) },
+            text = { Text(stringResource(R.string.settings_transfer_import_confirm_text)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmImport = false
+                    importDocument.launch(arrayOf("application/json", "text/json", "text/plain"))
+                }) { Text(stringResource(R.string.settings_transfer_import)) }
+            },
+            dismissButton = { TextButton(onClick = { confirmImport = false }) { Text(stringResource(R.string.action_cancel)) } },
         )
     }
 }

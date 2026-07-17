@@ -63,6 +63,7 @@ import de.thorstream.butler.core.designsystem.ThorGreen
 import de.thorstream.butler.core.designsystem.ThorRed
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.StreamingType
+import de.thorstream.butler.domain.service.DiscoveredHost
 import java.text.DateFormat
 import java.util.Date
 
@@ -99,12 +100,22 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
                 Text(stringResource(R.string.hosts_kicker), color = ThorCyan, style = MaterialTheme.typography.labelLarge)
                 Text(stringResource(R.string.hosts_title), style = MaterialTheme.typography.headlineLarge)
             }
-            Button(onClick = { editedHost = null; showEditor = true }) {
-                Icon(Icons.Rounded.Add, contentDescription = null)
-                Text(" " + stringResource(R.string.hosts_create))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(
+                    onClick = { withLocalNetworkPermission { viewModel.discoverLocalHosts() } },
+                    enabled = !state.isDiscovering,
+                ) {
+                    if (state.isDiscovering) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                    else Icon(Icons.Rounded.WifiFind, contentDescription = null)
+                    Text(" " + stringResource(R.string.hosts_discover))
+                }
+                Button(onClick = { editedHost = null; showEditor = true }) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                    Text(" " + stringResource(R.string.hosts_create))
+                }
             }
         }
-        if (state.hosts.isEmpty()) {
+        if (state.hosts.isEmpty() && state.discoveredHosts.isEmpty() && !state.isDiscovering) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(Icons.Rounded.Router, contentDescription = null, modifier = Modifier.size(64.dp), tint = ThorGray)
                 Text(stringResource(R.string.hosts_empty_title), style = MaterialTheme.typography.titleLarge)
@@ -112,6 +123,31 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
             }
         } else {
             LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (state.discoveredHosts.isNotEmpty()) {
+                    item {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text(stringResource(R.string.hosts_discovered_title), style = MaterialTheme.typography.titleLarge, color = ThorCyan, modifier = Modifier.weight(1f))
+                            TextButton(onClick = viewModel::dismissDiscovery) { Text(stringResource(R.string.action_close)) }
+                        }
+                    }
+                    items(state.discoveredHosts, key = { "${it.address}:${it.port}" }) { discovered ->
+                        DiscoveredHostCard(
+                            host = discovered,
+                            onAdd = {
+                                editedHost = LocalHost(
+                                    name = discovered.name,
+                                    address = discovered.address,
+                                    port = discovered.port,
+                                    streamingType = StreamingType.SUNSHINE_HOST,
+                                )
+                                showEditor = true
+                            },
+                        )
+                    }
+                    if (state.hosts.isNotEmpty()) {
+                        item { Text(stringResource(R.string.hosts_saved_title), style = MaterialTheme.typography.titleLarge, color = ThorCyan) }
+                    }
+                }
                 items(state.hosts, key = { it.id }) { host ->
                     HostCard(
                         host = host,
@@ -131,6 +167,23 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
             onDismiss = { showEditor = false },
             onSave = { host -> viewModel.save(host).also { if (it == null) showEditor = false } },
         )
+    }
+}
+
+@Composable
+private fun DiscoveredHostCard(host: DiscoveredHost, onAdd: () -> Unit) {
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Rounded.WifiFind, contentDescription = null, tint = ThorCyan, modifier = Modifier.size(38.dp))
+            Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
+                Text(host.name, style = MaterialTheme.typography.titleLarge)
+                Text("${host.address}:${host.port}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            FilledTonalButton(onClick = onAdd) {
+                Icon(Icons.Rounded.Add, contentDescription = null)
+                Text(" " + stringResource(R.string.action_add))
+            }
+        }
     }
 }
 

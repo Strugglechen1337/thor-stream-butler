@@ -8,8 +8,10 @@ import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.LocalHost
+import de.thorstream.butler.domain.service.DiscoveredHost
 import de.thorstream.butler.domain.repository.LocalHostRepository
 import de.thorstream.butler.domain.service.HostDiscoveryService
+import de.thorstream.butler.domain.service.LocalHostDiscoveryService
 import de.thorstream.butler.domain.service.WakeOnLanService
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +24,8 @@ import kotlinx.coroutines.launch
 data class HostsUiState(
     val hosts: List<LocalHost> = emptyList(),
     val testingHostId: Long? = null,
+    val isDiscovering: Boolean = false,
+    val discoveredHosts: List<DiscoveredHost> = emptyList(),
     val message: String? = null,
 )
 
@@ -29,6 +33,7 @@ data class HostsUiState(
 class HostsViewModel @Inject constructor(
     private val repository: LocalHostRepository,
     private val discoveryService: HostDiscoveryService,
+    private val localHostDiscoveryService: LocalHostDiscoveryService,
     private val wakeOnLanService: WakeOnLanService,
     private val strings: StringProvider,
 ) : ViewModel() {
@@ -85,6 +90,25 @@ class HostsViewModel @Inject constructor(
                 is AppResult.Failure -> localState.value.copy(message = result.error.message)
             }
         }
+    }
+
+    fun discoverLocalHosts() {
+        if (localState.value.isDiscovering) return
+        viewModelScope.launch {
+            localState.value = localState.value.copy(isDiscovering = true, discoveredHosts = emptyList(), message = null)
+            localState.value = when (val result = localHostDiscoveryService.discover()) {
+                is AppResult.Success -> localState.value.copy(
+                    isDiscovering = false,
+                    discoveredHosts = result.value,
+                    message = if (result.value.isEmpty()) strings.get(R.string.hosts_discovery_empty) else strings.get(R.string.hosts_discovery_found, result.value.size),
+                )
+                is AppResult.Failure -> localState.value.copy(isDiscovering = false, message = result.error.message)
+            }
+        }
+    }
+
+    fun dismissDiscovery() {
+        localState.value = localState.value.copy(discoveredHosts = emptyList())
     }
 
     fun consumeMessage() {
