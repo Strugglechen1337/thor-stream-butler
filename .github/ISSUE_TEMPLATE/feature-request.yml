@@ -1,0 +1,35 @@
+name: Feature vorschlagen
+description: Idee für Launcher, Diagnose oder Handheld-Bedienung einreichen
+title: "[Feature]: "
+labels: [enhancement, triage]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Beschreibe den Nutzungskontext, nicht nur die gewünschte Funktion.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Vorgeschlagene Lösung
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Relevanz
+      options:
+        - Häufiger Handheld-Workflow
+        - Bestimmter Streaming-Dienst
+        - Bestimmtes Gerät / Android-Version
+        - Komfortverbesserung
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Projektprinzipien
+      options:
+        - label: Die Idee funktioniert ohne Konto, Tracking oder Cloud-Backend.
+        - label: Die Idee lässt sich per Controller und Touch bedienen.
+

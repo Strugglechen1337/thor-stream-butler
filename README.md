@@ -1,8 +1,25 @@
-# Thor Stream Butler
+<div align="center">
+  <img src="docs/screenshots/dashboard-landscape.svg" width="860" alt="Thor Stream Butler Dashboard im Landscape-Format">
+  <h1>Thor Stream Butler</h1>
+  <p><strong>Streaming. Geprüft. Gestartet.</strong></p>
+  <p>Der lokale, controller-first Gaming-Streaming-Launcher für Android-Handhelds.</p>
+  <p>
+    <a href="https://strugglechen1337.github.io/thor-stream-butler/"><strong>Projektwebsite</strong></a>
+    ·
+    <a href="#build"><strong>Build-Anleitung</strong></a>
+    ·
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/issues"><strong>Issues</strong></a>
+  </p>
+  <p>
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/android-ci.yml"><img src="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/android-ci.yml/badge.svg" alt="Android CI"></a>
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/pages.yml"><img src="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/pages.yml/badge.svg" alt="GitHub Pages"></a>
+    <img src="https://img.shields.io/badge/Android-28--37-3DDC84?logo=android&logoColor=white" alt="Android API 28 bis 37">
+    <img src="https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin 2.3.21">
+    <img src="https://img.shields.io/badge/Tracking-keins-4ADE80" alt="Kein Tracking">
+  </p>
+</div>
 
-Thor Stream Butler ist ein lokaler Gaming-Streaming-Launcher für Android-Handhelds wie AYN Thor/Odin, Retroid Pocket und vergleichbare Geräte. Die App bündelt installierte Streaming-Apps, prüft auf Wunsch vor dem Start die Netzwerkqualität und verwaltet lokale Streaming-Hosts einschließlich Wake-on-LAN.
-
-Der aktuelle Stand ist ein kompilierbarer MVP ohne Konto, Cloud-Backend, Werbung, Tracking oder Telemetrie.
+Thor Stream Butler bündelt installierte Streaming-Apps, prüft auf Wunsch vor dem Start die Netzwerkqualität und verwaltet lokale Streaming-Hosts einschließlich Wake-on-LAN. Der aktuelle Stand ist ein kompilierbarer MVP ohne Konto, Cloud-Backend, Werbung, Tracking oder Telemetrie.
 
 ## Funktionsumfang
 

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://strugglechen1337.github.io/thor-stream-butler/sitemap.xml
+
