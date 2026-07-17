@@ -100,11 +100,14 @@ Place the keystore at `signing/thor-stream-release.jks` and run
 `./gradlew assembleRelease`. Without these values the release build stays
 unsigned; debug builds are unaffected.
 
-The `Release` workflow (`.github/workflows/release.yml`) builds and publishes a
-signed APK plus SHA-256 checksum for every `v*` tag. It requires the repository
+The `Release` workflow (`.github/workflows/release.yml`) builds and publishes an
+APK plus SHA-256 checksum for every `v*` tag. Stable tags require the repository
 secrets `SIGNING_KEYSTORE_BASE64` (base64 of the keystore file),
-`SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, and `SIGNING_KEY_PASSWORD`, and
-bilingual release notes at `docs/release-notes/<tag>.md`.
+`SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, and `SIGNING_KEY_PASSWORD`.
+Prerelease tags containing a hyphen may fall back to an explicitly named
+debug-signed APK when none of the secrets exist. A partial signing configuration
+always fails. Every tag requires equivalent bilingual release notes at
+`docs/release-notes/<tag>.md`.
 
 ### Deutsch
 
@@ -123,9 +126,11 @@ Den Keystore unter `signing/thor-stream-release.jks` ablegen und
 `./gradlew assembleRelease` ausführen. Ohne diese Werte bleibt der
 Release-Build unsigniert; Debug-Builds sind nicht betroffen.
 
-Der `Release`-Workflow (`.github/workflows/release.yml`) baut und
-veröffentlicht für jeden `v*`-Tag eine signierte APK samt SHA-256-Prüfsumme.
-Er benötigt die Repository-Secrets `SIGNING_KEYSTORE_BASE64` (Base64 der
-Keystore-Datei), `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` und
-`SIGNING_KEY_PASSWORD` sowie zweisprachige Release Notes unter
-`docs/release-notes/<tag>.md`.
+Der `Release`-Workflow (`.github/workflows/release.yml`) baut und veröffentlicht
+für jeden `v*`-Tag eine APK samt SHA-256-Prüfsumme. Stabile Tags benötigen die
+Repository-Secrets `SIGNING_KEYSTORE_BASE64` (Base64 der Keystore-Datei),
+`SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` und `SIGNING_KEY_PASSWORD`.
+Prerelease-Tags mit Bindestrich dürfen auf eine eindeutig benannte,
+debug-signierte APK zurückfallen, wenn keines der Secrets vorhanden ist. Eine
+unvollständige Signing-Konfiguration schlägt immer fehl. Jeder Tag benötigt
+gleichwertige zweisprachige Release Notes unter `docs/release-notes/<tag>.md`.

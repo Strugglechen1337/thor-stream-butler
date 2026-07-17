@@ -1,12 +1,20 @@
-# Builds a signed release APK and attaches it to the GitHub release
-# whenever a version tag (v*) is pushed.
+# Publishes an APK and SHA-256 checksum whenever a version tag (v*) is pushed.
+# Veröffentlicht APK und SHA-256-Prüfsumme für jeden gepushten Versions-Tag (v*).
 #
-# Required repository secrets:
+# Stable tags require all four production-signing secrets. Prerelease tags
+# (alpha, beta, rc, or any tag containing "-") may fall back to an explicitly
+# named debug APK when no signing secrets are configured. A partial signing
+# configuration always fails closed.
+# Stabile Tags benötigen alle vier produktiven Signing-Secrets. Prerelease-Tags
+# dürfen ohne Signing-Secrets auf eine eindeutig benannte Debug-APK zurückfallen.
+# Eine unvollständige Signing-Konfiguration schlägt immer sicher fehl.
+#
+# Production-signing repository secrets:
 #   SIGNING_KEYSTORE_BASE64   – base64 of signing/thor-stream-release.jks
 #   SIGNING_STORE_PASSWORD    – keystore password
 #   SIGNING_KEY_ALIAS         – key alias
 #   SIGNING_KEY_PASSWORD      – key password
-name: Release
+name: Release / Veröffentlichung
 
 on:
   push:
@@ -15,7 +23,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to build, e.g. v0.2.0"
+        description: "Existing release tag / Existierender Release-Tag, e.g. v0.3.0-alpha.1"
         required: true
         type: string
 
@@ -32,39 +40,40 @@ jobs:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
 
     steps:
-      - name: Check out repository
+      - name: Check out repository / Repository auschecken
         uses: actions/checkout@v7
         with:
           ref: ${{ env.RELEASE_TAG }}
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
-
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v4
-
-      - name: Install Android 17 SDK
-        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
-
-      - name: Validate signing secrets
+      - name: Determine signing mode / Signing-Modus ermitteln
+        id: signing
+        shell: bash
         run: |
+          configured=0
           missing=0
           for name in SIGNING_KEYSTORE_BASE64 SIGNING_STORE_PASSWORD SIGNING_KEY_ALIAS SIGNING_KEY_PASSWORD; do
-            if [ -z "${!name}" ]; then
-              echo "::error::$name is not configured."
-              missing=1
+            if [ -n "${!name}" ]; then
+              configured=$((configured + 1))
+            else
+              missing=$((missing + 1))
             fi
           done
-          if [ "$missing" -ne 0 ]; then
+
+          if [ "$configured" -gt 0 ] && [ "$missing" -gt 0 ]; then
+            echo "::error::Signing is only partially configured / Signing ist unvollständig. Configure all four secrets or remove all of them / Alle vier Secrets setzen oder alle entfernen."
+            exit 1
+          fi
+
+          if [ "$missing" -eq 0 ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "asset_suffix=" >> "$GITHUB_OUTPUT"
+            echo "Production signing is configured / Produktives Signing ist konfiguriert."
+          elif [[ "$RELEASE_TAG" == *-* ]]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "asset_suffix=-debug" >> "$GITHUB_OUTPUT"
+            echo "::warning::No production-signing secrets / Keine produktiven Signing-Secrets. Publishing an explicitly named debug APK / Eine eindeutig benannte Debug-APK wird veröffentlicht."
+          else
+            echo "::error::Stable releases require all four production-signing secrets / Stabile Releases benötigen alle vier produktiven Signing-Secrets."
             exit 1
           fi
         env:
@@ -73,17 +82,37 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
-      - name: Decode keystore
+      - name: Set up Java 17 / Java 17 einrichten
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle / Gradle einrichten
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Set up Android SDK / Android SDK einrichten
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android 17 SDK / Android-17-SDK installieren
+        run: sdkmanager "platforms;android-37.0" "build-tools;36.0.0"
+
+      - name: Make Gradle wrapper executable / Gradle Wrapper ausführbar machen
+        run: chmod +x gradlew
+
+      - name: Decode production keystore / Produktiven Keystore dekodieren
+        if: steps.signing.outputs.enabled == 'true'
         run: |
           mkdir -p signing
           echo "$SIGNING_KEYSTORE_BASE64" | base64 -d > signing/thor-stream-release.jks
         env:
           SIGNING_KEYSTORE_BASE64: ${{ secrets.SIGNING_KEYSTORE_BASE64 }}
 
-      - name: Run unit tests
+      - name: Run unit tests / Unit Tests ausführen
         run: ./gradlew :app:testDebugUnitTest
 
-      - name: Build signed release APK
+      - name: Build production-signed APK / Produktiv signierte APK bauen
+        if: steps.signing.outputs.enabled == 'true'
         run: ./gradlew :app:assembleRelease
         env:
           SIGNING_STORE_FILE: thor-stream-release.jks
@@ -91,35 +120,69 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
 
-      - name: Rename APK and create checksum
-        run: |
-          cp app/build/outputs/apk/release/app-release.apk \
-             "ThorStreamButler-${RELEASE_TAG}.apk"
-          sha256sum "ThorStreamButler-${RELEASE_TAG}.apk" > "ThorStreamButler-${RELEASE_TAG}.apk.sha256"
+      - name: Build debug-signed prerelease APK / Debug-signierte Prerelease-APK bauen
+        if: steps.signing.outputs.enabled != 'true'
+        run: ./gradlew :app:assembleDebug
 
-      - name: Prepare release notes
+      - name: Rename APK and create checksum / APK umbenennen und Prüfsumme erzeugen
+        id: asset
+        shell: bash
+        run: |
+          if [ "$SIGNING_ENABLED" = "true" ]; then
+            source_apk="app/build/outputs/apk/release/app-release.apk"
+          else
+            source_apk="app/build/outputs/apk/debug/app-debug.apk"
+          fi
+
+          asset="ThorStreamButler-${RELEASE_TAG}${ASSET_SUFFIX}.apk"
+          cp "$source_apk" "$asset"
+          sha256sum "$asset" > "$asset.sha256"
+          echo "name=$asset" >> "$GITHUB_OUTPUT"
+        env:
+          SIGNING_ENABLED: ${{ steps.signing.outputs.enabled }}
+          ASSET_SUFFIX: ${{ steps.signing.outputs.asset_suffix }}
+
+      - name: Prepare bilingual release notes / Zweisprachige Release Notes vorbereiten
+        id: notes
+        shell: bash
         run: |
           notes_path="docs/release-notes/${RELEASE_TAG}.md"
           if [ -f "$notes_path" ]; then
             cp "$notes_path" release-notes.md
           elif gh release view "$RELEASE_TAG" --json body --jq .body > release-notes.md; then
             if [ ! -s release-notes.md ]; then
-              echo "::error::Existing release has empty notes."
+              echo "::error::Existing release has empty notes / Vorhandenes Release hat leere Release Notes."
               exit 1
             fi
           else
-            echo "::error::Missing $notes_path. Release notes must be bilingual (EN/DE)."
+            echo "::error::Missing $notes_path / $notes_path fehlt. Release notes must be bilingual / Release Notes müssen zweisprachig sein (EN/DE)."
             exit 1
           fi
+
+          if ! grep -q '^## English$' release-notes.md || ! grep -q '^## Deutsch$' release-notes.md; then
+            echo "::error::Release notes need equivalent English and German sections / Release Notes benötigen gleichwertige englische und deutsche Abschnitte."
+            exit 1
+          fi
+
+          title="$(sed -n '1{s/^# //;p;}' release-notes.md)"
+          if [ -z "$title" ]; then
+            echo "::error::Release notes need a level-one title / Release Notes benötigen eine Überschrift erster Ebene."
+            exit 1
+          fi
+          echo "title=$title" >> "$GITHUB_OUTPUT"
         env:
           GH_TOKEN: ${{ github.token }}
 
-      - name: Create GitHub release
+      - name: Create GitHub release / GitHub-Release erstellen
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
+          name: ${{ steps.notes.outputs.title }}
           body_path: release-notes.md
+          prerelease: ${{ contains(env.RELEASE_TAG, '-') }}
+          make_latest: ${{ contains(env.RELEASE_TAG, '-') && 'false' || 'true' }}
           files: |
-            ThorStreamButler-${{ env.RELEASE_TAG }}.apk
-            ThorStreamButler-${{ env.RELEASE_TAG }}.apk.sha256
+            ThorStreamButler-${{ env.RELEASE_TAG }}*.apk
+            ThorStreamButler-${{ env.RELEASE_TAG }}*.apk.sha256
+          fail_on_unmatched_files: true
           overwrite_files: true
