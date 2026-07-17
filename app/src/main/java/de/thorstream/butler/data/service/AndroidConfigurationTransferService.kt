@@ -1,7 +1,7 @@
 package de.thorstream.butler.data.service
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppError
@@ -61,7 +61,7 @@ class AndroidConfigurationTransferService @Inject constructor(
                 .put("entries", JSONArray().apply { entries.forEach { put(it.toJson()) } })
             if (includeHistory) root.put("history", JSONArray().apply { history.forEach { put(it.toJson()) } })
 
-            val uri = Uri.parse(documentUri)
+            val uri = documentUri.toUri()
             context.contentResolver.openOutputStream(uri, "wt")?.bufferedWriter(Charsets.UTF_8)?.use { writer ->
                 writer.write(root.toString(2))
             } ?: throw IOException("Unable to open output document")
@@ -75,7 +75,7 @@ class AndroidConfigurationTransferService @Inject constructor(
 
     override suspend fun importFrom(documentUri: String): AppResult<ConfigurationTransferSummary> = withContext(Dispatchers.IO) {
         try {
-            val uri = Uri.parse(documentUri)
+            val uri = documentUri.toUri()
             val content = context.contentResolver.openInputStream(uri)?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }
                 ?: throw IOException("Unable to open input document")
             val root = JSONObject(content)

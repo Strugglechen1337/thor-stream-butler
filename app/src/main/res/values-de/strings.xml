@@ -127,7 +127,7 @@
     <string name="hosts_discovered_title">Gefundene Sunshine-Hosts</string>
     <string name="hosts_saved_title">Gespeicherte Hosts</string>
     <string name="hosts_discovery_empty">Kein Sunshine-kompatibler Host gefunden. Prüfe, ob Host und Handheld im selben lokalen Netzwerk sind.</string>
-    <string name="hosts_discovery_found">%1$d kompatible Hosts gefunden.</string>
+    <string name="hosts_discovery_found">Kompatible Hosts gefunden: %1$d.</string>
     <string name="hosts_discovery_failed">Die lokale Host-Suche konnte auf diesem Gerät nicht gestartet werden.</string>
     <string name="hosts_empty_title">Noch kein lokaler Host</string>
     <string name="hosts_empty_hint">Lege deinen Sunshine-, Moonlight- oder Remote-Play-Host an.</string>
@@ -144,7 +144,7 @@
     <string name="hosts_field_mac">MAC-Adresse</string>
     <string name="hosts_field_broadcast">Broadcast-Zieladresse</string>
     <string name="hosts_wol_title">Wake-on-LAN</string>
-    <string name="hosts_wol_hint">UDP Magic Packet senden</string>
+    <string name="hosts_wol_hint">UDP-Magic-Paket senden</string>
     <string name="hosts_error_name">Bitte gib einen Namen ein.</string>
     <string name="hosts_error_address">Hostname oder IP-Adresse ist ungültig.</string>
     <string name="hosts_error_port">Der Port muss zwischen 1 und 65535 liegen.</string>
@@ -165,7 +165,7 @@
     <string name="history_filter_empty">Keine Messungen entsprechen diesem Filter.</string>
     <string name="history_filter_all">Alle</string>
     <string name="history_filter_host">Mit Host</string>
-    <string name="history_summary_title">Zusammenfassung · %1$d Messungen</string>
+    <string name="history_summary_title">Messungen in der Zusammenfassung: %1$d</string>
     <string name="history_summary_metrics">Ø Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
     <string name="history_latency_trend">Latenzverlauf · älteste bis neueste Messung</string>
     <string name="history_host_label">Host-Test</string>
@@ -200,7 +200,7 @@
     <string name="settings_download_hint">Optionaler HTTPS-Test; überträgt Testdaten und ist standardmäßig aus</string>
     <string name="settings_logging_title">Diagnoseprotokoll</string>
     <string name="settings_logging_hint">Nur technische Zustände, keine IPs, SSIDs oder MAC-Adressen</string>
-    <string name="settings_logging_count">%1$d lokale Ereignisse, maximal 200</string>
+    <string name="settings_logging_count">Lokale Ereignisse: %1$d (maximal 200)</string>
     <string name="settings_logging_clear">Protokoll löschen</string>
     <string name="settings_group_appearance">Darstellung und Bedienung</string>
     <string name="settings_theme">Theme</string>
@@ -218,8 +218,8 @@
     <string name="settings_transfer_import">Importieren</string>
     <string name="settings_transfer_import_confirm_title">Lokale Konfiguration ersetzen?</string>
     <string name="settings_transfer_import_confirm_text">Importierte Apps, Hosts und Einstellungen ersetzen die aktuelle Konfiguration. Die Historie wird nur ersetzt, wenn sie in der Datei enthalten ist.</string>
-    <string name="settings_transfer_export_success">%1$d Apps, %2$d Hosts und %3$d Messungen exportiert.</string>
-    <string name="settings_transfer_import_success">%1$d Apps, %2$d Hosts und %3$d Messungen importiert.</string>
+    <string name="settings_transfer_export_success">Export abgeschlossen · Apps: %1$d · Hosts: %2$d · Messungen: %3$d</string>
+    <string name="settings_transfer_import_success">Import abgeschlossen · Apps: %1$d · Hosts: %2$d · Messungen: %3$d</string>
     <string name="settings_transfer_export_failed">Die Konfigurationsdatei konnte nicht geschrieben werden.</string>
     <string name="settings_transfer_invalid">Dies ist keine gültige oder unterstützte Thor-Stream-Butler-Konfiguration.</string>
     <string name="settings_clear_history">Messhistorie löschen</string>
@@ -258,7 +258,6 @@
 
     <!-- Errors -->
     <string name="error_no_network">Keine aktive Netzwerkverbindung gefunden.</string>
-    <string name="error_technical">Die Funktion konnte nicht ausgeführt werden.</string>
     <string name="error_ping_unreachable">Das Ping-Ziel konnte nicht erreicht oder aufgelöst werden.</string>
     <string name="error_download_no_data">Der Downloadtest lieferte keine Messdaten.</string>
     <string name="error_download_unavailable">Der optionale Downloadtest ist derzeit nicht erreichbar.</string>
