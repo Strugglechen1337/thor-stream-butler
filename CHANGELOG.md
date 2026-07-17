@@ -10,11 +10,57 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- Full bilingual in-app interface: English is the new default language, German
+  is bundled and follows the system language or the per-app language setting
+  (Android 13+). All screens, dialogs, error messages, diagnostic steps, and
+  quality assessments are localized.
+- Release signing infrastructure: local builds read `signing/keystore.properties`
+  (gitignored), and a new `Release` GitHub Actions workflow builds a signed APK
+  with SHA-256 checksum for `v*` tags using repository secrets.
+
+#### Changed
+
+- Number formatting in measurements now follows the active locale instead of
+  always using German decimal formatting.
+- Diagnostic progress steps are locale-independent identifiers internally,
+  which keeps stored data and tests independent of the display language.
+
+#### Fixed
+
+- A failed pre-launch network check no longer stores an invented "no
+  connection" measurement in the history; the error is now shown directly in
+  the launch dialog instead.
+- Installed-app lookups for dashboard tiles no longer run on the main thread.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- Vollständig zweisprachige App-Oberfläche: Englisch ist die neue
+  Standardsprache, Deutsch ist enthalten und folgt der Systemsprache bzw. der
+  App-Sprach-Einstellung (Android 13+). Alle Screens, Dialoge, Fehlermeldungen,
+  Diagnoseschritte und Qualitätsbewertungen sind lokalisiert.
+- Release-Signing-Infrastruktur: Lokale Builds lesen
+  `signing/keystore.properties` (gitignored), und ein neuer
+  `Release`-GitHub-Actions-Workflow baut für `v*`-Tags eine signierte APK mit
+  SHA-256-Prüfsumme aus Repository-Secrets.
+
+#### Geändert
+
+- Zahlenformatierung in Messwerten folgt jetzt der aktiven Sprache statt immer
+  der deutschen Dezimalformatierung.
+- Diagnose-Fortschrittsschritte sind intern sprachunabhängige Kennungen; damit
+  bleiben gespeicherte Daten und Tests von der Anzeigesprache unabhängig.
+
+#### Behoben
+
+- Ein fehlgeschlagener Netzwerkcheck vor dem App-Start speichert keine
+  erfundene "keine Verbindung"-Messung mehr in der Historie; der Fehler wird
+  stattdessen direkt im Start-Dialog angezeigt.
+- Die Abfrage installierter Apps für Dashboard-Kacheln läuft nicht mehr auf dem
+  Main-Thread.
 
 ## [0.1.0-alpha.1] - 2026-07-17
 

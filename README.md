@@ -50,8 +50,10 @@ release assets.
 > **Alpha warning:** This APK uses the Android debug signature and is not a
 > production-signed stable release. A future stable version cannot update it
 > directly. Uninstall this alpha first; doing so removes its local settings,
-> configured hosts, and measurement history. The in-app interface is currently
-> German only.
+> configured hosts, and measurement history. The in-app interface of this alpha
+> is German only; the current development version is fully localized in English
+> and German (English is the default, German follows the system or per-app
+> language setting).
 
 ### Screenshots
 
@@ -400,7 +402,9 @@ Release-Dateien herunter.
 > produktiv signiertes stabiles Release. Eine zukünftige stabile Version kann sie
 > nicht direkt aktualisieren. Deinstalliere diese Alpha zuerst; dabei werden ihre
 > lokalen Einstellungen, konfigurierten Hosts und die Messhistorie entfernt. Die
-> Oberfläche in der App ist derzeit nur auf Deutsch verfügbar.
+> Oberfläche dieser Alpha ist nur auf Deutsch verfügbar; der aktuelle
+> Entwicklungsstand ist vollständig auf Englisch und Deutsch lokalisiert
+> (Englisch als Standard, Deutsch folgt der System- bzw. App-Sprache).
 
 ### Screenshots
 
