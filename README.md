@@ -8,6 +8,8 @@
     ·
     <a href="https://strugglechen1337.github.io/thor-stream-butler/de/"><strong>Deutsche Website</strong></a>
     ·
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.1.0-alpha.1"><strong>Download v0.1.0-alpha.1</strong></a>
+    ·
     <a href="#build"><strong>Build guide</strong></a>
     ·
     <a href="https://github.com/Strugglechen1337/thor-stream-butler/issues"><strong>Issues</strong></a>
@@ -37,6 +39,19 @@ It is built for Android gaming handhelds such as **AYN Thor / Odin** and
 similar devices running Android 9 or newer.
 
 > Local-first by design. Measurements, hosts, settings, and history stay on the device.
+
+### First alpha download
+
+The first installable development preview is available as
+[v0.1.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.1.0-alpha.1)
+for Android 9 and newer. Download the APK and its SHA-256 checksum from the
+release assets.
+
+> **Alpha warning:** This APK uses the Android debug signature and is not a
+> production-signed stable release. A future stable version cannot update it
+> directly. Uninstall this alpha first; doing so removes its local settings,
+> configured hosts, and measurement history. The in-app interface is currently
+> German only.
 
 ### Screenshots
 
@@ -373,6 +388,19 @@ Die App ist für Android-Gaming-Handhelds wie **AYN Thor / Odin** und
 und vergleichbaren Geräten ab Android 9.
 
 > Local-first by Design: Messungen, Hosts, Einstellungen und Historie bleiben auf dem Gerät.
+
+### Erster Alpha-Download
+
+Die erste installierbare Entwicklungsvorschau steht als
+[v0.1.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.1.0-alpha.1)
+für Android 9 und neuer bereit. Lade die APK und ihre SHA-256-Prüfsumme aus den
+Release-Dateien herunter.
+
+> **Alpha-Warnung:** Diese APK verwendet die Android-Debug-Signatur und ist kein
+> produktiv signiertes stabiles Release. Eine zukünftige stabile Version kann sie
+> nicht direkt aktualisieren. Deinstalliere diese Alpha zuerst; dabei werden ihre
+> lokalen Einstellungen, konfigurierten Hosts und die Messhistorie entfernt. Die
+> Oberfläche in der App ist derzeit nur auf Deutsch verfügbar.
 
 ### Screenshots
 
