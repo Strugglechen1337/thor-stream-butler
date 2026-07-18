@@ -31,6 +31,20 @@ enum class NetworkQuality {
     NOT_MEASURABLE,
 }
 
+enum class StreamingResolution {
+    AUTO,
+    HD_720P,
+    FULL_HD_1080P,
+    QHD_1440P,
+    UHD_4K,
+}
+
+data class StreamingProfile(
+    val resolution: StreamingResolution = StreamingResolution.AUTO,
+    val framesPerSecond: Int = 60,
+    val bitrateMbps: Int = 20,
+)
+
 data class StreamingEntry(
     val id: Long = 0,
     val displayName: String,
@@ -38,6 +52,8 @@ data class StreamingEntry(
     val iconReference: String = "package://$packageName",
     val streamingType: StreamingType = StreamingType.CUSTOM,
     val customName: String? = null,
+    val hostId: Long? = null,
+    val profile: StreamingProfile = StreamingProfile(),
     val sortOrder: Int = 0,
     val lastUsedAt: Long? = null,
     val lastNetworkQuality: NetworkQuality? = null,

@@ -18,6 +18,10 @@ data class QualityThresholds(
     val problematicPacketLossPercent: Double = 1.0,
     val weakWifiSignalPercent: Int = 35,
     val fairWifiSignalPercent: Int = 55,
+    val criticalWifiLinkSpeedMbps: Int = 25,
+    val recommendedWifiLinkSpeedMbps: Int = 100,
+    val criticalDownloadMbps: Double = 10.0,
+    val recommendedDownloadMbps: Double = 25.0,
 )
 
 @Singleton
@@ -37,6 +41,7 @@ class QualityEvaluator @Inject constructor(private val strings: StringProvider) 
         val recommendations = mutableListOf<String>()
 
         if (snapshot.internetValidated == false && snapshot.host == null) critical += strings.get(R.string.eval_problem_no_internet)
+        if (snapshot.dnsReachable == false && snapshot.host == null) critical += strings.get(R.string.eval_problem_dns_unreachable)
         if (snapshot.hostReachable == false) critical += strings.get(R.string.eval_problem_host_unreachable)
 
         snapshot.latencyMs?.let {
@@ -55,6 +60,12 @@ class QualityEvaluator @Inject constructor(private val strings: StringProvider) 
             when {
                 it > thresholds.problematicPacketLossPercent -> critical += strings.get(R.string.eval_problem_packet_loss, it.rounded())
                 it > 0.0 -> warnings += strings.get(R.string.eval_problem_light_packet_loss, it.rounded())
+            }
+        }
+        snapshot.downloadMbps?.let {
+            when {
+                it < thresholds.criticalDownloadMbps -> critical += strings.get(R.string.eval_problem_low_download, it.rounded())
+                it < thresholds.recommendedDownloadMbps -> warnings += strings.get(R.string.eval_problem_limited_download, it.rounded())
             }
         }
 
@@ -79,12 +90,24 @@ class QualityEvaluator @Inject constructor(private val strings: StringProvider) 
                     signal < thresholds.fairWifiSignalPercent -> warnings += strings.get(R.string.eval_problem_fair_signal, signal)
                 }
             }
+            snapshot.linkSpeedMbps?.let { linkSpeed ->
+                when {
+                    linkSpeed < thresholds.criticalWifiLinkSpeedMbps -> critical += strings.get(R.string.eval_problem_low_link_speed, linkSpeed)
+                    linkSpeed < thresholds.recommendedWifiLinkSpeedMbps -> warnings += strings.get(R.string.eval_problem_limited_link_speed, linkSpeed)
+                }
+            }
         }
 
         if (snapshot.jitterMs != null && snapshot.jitterMs > thresholds.goodJitterMs) {
             recommendations += strings.get(R.string.eval_reco_lower_bitrate)
         }
         if (snapshot.packetLossPercent != null && snapshot.packetLossPercent > 0.0) {
+            recommendations += strings.get(R.string.eval_reco_reduce_interference)
+        }
+        if (snapshot.downloadMbps != null && snapshot.downloadMbps < thresholds.recommendedDownloadMbps) {
+            recommendations += strings.get(R.string.eval_reco_lower_bitrate)
+        }
+        if (snapshot.connectionType == ConnectionType.WIFI && snapshot.linkSpeedMbps != null && snapshot.linkSpeedMbps < thresholds.recommendedWifiLinkSpeedMbps) {
             recommendations += strings.get(R.string.eval_reco_reduce_interference)
         }
         if (snapshot.hostReachable == false) {

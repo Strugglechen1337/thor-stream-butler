@@ -11,6 +11,10 @@ data class StreamingEntryEntity(
     val iconReference: String,
     val streamingType: String,
     val customName: String?,
+    val hostId: Long?,
+    val profileResolution: String,
+    val profileFramesPerSecond: Int,
+    val profileBitrateMbps: Int,
     val sortOrder: Int,
     val lastUsedAt: Long?,
     val lastNetworkQuality: String?,
@@ -55,4 +59,3 @@ data class NetworkMeasurementEntity(
     val problems: List<String>,
     val recommendations: List<String>,
 )
-

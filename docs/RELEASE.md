@@ -16,10 +16,12 @@ Release-Text und halte beide Abschnitte inhaltlich gleichwertig.
 2. Move completed entries from `Unreleased` into a dated version in `CHANGELOG.md`.
 3. Describe features, fixes, limitations, migration steps, and known issues in English and German.
 4. Run unit tests, lint, the debug build, and the instrumented-test build.
-5. Build the configured signed release APK. Never publish a debug APK as a production release.
-6. Generate and verify a SHA-256 checksum for every downloadable APK.
-7. Test installation or update on representative Android hardware.
+5. Build the configured signed release APK and AAB. Never publish debug-signed artifacts as a production release.
+6. Verify both signatures and generate and verify a SHA-256 checksum for every downloadable artifact.
+7. Complete the [physical-device test plan](PHYSICAL_TEST_PLAN.md), including APK
+   installation/update and the AAB-derived install set on representative hardware.
 8. Replace or sanitize screenshots so they contain no private network data.
+9. Recheck the [store listing and Data safety draft](STORE_LISTING.md) against the signed artifact.
 
 ### Development preview exception
 
@@ -39,7 +41,7 @@ when installation on physical hardware was not verified.
 
 ### After publishing
 
-1. Verify the release page, APK, and checksum without an authenticated session.
+1. Verify the release page, APK, AAB, signatures, and checksums without an authenticated session.
 2. Verify the English and German project pages.
 3. Confirm that Android CI and GitHub Pages are green.
 4. Add the new release link to the README when downloads become available.
@@ -52,10 +54,12 @@ when installation on physical hardware was not verified.
 2. Fertige Einträge aus `Unreleased` in eine datierte Version in `CHANGELOG.md` verschieben.
 3. Funktionen, Fehlerbehebungen, Einschränkungen, Migration und bekannte Probleme auf Englisch und Deutsch beschreiben.
 4. Unit Tests, Lint, Debug-Build und instrumentierten Test-Build ausführen.
-5. Die konfigurierte signierte Release-APK bauen. Niemals eine Debug-APK als produktives Release veröffentlichen.
-6. Für jede herunterladbare APK eine SHA-256-Prüfsumme erzeugen und prüfen.
-7. Installation oder Update auf repräsentativer Android-Hardware testen.
+5. Die konfiguriert signierte Release-APK und das AAB bauen. Niemals debug-signierte Artefakte als produktives Release veröffentlichen.
+6. Beide Signaturen prüfen und für jedes herunterladbare Artefakt eine SHA-256-Prüfsumme erzeugen und prüfen.
+7. Den [Hardware-Testplan](PHYSICAL_TEST_PLAN.md) einschließlich APK-Installation/
+   -Update und AAB-Installationssatz auf repräsentativer Hardware abschließen.
 8. Screenshots ersetzen oder bereinigen, sodass sie keine privaten Netzwerkdaten enthalten.
+9. [Store-Eintrag und Data-Safety-Entwurf](STORE_LISTING.md) mit dem signierten Artefakt abgleichen.
 
 ### Ausnahme für Entwicklungsvorschauen
 
@@ -76,7 +80,7 @@ echter Hardware nicht geprüft wurde.
 
 ### Nach der Veröffentlichung
 
-1. Release-Seite, APK und Prüfsumme ohne angemeldete Sitzung prüfen.
+1. Release-Seite, APK, AAB, Signaturen und Prüfsummen ohne angemeldete Sitzung prüfen.
 2. Englische und deutsche Projektseite prüfen.
 3. Sicherstellen, dass Android CI und GitHub Pages grün sind.
 4. Den neuen Release-Link in der README ergänzen, sobald Downloads verfügbar sind.
@@ -88,6 +92,12 @@ echter Hardware nicht geprüft wurde.
 Local signed builds read `signing/keystore.properties` (the whole `signing/`
 directory is gitignored — back up the keystore externally, otherwise future
 app updates become impossible):
+
+On Windows, run `./scripts/New-ReleaseSigningKey.ps1` once to create both local
+files without printing passwords. Add `-ConfigureGitHubSecrets` only when the
+GitHub CLI is authenticated for the intended repository and you want the script
+to upload all four secrets. The key and passwords are permanent release assets;
+keep separate offline backups. The project cannot recreate a lost update key.
 
 ```properties
 storeFile=thor-stream-release.jks
@@ -101,7 +111,8 @@ Place the keystore at `signing/thor-stream-release.jks` and run
 unsigned; debug builds are unaffected.
 
 The `Release` workflow (`.github/workflows/release.yml`) builds and publishes an
-APK plus SHA-256 checksum for every `v*` tag. Stable tags require the repository
+APK and AAB plus SHA-256 checksums for every `v*` tag and rejects either artifact
+when signature verification fails. Stable tags require the repository
 secrets `SIGNING_KEYSTORE_BASE64` (base64 of the keystore file),
 `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS`, and `SIGNING_KEY_PASSWORD`.
 Prerelease tags containing a hyphen may fall back to an explicitly named
@@ -109,11 +120,22 @@ debug-signed APK when none of the secrets exist. A partial signing configuration
 always fails. Every tag requires equivalent bilingual release notes at
 `docs/release-notes/<tag>.md`.
 
+All third-party workflow actions are pinned to reviewed commit hashes.
+Dependabot proposes updates without silently changing an existing workflow run.
+
 ### Deutsch
 
 Lokale signierte Builds lesen `signing/keystore.properties` (das gesamte
 `signing/`-Verzeichnis ist gitignored — Keystore unbedingt extern sichern,
 sonst sind keine App-Updates mehr möglich):
+
+Unter Windows einmal `./scripts/New-ReleaseSigningKey.ps1` ausführen, um beide
+lokalen Dateien ohne Passwortausgabe zu erstellen. Den Schalter
+`-ConfigureGitHubSecrets` nur verwenden, wenn die GitHub CLI für das richtige
+Repository angemeldet ist und alle vier Secrets hochgeladen werden sollen.
+Schlüssel und Passwörter sind dauerhafte Release-Werte und benötigen getrennte
+Offline-Sicherungen. Ein verlorener Update-Schlüssel kann nicht wiederhergestellt
+werden.
 
 ```properties
 storeFile=thor-stream-release.jks
@@ -127,10 +149,15 @@ Den Keystore unter `signing/thor-stream-release.jks` ablegen und
 Release-Build unsigniert; Debug-Builds sind nicht betroffen.
 
 Der `Release`-Workflow (`.github/workflows/release.yml`) baut und veröffentlicht
-für jeden `v*`-Tag eine APK samt SHA-256-Prüfsumme. Stabile Tags benötigen die
+für jeden `v*`-Tag APK und AAB samt SHA-256-Prüfsummen und weist beide Artefakte
+bei fehlgeschlagener Signaturprüfung zurück. Stabile Tags benötigen die
 Repository-Secrets `SIGNING_KEYSTORE_BASE64` (Base64 der Keystore-Datei),
 `SIGNING_STORE_PASSWORD`, `SIGNING_KEY_ALIAS` und `SIGNING_KEY_PASSWORD`.
 Prerelease-Tags mit Bindestrich dürfen auf eine eindeutig benannte,
 debug-signierte APK zurückfallen, wenn keines der Secrets vorhanden ist. Eine
 unvollständige Signing-Konfiguration schlägt immer fehl. Jeder Tag benötigt
 gleichwertige zweisprachige Release Notes unter `docs/release-notes/<tag>.md`.
+
+Alle Workflow-Aktionen von Drittanbietern sind auf geprüfte Commit-Hashes
+festgesetzt. Dependabot schlägt Aktualisierungen vor, ohne einen vorhandenen
+Workflow-Lauf unbemerkt zu verändern.

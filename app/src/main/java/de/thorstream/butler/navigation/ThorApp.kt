@@ -54,7 +54,9 @@ fun ThorApp(viewModel: ThorAppViewModel = hiltViewModel()) {
         val navController = rememberNavController()
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
         BoxWithConstraints(Modifier.fillMaxSize()) {
-            val useNavigationRail = maxWidth >= 700.dp
+            // Keep the full content width on portrait handhelds and compact tablets.
+            // The rail is reserved for the Material 3 expanded-width breakpoint.
+            val useNavigationRail = maxWidth >= 840.dp
             if (useNavigationRail) {
                 Row(Modifier.fillMaxSize()) {
                     NavigationRail {

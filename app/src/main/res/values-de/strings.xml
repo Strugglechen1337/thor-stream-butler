@@ -14,6 +14,7 @@
     <string name="action_save">Speichern</string>
     <string name="action_add">Hinzufügen</string>
     <string name="action_retry_test">Erneut testen</string>
+    <string name="action_close">Schließen</string>
     <string name="value_not_available">Nicht verfügbar</string>
     <string name="value_reachable">Erreichbar</string>
     <string name="value_not_reachable">Nicht erreichbar</string>
@@ -53,6 +54,9 @@
     <string name="dashboard_empty_title">Noch keine Streaming-Apps eingerichtet</string>
     <string name="dashboard_empty_action">Erste App auswählen</string>
     <string name="dashboard_remove_tile">Kachel entfernen</string>
+    <string name="dashboard_remove_confirm_title">Dashboard-Kachel entfernen?</string>
+    <string name="dashboard_remove_confirm_text">%1$s vom Dashboard entfernen? Die installierte App wird nicht deinstalliert.</string>
+    <string name="dashboard_remove_confirm_action">Entfernen</string>
     <string name="dashboard_last_used">Zuletzt %1$s</string>
     <string name="dashboard_ready">Bereit</string>
     <string name="dashboard_not_installed">Nicht installiert</string>
@@ -67,6 +71,25 @@
     <string name="dashboard_check_launching">App wird gleich gestartet</string>
     <string name="dashboard_check_finished">Prüfung abgeschlossen</string>
     <string name="dashboard_launch_anyway">Trotzdem starten</string>
+    <string name="dashboard_configure_tile">Kachel konfigurieren</string>
+    <string name="dashboard_configure_title">%1$s konfigurieren</string>
+    <string name="dashboard_configuration_saved">Kachelkonfiguration gespeichert.</string>
+    <string name="dashboard_host_assignment">Lokaler Host</string>
+    <string name="dashboard_no_host">Kein verknüpfter Host</string>
+    <string name="dashboard_linked_host">Host: %1$s</string>
+    <string name="dashboard_streaming_profile">Streaming-Profil</string>
+    <string name="dashboard_profile_fps">FPS</string>
+    <string name="dashboard_profile_bitrate">Mbit/s</string>
+    <string name="dashboard_profile_summary">%1$s · %2$d FPS · %3$d Mbit/s</string>
+    <string name="dashboard_recommended_profile">Für diese Verbindung empfohlen: %1$s, %2$d FPS, %3$d Mbit/s</string>
+    <string name="dashboard_wake_host">%1$s aufwecken</string>
+    <string name="dashboard_move_back">Kachel zurückschieben</string>
+    <string name="dashboard_move_forward">Kachel vorschieben</string>
+    <string name="resolution_auto">Automatische Empfehlung</string>
+    <string name="resolution_720p">720p</string>
+    <string name="resolution_1080p">1080p</string>
+    <string name="resolution_1440p">1440p</string>
+    <string name="resolution_4k">4K</string>
 
     <!-- Network test -->
     <string name="nettest_kicker">THOR // DIAGNOSE</string>
@@ -100,10 +123,19 @@
     <string name="hosts_kicker">THOR // HOSTS</string>
     <string name="hosts_title">Lokale Streaming-Hosts</string>
     <string name="hosts_create">Host anlegen</string>
+    <string name="hosts_discover">Hosts suchen</string>
+    <string name="hosts_discovered_title">Gefundene Sunshine-Hosts</string>
+    <string name="hosts_saved_title">Gespeicherte Hosts</string>
+    <string name="hosts_discovery_empty">Kein Sunshine-kompatibler Host gefunden. Prüfe, ob Host und Handheld im selben lokalen Netzwerk sind.</string>
+    <string name="hosts_discovery_found">Kompatible Hosts gefunden: %1$d.</string>
+    <string name="hosts_discovery_failed">Die lokale Host-Suche konnte auf diesem Gerät nicht gestartet werden.</string>
     <string name="hosts_empty_title">Noch kein lokaler Host</string>
     <string name="hosts_empty_hint">Lege deinen Sunshine-, Moonlight- oder Remote-Play-Host an.</string>
     <string name="hosts_edit">Host bearbeiten</string>
     <string name="hosts_delete">Host löschen</string>
+    <string name="hosts_delete_confirm_title">Lokalen Host löschen?</string>
+    <string name="hosts_delete_confirm_text">%1$s löschen? Verknüpfte Dashboard-Kacheln behalten ihre App, verlieren aber die Host-Zuordnung.</string>
+    <string name="hosts_delete_confirm_action">Host löschen</string>
     <string name="hosts_test_connection">Verbindung testen</string>
     <string name="hosts_wake">Aufwecken</string>
     <string name="hosts_last_reachable">Zuletzt erreichbar%1$s</string>
@@ -115,7 +147,7 @@
     <string name="hosts_field_mac">MAC-Adresse</string>
     <string name="hosts_field_broadcast">Broadcast-Zieladresse</string>
     <string name="hosts_wol_title">Wake-on-LAN</string>
-    <string name="hosts_wol_hint">UDP Magic Packet senden</string>
+    <string name="hosts_wol_hint">UDP-Magic-Paket senden</string>
     <string name="hosts_error_name">Bitte gib einen Namen ein.</string>
     <string name="hosts_error_address">Hostname oder IP-Adresse ist ungültig.</string>
     <string name="hosts_error_port">Der Port muss zwischen 1 und 65535 liegen.</string>
@@ -131,13 +163,24 @@
     <string name="history_kicker">THOR // VERLAUF</string>
     <string name="history_title">Messhistorie</string>
     <string name="history_clear">Verlauf löschen</string>
+    <string name="history_clear_confirm_title">Messhistorie löschen?</string>
+    <string name="history_clear_confirm_text">Dadurch werden alle lokal gespeicherten Netzwerkprüfungen dauerhaft von diesem Gerät entfernt.</string>
+    <string name="history_clear_confirm_action">Verlauf löschen</string>
     <string name="history_empty_title">Noch keine Messungen gespeichert</string>
     <string name="history_empty_hint">Starte einen Netzwerktest, um einen Verlauf aufzubauen.</string>
+    <string name="history_filter_empty">Keine Messungen entsprechen diesem Filter.</string>
+    <string name="history_filter_all">Alle</string>
+    <string name="history_filter_host">Mit Host</string>
+    <string name="history_summary_title">Messungen in der Zusammenfassung: %1$d</string>
+    <string name="history_summary_metrics">Ø Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
+    <string name="history_latency_trend">Latenzverlauf · älteste bis neueste Messung</string>
+    <string name="history_host_label">Host-Test</string>
     <string name="history_metrics">Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
     <string name="history_trend_first">Erste vergleichbare Messung</string>
     <string name="history_trend_flat">Latenz weitgehend unverändert</string>
     <string name="history_trend_improved">Latenz um %1$s ms verbessert</string>
     <string name="history_trend_worse">Latenz um %1$s ms verschlechtert</string>
+    <string name="history_trend_unavailable">Kein vergleichbarer Latenzwert</string>
 
     <!-- Settings -->
     <string name="settings_kicker">THOR // KONFIGURATION</string>
@@ -163,6 +206,8 @@
     <string name="settings_download_hint">Optionaler HTTPS-Test; überträgt Testdaten und ist standardmäßig aus</string>
     <string name="settings_logging_title">Diagnoseprotokoll</string>
     <string name="settings_logging_hint">Nur technische Zustände, keine IPs, SSIDs oder MAC-Adressen</string>
+    <string name="settings_logging_count">Lokale Ereignisse: %1$d (maximal 200)</string>
+    <string name="settings_logging_clear">Protokoll löschen</string>
     <string name="settings_group_appearance">Darstellung und Bedienung</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_dark">Thor Dark</string>
@@ -171,8 +216,30 @@
     <string name="settings_focus_title">Controller-Fokusanimationen</string>
     <string name="settings_focus_hint">Kacheln beim Fokussieren leicht vergrößern</string>
     <string name="settings_group_data">Lokale Daten</string>
+    <string name="settings_transfer_title">Konfigurationssicherung</string>
+    <string name="settings_transfer_hint">Exportiere und importiere eine versionierte JSON-Datei über die Android-Dateiauswahl. Host-Adressen und MAC-Adressen sind sensibel; bewahre die Datei privat auf.</string>
+    <string name="settings_transfer_history_title">Messhistorie einschließen</string>
+    <string name="settings_transfer_history_hint">Fügt lokal gespeicherte Netzwerkdetails wie SSIDs und Host-Adressen zur Sicherung hinzu</string>
+    <string name="settings_transfer_export">Exportieren</string>
+    <string name="settings_transfer_import">Importieren</string>
+    <string name="settings_transfer_import_confirm_title">Lokale Konfiguration ersetzen?</string>
+    <string name="settings_transfer_import_confirm_text">Importierte Apps, Hosts und Einstellungen ersetzen die aktuelle Konfiguration. Die Historie wird nur ersetzt, wenn sie in der Datei enthalten ist.</string>
+    <string name="settings_transfer_export_success">Export abgeschlossen · Apps: %1$d · Hosts: %2$d · Messungen: %3$d</string>
+    <string name="settings_transfer_import_success">Import abgeschlossen · Apps: %1$d · Hosts: %2$d · Messungen: %3$d</string>
+    <string name="settings_transfer_export_failed">Die Konfigurationsdatei konnte nicht geschrieben werden.</string>
+    <string name="settings_transfer_invalid">Dies ist keine gültige oder unterstützte Thor-Stream-Butler-Konfiguration.</string>
     <string name="settings_clear_history">Messhistorie löschen</string>
     <string name="settings_local_only">Alle Einstellungen, Hosts und Messdaten bleiben ausschließlich auf diesem Gerät.</string>
+    <string name="settings_group_about">Über die App und Datenschutz</string>
+    <string name="settings_about_version">Thor Stream Butler %1$s</string>
+    <string name="settings_about_privacy_summary">Kein Konto, keine Werbung, kein Tracking und keine Telemetrie. Netzwerk- und Hostdaten bleiben lokal, sofern du nicht ausdrücklich eine Sicherung exportierst.</string>
+    <string name="settings_about_privacy_action">Datenschutzdetails</string>
+    <string name="settings_about_source_action">Quellcode</string>
+    <string name="settings_about_license_action">MIT-Lizenz</string>
+    <string name="settings_about_privacy_title">Datenschutz in Thor Stream Butler</string>
+    <string name="settings_about_privacy_body">Die App liest aktive Netzwerkdetails nur für von dir gestartete Diagnosen oder für den aktivierten Startcheck. Gespeicherte Prüfungen, Hosts, Einstellungen und App-Kacheln bleiben auf diesem Gerät. Der optionale Downloadtest kontaktiert Cloudflare nur, wenn er aktiviert ist. Die Hostsuche verwendet das lokale Netzwerk. Exportdateien können private Netzwerkkennungen enthalten und sollten sicher aufbewahrt werden. Die App enthält kein Kontosystem, keine Werbung, keine Analysedienste, keine Absturzberichte, kein Tracking und keine Telemetrie.</string>
+    <string name="settings_about_privacy_web">Vollständige Datenschutzerklärung öffnen</string>
+    <string name="settings_about_link_failed">Kein kompatibler Browser konnte diesen Link öffnen.</string>
     <string name="settings_clear_confirm_title">Messhistorie löschen?</string>
     <string name="settings_clear_confirm_text">Dieser Vorgang entfernt alle gespeicherten Netzwerkprüfungen dauerhaft.</string>
     <string name="settings_clear_confirm_action">Löschen</string>
@@ -185,6 +252,7 @@
     <string name="eval_summary_not_measurable">Die Kernwerte konnten nicht zuverlässig gemessen werden. Verfügbare Basisdaten werden trotzdem angezeigt.</string>
     <string name="eval_problem_no_connection">Keine aktive Verbindung</string>
     <string name="eval_problem_no_internet">Kein bestätigter Internetzugang</string>
+    <string name="eval_problem_dns_unreachable">DNS-Auflösung ist nicht erreichbar</string>
     <string name="eval_problem_host_unreachable">Streaming-Host nicht erreichbar</string>
     <string name="eval_problem_high_latency">Hohe Latenz (%1$s ms)</string>
     <string name="eval_problem_elevated_latency">Erhöhte Latenz (%1$s ms)</string>
@@ -192,6 +260,10 @@
     <string name="eval_problem_elevated_jitter">Erhöhter Jitter (%1$s ms)</string>
     <string name="eval_problem_packet_loss">Paketverlust (%1$s %%)</string>
     <string name="eval_problem_light_packet_loss">Leichter Paketverlust (%1$s %%)</string>
+    <string name="eval_problem_low_download">Sehr niedrige Downloadrate (%1$s Mbit/s)</string>
+    <string name="eval_problem_limited_download">Begrenzte Downloadrate (%1$s Mbit/s)</string>
+    <string name="eval_problem_low_link_speed">Sehr niedrige WLAN-Linkrate (%1$d Mbit/s)</string>
+    <string name="eval_problem_limited_link_speed">Begrenzte WLAN-Linkrate (%1$d Mbit/s)</string>
     <string name="eval_problem_cellular">Mobilfunkverbindung</string>
     <string name="eval_problem_vpn">Aktive VPN-Verbindung</string>
     <string name="eval_problem_wifi_24">2,4-GHz-WLAN</string>
@@ -207,7 +279,6 @@
 
     <!-- Errors -->
     <string name="error_no_network">Keine aktive Netzwerkverbindung gefunden.</string>
-    <string name="error_technical">Die Funktion konnte nicht ausgeführt werden.</string>
     <string name="error_ping_unreachable">Das Ping-Ziel konnte nicht erreicht oder aufgelöst werden.</string>
     <string name="error_download_no_data">Der Downloadtest lieferte keine Messdaten.</string>
     <string name="error_download_unavailable">Der optionale Downloadtest ist derzeit nicht erreichbar.</string>
@@ -215,6 +286,10 @@
     <string name="error_wol_failed">Das Wake-on-LAN-Paket konnte nicht gesendet werden.</string>
     <string name="error_network_permission">Netzwerkdetails sind ohne die zugehörige Android-Berechtigung nur eingeschränkt verfügbar.</string>
     <string name="error_network_read">Die aktiven Netzwerkdaten konnten nicht gelesen werden.</string>
+    <string name="error_diagnostics_failed">Der Netzwerktest konnte nicht vollständig abgeschlossen werden. Verfügbare Teilergebnisse werden weiterhin angezeigt.</string>
+    <string name="error_history_save_failed">Das Ergebnis ist sichtbar, konnte aber nicht in der lokalen Historie gespeichert werden.</string>
+    <string name="error_local_data_failed">Die lokale Änderung konnte nicht gespeichert werden. Es gibt keine Cloud-Kopie; bitte versuche es erneut.</string>
+    <string name="error_app_launch_failed">Die Ziel-App konnte nicht gestartet werden.</string>
     <string name="error_apps_restricted">Die installierten Apps dürfen auf diesem Gerät nicht vollständig gelesen werden.</string>
     <string name="error_apps_load">Die Liste der installierten Apps konnte nicht geladen werden.</string>
     <string name="error_app_not_launchable">Die App ist nicht installiert oder besitzt keinen startbaren Bildschirm.</string>

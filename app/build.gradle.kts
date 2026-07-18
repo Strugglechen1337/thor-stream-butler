@@ -26,8 +26,8 @@ android {
         applicationId = "de.thorstream.butler"
         minSdk = 28
         targetSdk = 37
-        versionCode = 3
-        versionName = "0.3.0-alpha.1"
+        versionCode = 4
+        versionName = "0.4.0-alpha.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -48,7 +48,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             if (signingValue("storeFile", "SIGNING_STORE_FILE") != null) {
                 signingConfig = signingConfigs.getByName("release")
@@ -64,6 +65,10 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    sourceSets {
+        getByName("androidTest").assets.directories.add("$projectDir/schemas")
     }
 
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -95,6 +100,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.coroutines.android)
+    // Room's migration reader requires serialization 1.8.1 or newer. Declaring the
+    // current version explicitly also prevents transitive constraints from downgrading tests.
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

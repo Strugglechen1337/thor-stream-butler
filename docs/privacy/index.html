@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090b11">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Privacy policy for the local-first Android app Thor Stream Butler.">
+  <link rel="canonical" href="https://strugglechen1337.github.io/thor-stream-butler/privacy/">
+  <link rel="alternate" hreflang="en" href="https://strugglechen1337.github.io/thor-stream-butler/privacy/">
+  <link rel="alternate" hreflang="de" href="https://strugglechen1337.github.io/thor-stream-butler/de/datenschutz/">
+  <link rel="alternate" hreflang="x-default" href="https://strugglechen1337.github.io/thor-stream-butler/privacy/">
+  <link rel="stylesheet" href="../styles.css">
+  <title>Privacy policy — Thor Stream Butler</title>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="noise" aria-hidden="true"></div>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="../" aria-label="Thor Stream Butler home">
+        <span class="brand-mark" aria-hidden="true"><span>T</span><i></i></span>
+        <span class="brand-copy"><strong>THOR</strong><small>STREAM BUTLER</small></span>
+      </a>
+      <nav class="legal-nav" aria-label="Privacy navigation">
+        <a href="../">Home</a>
+        <a class="language-link" href="../de/datenschutz/" lang="de" hreflang="de">DE</a>
+        <a class="nav-cta" href="https://github.com/Strugglechen1337/thor-stream-butler">GitHub <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="legal-page shell">
+    <div class="eyebrow">LOCAL-FIRST · TRANSPARENT · NO TRACKING</div>
+    <h1>Privacy policy</h1>
+    <p class="legal-lead">Thor Stream Butler is designed to work without an account, advertising, analytics, tracking, telemetry, or a cloud backend. This policy explains the local data the app uses and the few network requests initiated by its diagnostics.</p>
+    <p class="legal-updated">Last updated: July 17, 2026</p>
+
+    <section>
+      <h2>1. Scope and contact</h2>
+      <p>This policy covers the Thor Stream Butler Android app and its project website. Questions can be submitted through the repository's <a href="https://github.com/Strugglechen1337/thor-stream-butler/issues">public issue tracker</a>. Please do not include private network identifiers in a public issue. Security-sensitive reports should follow the <a href="https://github.com/Strugglechen1337/thor-stream-butler/security/policy">security policy</a>.</p>
+    </section>
+
+    <section>
+      <h2>2. Data stored on the device</h2>
+      <p>Depending on the features you use, the app stores the following data only in its private Android app storage:</p>
+      <ul>
+        <li>dashboard entries, Android package names, custom labels, sort order, and streaming profiles;</li>
+        <li>local host names, hostnames or IP addresses, optional MAC addresses and ports, Wake-on-LAN settings, and test status;</li>
+        <li>up to 100 recent network measurements, which may include connection type, local IP address, gateway, Wi-Fi SSID, radio information, latency, jitter, packet loss, download rate, and a tested host;</li>
+        <li>app settings and, only when explicitly enabled, up to 200 diagnostic event names and timestamps. Diagnostic logs contain no IP addresses, SSIDs, MAC addresses, hostnames, or credentials.</li>
+      </ul>
+      <p>The app does not store passwords or streaming-service credentials.</p>
+    </section>
+
+    <section>
+      <h2>3. Network processing</h2>
+      <p>Thor Stream Butler does not automatically upload its database or settings. Network traffic occurs only for functionality you start or explicitly enable:</p>
+      <ul>
+        <li>ping, DNS, and reachability checks contact the configured test target, the device's DNS resolver, or a host you configured;</li>
+        <li>local discovery uses Android Network Service Discovery on the current local network;</li>
+        <li>TCP checks and Wake-on-LAN packets are sent to the local target you selected;</li>
+        <li>the optional download test requests test bytes from <code>speed.cloudflare.com</code>. It is disabled by default. Cloudflare and the network path necessarily receive the request's source IP address and normal connection metadata, but Thor Stream Butler sends no saved app configuration with that request;</li>
+        <li>opening source-code or privacy links leaves the app and uses the browser selected on the device.</li>
+      </ul>
+      <p>The app contains no advertising, analytics, crash-reporting, tracking, or telemetry SDK.</p>
+    </section>
+
+    <section>
+      <h2>4. Permissions</h2>
+      <p>The app declares internet, network-state, and Wi-Fi-state permissions for diagnostics. Android may additionally require Nearby Wi-Fi or location permission to expose SSID details, and Android 17 or newer requires local-network permission before host discovery, TCP tests, or Wake-on-LAN. Runtime permissions are requested when the related feature is used. Denial reduces the available values but does not create an account or transmit stored data.</p>
+    </section>
+
+    <section>
+      <h2>5. Export, retention, and deletion</h2>
+      <p>Configuration export is initiated by the user through Android's document picker. Export files can include private host and network identifiers; they are not encrypted by the app and should be stored securely. History is excluded unless the user includes it. Individual dashboard entries and hosts can be deleted in the app. Measurement history and diagnostic logs can be cleared in Settings. Uninstalling the app removes its private local data under Android's app-storage rules. Android cloud backup is disabled for this app.</p>
+    </section>
+
+    <section>
+      <h2>6. Sharing, sale, and profiling</h2>
+      <p>Thor Stream Butler does not sell data, build advertising profiles, or share its local database with the project maintainers. There is no account system and no project-operated backend receiving app data.</p>
+    </section>
+
+    <section>
+      <h2>7. Changes</h2>
+      <p>Material changes will be documented in the bilingual changelog and release notes. The current policy remains available at this URL.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-inner">
+      <a class="brand" href="../"><span class="brand-mark" aria-hidden="true"><span>T</span><i></i></span></a>
+      <p>Local gaming-stream diagnostics without accounts, ads, or tracking.</p>
+      <div class="footer-links"><a href="../">Home</a><a href="../de/datenschutz/" lang="de" hreflang="de">Deutsch</a><a href="https://github.com/Strugglechen1337/thor-stream-butler">GitHub</a></div>
+    </div>
+  </footer>
+</body>
+</html>

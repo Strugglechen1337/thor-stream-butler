@@ -8,7 +8,7 @@
     ·
     <a href="https://strugglechen1337.github.io/thor-stream-butler/de/"><strong>Deutsche Website</strong></a>
     ·
-    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1"><strong>Download v0.3.0-alpha.1</strong></a>
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.4.0-alpha.1"><strong>Download v0.4.0-alpha.1</strong></a>
     ·
     <a href="#build"><strong>Build guide</strong></a>
     ·
@@ -20,8 +20,9 @@
     <a href="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/android-ci.yml"><img src="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/android-ci.yml/badge.svg" alt="Android CI"></a>
     <a href="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/pages.yml"><img src="https://github.com/Strugglechen1337/thor-stream-butler/actions/workflows/pages.yml/badge.svg" alt="GitHub Pages"></a>
     <img src="https://img.shields.io/badge/Android-28--37-3DDC84?logo=android&logoColor=white" alt="Android API 28 through 37">
-    <img src="https://img.shields.io/badge/Kotlin-2.3.21-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin 2.3.21">
+    <img src="https://img.shields.io/badge/Kotlin-2.4.10-7F52FF?logo=kotlin&logoColor=white" alt="Kotlin 2.4.10">
     <img src="https://img.shields.io/badge/Tracking-none-4ADE80" alt="No tracking">
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-72E6FF" alt="MIT License"></a>
   </p>
 </div>
 
@@ -43,17 +44,17 @@ similar devices running Android 9 or newer.
 ### Alpha download
 
 The current installable development preview is available as
-[v0.3.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1)
+[v0.4.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.4.0-alpha.1)
 for Android 9 and newer. Download the APK and its SHA-256 checksum from the
 release assets. The in-app interface is fully localized in English and German:
 English is the default, German follows the system or per-app language setting
 (Android 13+).
 
-> **Alpha warning:** This APK uses the Android debug signature and is not a
-> production-signed stable release. A future production-signed version — and,
-> depending on the build machine, even another debug-signed alpha — cannot
-> update it directly. Uninstall the previous alpha first; doing so removes its
-> local settings, configured hosts, and measurement history.
+> **Alpha warning:** v0.4.0-alpha.1 is the first preview signed with the
+> permanent Thor Stream Butler production key, but physical handheld validation
+> is still pending. It cannot update the older debug-signed previews in place.
+> Export the configuration if needed, uninstall the old alpha, and then install
+> v0.4.0-alpha.1; uninstalling removes the old app's local data.
 
 ### Screenshots
 
@@ -77,7 +78,14 @@ handheld hardware as the project moves toward its first release.
 - VPN-aware transport detection with a contextual quality recommendation
 - Complete cancellable network test with live progress
 - Local host management, TCP port checks, and Wake-on-LAN
-- Room-backed history with a simple latency comparison to the previous measurement
+- Per-tile local-host assignment and resolution, FPS, and bitrate profiles
+- Network-aware streaming-profile recommendations based on all quality signals
+- User-initiated Sunshine/Moonlight-compatible discovery through Android NSD
+- Versioned JSON configuration export/import with optional history, strict size
+  and value validation, and rollback if any part of an import fails
+- IPv4, IPv6 (including bracketed and scoped addresses), and hostname support
+- Room-backed history with filters, averages, a latency sparkline, and comparable trends
+- Optional privacy-safe diagnostic event log without network identifiers
 - DataStore settings for launch behavior, diagnostics, and presentation
 
 Initial streaming categories:
@@ -152,6 +160,8 @@ Current defaults:
 | Jitter | up to 10 ms | above 10 ms | above 20 ms |
 | Packet loss | 0% | above 0% | above 1% |
 | Wi-Fi signal | 55% or higher | below 55% | below 35% |
+| Wi-Fi link rate | 100 Mbit/s or higher | below 100 Mbit/s | below 25 Mbit/s |
+| Measured download | 25 Mbit/s or higher | below 25 Mbit/s | below 10 Mbit/s |
 
 The evaluator also considers transport type, 2.4/5/6 GHz Wi-Fi, validated
 internet access, and host reachability. Download speed alone never determines
@@ -159,7 +169,8 @@ the overall rating. Ethernet and 5/6 GHz Wi-Fi are preferred; cellular and
 2.4 GHz Wi-Fi produce a contextual note even when the other metrics are good.
 An active VPN is detected before its underlying transport and adds a non-critical
 warning. The measured latency, jitter, packet loss, and host reachability still
-determine whether the connection is actually problematic.
+determine whether the connection is actually problematic. Link rate and download
+speed affect the rating only when Android or the optional test supplied a real value.
 
 ### Technical foundation
 
@@ -211,9 +222,10 @@ app/src/main/java/de/thorstream/butler/
 ```
 
 The central interfaces are `NetworkDiagnosticsService`, `PingService`,
-`SpeedTestService`, `HostDiscoveryService`, `WakeOnLanService`,
-`InstalledAppsRepository`, `StreamingEntryRepository`, and
-`NetworkHistoryRepository`.
+`SpeedTestService`, `HostDiscoveryService`, `LocalHostDiscoveryService`,
+`WakeOnLanService`, `ConfigurationTransferService`, `InstalledAppsRepository`,
+`StreamingEntryRepository`, `NetworkHistoryRepository`, and
+`DiagnosticLogRepository`.
 
 ### Build
 
@@ -224,7 +236,9 @@ The central interfaces are `NetworkDiagnosticsService`, `PingService`,
 - Android SDK Build Tools 36.0.0 or newer
 - Android Studio with Android 17 support, or an equivalent command-line SDK installation
 
-The repository includes Gradle Wrapper 9.5.0; no global Gradle installation is required.
+The repository includes Gradle Wrapper 9.6.1; no global Gradle installation is required.
+The wrapper distribution and all resolved build dependencies are protected by
+SHA-256 verification metadata in `gradle/verification-metadata.xml`.
 
 #### Local SDK configuration
 
@@ -249,6 +263,7 @@ Windows PowerShell:
 ./gradlew.bat :app:testDebugUnitTest
 ./gradlew.bat :app:assembleDebugAndroidTest
 ./gradlew.bat :app:lintDebug
+./gradlew.bat :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 macOS or Linux:
@@ -258,13 +273,22 @@ macOS or Linux:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebugAndroidTest
 ./gradlew :app:lintDebug
+./gradlew :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+Optimized local release builds use R8 and resource shrinking and produce an
+unsigned APK plus AAB unless production signing is configured. See the
+[release guide](docs/RELEASE.md) before distributing either artifact.
 
 JVM tests run without a device. Instrumented Room repository tests are compiled
 with `:app:assembleDebugAndroidTest` and can run on an emulator or device with
 `connectedDebugAndroidTest`.
+
+After an intentional dependency update, regenerate verification metadata with
+the same full task set plus `--write-verification-metadata sha256`, review every
+new checksum against the configured Google/Maven/Gradle source, and retain the
+Linux, macOS, and Windows AAPT2 classifiers required by supported build hosts.
 
 ### Permissions
 
@@ -277,12 +301,13 @@ Dangerous permissions are requested only when the related feature is used.
 | `ACCESS_WIFI_STATE` | All | Wi-Fi link data | Wi-Fi details are omitted |
 | `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` | Through Android 12L; manifest `maxSdkVersion=32` | SSID and Wi-Fi details on older versions; Android 12 requires both together | SSID and individual Wi-Fi values are omitted |
 | `NEARBY_WIFI_DEVICES` | Android 13+ | Current Wi-Fi details, declared with `neverForLocation` | SSID and individual Wi-Fi values are omitted |
-| `ACCESS_LOCAL_NETWORK` | Android 17+ when targeting SDK 37 | Explicit TCP/UDP communication with saved LAN hosts and Wake-on-LAN | Host tests and Wake-on-LAN are not executed; internet tests remain available |
+| `ACCESS_LOCAL_NETWORK` | Android 17+ when targeting SDK 37 | Explicit TCP/UDP communication, Android NSD host discovery, and Wake-on-LAN | Host discovery, host tests, and Wake-on-LAN are not executed; internet tests remain available |
 
 `CHANGE_WIFI_MULTICAST_STATE` is intentionally not declared in the MVP because
-there is no multicast or mDNS discovery. UDP broadcast to an explicitly
-configured Wake-on-LAN target does not require it. The permission decision must
-be reviewed if automatic host discovery is added later.
+the app delegates service discovery to Android's `NsdManager` and does not
+acquire a raw multicast lock itself. UDP broadcast to an explicitly configured
+Wake-on-LAN target does not require it. This decision will be reviewed if a
+future Android version or discovery transport requires an app-managed lock.
 
 The manifest's `<queries>` block is not a runtime permission. It limits package
 visibility to activities with a launcher intent.
@@ -301,6 +326,13 @@ Further reading: [Android local network permission](https://developer.android.co
 - Cleartext HTTP is disabled; the optional download test uses HTTPS
 - Logs do not contain IP addresses, SSIDs, or MAC addresses
 - Network operations use timeouts and respect coroutine cancellation
+- Configuration exports are created only at a user-selected document location;
+  they may contain sensitive host data and optional measurement history
+
+Full notices: [Privacy policy](docs/privacy/index.html),
+[MIT license](LICENSE), and [third-party notices](THIRD_PARTY_NOTICES.md).
+Release preparation: [physical-device test plan](docs/PHYSICAL_TEST_PLAN.md) and
+[store listing/Data safety draft](docs/STORE_LISTING.md).
 
 Uninstalling the app removes the local database and DataStore settings through
 Android. Measurement history can also be deleted separately inside the app.
@@ -314,8 +346,9 @@ Android. Measurement history can also be deleted separately inside the app.
 - Wake-on-LAN only works when the host, firmware, network adapter, and router support broadcast or magic packets.
 - The default `255.255.255.255` broadcast does not work on every network; each host can use a subnet broadcast or unicast target instead.
 - Demo tiles use common package names. Manufacturer or store variants may use different identifiers and appear as not installed.
-- The MVP history is a list of the latest 100 measurements. Full charts are not implemented yet.
-- Automatic Sunshine/Moonlight discovery and port scanning are explicitly outside the MVP.
+- The history keeps the latest 100 measurements and provides a compact latency sparkline, not a full analytics dashboard.
+- Sunshine/Moonlight discovery only sees hosts advertising `_nvstream._tcp` on the same local network. It never scans the subnet.
+- Streaming profiles and recommendations are guidance; third-party apps without a supported public configuration API are not modified.
 
 ### Tests
 
@@ -323,25 +356,34 @@ The test suite covers:
 
 - quality evaluation across green, yellow, red, and gray outcomes
 - jitter and packet-loss calculations
-- IPv4, hostname, and MAC validation
+- IPv4, IPv6, hostname, and MAC validation
 - exact construction of the 102-byte Wake-on-LAN packet
 - successful and failed network-test ViewModel flows
 - no-active-network errors without invented measurements
 - Room repositories for launcher tiles, hosts, and history
+- Room schema migration from version 1 to 2
+- streaming-profile recommendations and comparable history trends
+- dashboard pre-launch host integration and successful app launching
+- configuration export/import validation, database/DataStore rollback, history
+  retention, and privacy-safe diagnostic logging
+- normalization of persisted diagnostic settings and safe fallbacks for
+  forward-version Room enum values
+- D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. GitHub Actions builds the app, runs unit tests and lint, compiles
-instrumented tests, and uploads the debug APK and reports.
+network access. The latest validation run passed 40 JVM tests and 14 Android
+instrumentation tests locally on Android 15. GitHub Actions builds debug and
+optimized release variants, runs unit tests, both lint variants, and the same
+14 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
+uploads APK, AAB, and reports. Workflow dependencies
+are pinned to reviewed commit hashes and kept current through Dependabot;
+dependency review blocks newly introduced vulnerabilities of moderate or higher severity.
 
 ### Roadmap after the MVP
 
-- Automatic Sunshine and Moonlight host discovery through an Android 17-compliant, privacy-friendly flow
 - Port scanning only for explicitly entered hosts
-- Profiles per streaming service
-- Recommended resolution and bitrate
 - Separate Wi-Fi and Ethernet profiles
 - Widgets and a Quick Settings tile
-- Configuration export and import
 - Backup to a local NAS
 - Controller mapping test
 - Streaming-session timer
@@ -371,6 +413,12 @@ Thor Stream Butler follows the same local-first and handheld-first philosophy as
 [Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), the Android
 assistant for organizing, checking, patching, and maintaining ROM collections.
 
+### License
+
+Thor Stream Butler is available under the [MIT License](LICENSE). An
+[unofficial German reading aid](LICENSE.de.md) and bilingual
+[third-party notices](THIRD_PARTY_NOTICES.md) are included.
+
 ### Optional support
 
 Thor Stream Butler stays free of advertising, tracking, and telemetry. If the
@@ -397,18 +445,18 @@ und vergleichbaren Geräten ab Android 9.
 ### Alpha-Download
 
 Die aktuelle installierbare Entwicklungsvorschau steht als
-[v0.3.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.3.0-alpha.1)
+[v0.4.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.4.0-alpha.1)
 für Android 9 und neuer bereit. Lade die APK und ihre SHA-256-Prüfsumme aus den
 Release-Dateien herunter. Die App-Oberfläche ist vollständig auf Englisch und
 Deutsch lokalisiert: Englisch ist der Standard, Deutsch folgt der Systemsprache
 bzw. der App-Sprach-Einstellung (Android 13+).
 
-> **Alpha-Warnung:** Diese APK verwendet die Android-Debug-Signatur und ist kein
-> produktiv signiertes stabiles Release. Eine zukünftige produktiv signierte
-> Version — und je nach Build-Rechner auch eine andere debug-signierte Alpha —
-> kann sie nicht direkt aktualisieren. Deinstalliere die vorherige Alpha zuerst;
-> dabei werden ihre lokalen Einstellungen, konfigurierten Hosts und die
-> Messhistorie entfernt.
+> **Alpha-Warnung:** v0.4.0-alpha.1 ist die erste Vorschau mit dem dauerhaften
+> Thor-Stream-Butler-Produktionsschlüssel; die Prüfung auf echten Handhelds steht
+> jedoch noch aus. Sie kann ältere debug-signierte Vorschauen nicht direkt
+> aktualisieren. Exportiere bei Bedarf die Konfiguration, deinstalliere die alte
+> Alpha und installiere danach v0.4.0-alpha.1; die Deinstallation löscht die alten
+> lokalen App-Daten.
 
 ### Screenshots
 
@@ -432,7 +480,15 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - VPN-bewusste Transporterkennung mit passender Qualitätsempfehlung
 - Vollständiger, abbrechbarer Netzwerktest mit Live-Fortschritt
 - Lokale Hostverwaltung, TCP-Port-Tests und Wake-on-LAN
-- Room-Historie mit einfachem Vergleich zur vorherigen Messung
+- Host-Zuordnung pro Kachel sowie Profile für Auflösung, FPS und Bitrate
+- Netzwerkabhängige Streaming-Empfehlungen aus allen Qualitätssignalen
+- Benutzergesteuerte Sunshine-/Moonlight-kompatible Erkennung über Android NSD
+- Versionierter JSON-Konfigurationsexport/-import mit optionaler Historie,
+  strikter Größen-/Werteprüfung und Rollback bei einem unvollständigen Import
+- Unterstützung für IPv4, IPv6 (einschließlich Klammer- und Bereichsnotation)
+  sowie Hostnamen
+- Room-Historie mit Filtern, Mittelwerten, Latenzverlauf und vergleichbaren Trends
+- Optionales datenschutzsicheres Diagnoseprotokoll ohne Netzwerkkennungen
 - DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
 
 Erste Streaming-Kategorien:
@@ -509,6 +565,8 @@ Aktuelle Standardwerte:
 | Jitter | bis 10 ms | über 10 ms | über 20 ms |
 | Paketverlust | 0 % | über 0 % | über 1 % |
 | WLAN-Signal | mindestens 55 % | unter 55 % | unter 35 % |
+| WLAN-Linkrate | mindestens 100 Mbit/s | unter 100 Mbit/s | unter 25 Mbit/s |
+| gemessener Download | mindestens 25 Mbit/s | unter 25 Mbit/s | unter 10 Mbit/s |
 
 Zusätzlich berücksichtigt die Bewertung Transporttyp, 2,4-/5-/6-GHz-WLAN,
 validierten Internetzugang und Host-Erreichbarkeit. Downloadgeschwindigkeit
@@ -517,7 +575,8 @@ werden bevorzugt; Mobilfunk und 2,4-GHz-WLAN erzeugen einen passenden Hinweis.
 Ein aktives VPN wird vor seinem darunterliegenden Transport erkannt und erzeugt
 einen nicht kritischen Hinweis. Ob die Verbindung tatsächlich problematisch ist,
 entscheiden weiterhin die gemessene Latenz, der Jitter, der Paketverlust und die
-Host-Erreichbarkeit.
+Host-Erreichbarkeit. Linkrate und Downloadgeschwindigkeit beeinflussen die
+Bewertung nur, wenn Android oder der optionale Test einen echten Wert geliefert hat.
 
 ### Technische Grundlage
 
@@ -570,9 +629,10 @@ app/src/main/java/de/thorstream/butler/
 ```
 
 Zentrale Schnittstellen sind `NetworkDiagnosticsService`, `PingService`,
-`SpeedTestService`, `HostDiscoveryService`, `WakeOnLanService`,
-`InstalledAppsRepository`, `StreamingEntryRepository` und
-`NetworkHistoryRepository`.
+`SpeedTestService`, `HostDiscoveryService`, `LocalHostDiscoveryService`,
+`WakeOnLanService`, `ConfigurationTransferService`, `InstalledAppsRepository`,
+`StreamingEntryRepository`, `NetworkHistoryRepository` und
+`DiagnosticLogRepository`.
 
 ### Build
 
@@ -583,8 +643,10 @@ Voraussetzungen:
 - Android SDK Build Tools 36.0.0 oder neuer
 - Android Studio mit Android-17-Unterstützung oder eine entsprechende Kommandozeileninstallation
 
-Der Gradle Wrapper 9.5.0 ist enthalten; eine globale Gradle-Installation ist
+Der Gradle Wrapper 9.6.1 ist enthalten; eine globale Gradle-Installation ist
 nicht erforderlich.
+Wrapper-Distribution und alle aufgelösten Build-Abhängigkeiten sind durch
+SHA-256-Prüfmetadaten in `gradle/verification-metadata.xml` geschützt.
 
 Lege eine nicht versionierte `local.properties` im Projektverzeichnis an:
 
@@ -605,6 +667,7 @@ Windows PowerShell:
 ./gradlew.bat :app:testDebugUnitTest
 ./gradlew.bat :app:assembleDebugAndroidTest
 ./gradlew.bat :app:lintDebug
+./gradlew.bat :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 macOS oder Linux:
@@ -614,12 +677,21 @@ macOS oder Linux:
 ./gradlew :app:testDebugUnitTest
 ./gradlew :app:assembleDebugAndroidTest
 ./gradlew :app:lintDebug
+./gradlew :app:assembleRelease :app:bundleRelease :app:lintRelease
 ```
 
 Die Debug-APK wird unter `app/build/outputs/apk/debug/app-debug.apk` erzeugt.
+Optimierte lokale Release-Builds verwenden R8 und Ressourcenverkleinerung und
+erzeugen ohne eingerichtete Produktionssignierung eine unsignierte APK sowie
+ein AAB. Vor einer Verteilung die [Release-Anleitung](docs/RELEASE.md) beachten.
 JVM-Tests laufen ohne Gerät. Instrumentierte Room-Repositorytests werden mit
 `:app:assembleDebugAndroidTest` gebaut und mit `connectedDebugAndroidTest` auf
 einem Emulator oder Gerät ausgeführt.
+
+Nach einer beabsichtigten Abhängigkeitsaktualisierung die Prüfmetadaten mit
+demselben vollständigen Task-Satz und `--write-verification-metadata sha256`
+neu erzeugen. Jede neue Prüfsumme mit der konfigurierten Google-/Maven-/Gradle-
+Quelle abgleichen und die benötigten Linux-, macOS- und Windows-AAPT2-Varianten erhalten.
 
 ### Berechtigungen
 
@@ -633,12 +705,14 @@ verwendet wird.
 | `ACCESS_WIFI_STATE` | alle | WLAN-Linkdaten | WLAN-Details fehlen |
 | `ACCESS_COARSE_LOCATION` + `ACCESS_FINE_LOCATION` | bis Android 12L; Manifest `maxSdkVersion=32` | SSID und WLAN-Details auf älteren Versionen | SSID und einzelne WLAN-Werte fehlen |
 | `NEARBY_WIFI_DEVICES` | ab Android 13 | aktuelle WLAN-Details, mit `neverForLocation` | SSID und einzelne WLAN-Werte fehlen |
-| `ACCESS_LOCAL_NETWORK` | ab Android 17 bei Target SDK 37 | TCP-/UDP-Kommunikation mit gespeicherten LAN-Hosts und Wake-on-LAN | Hosttests und WOL werden nicht ausgeführt; Internettests bleiben verfügbar |
+| `ACCESS_LOCAL_NETWORK` | ab Android 17 bei Target SDK 37 | TCP-/UDP-Kommunikation, Android-NSD-Hostsuche und Wake-on-LAN | Hostsuche, Hosttests und WOL werden nicht ausgeführt; Internettests bleiben verfügbar |
 
 `CHANGE_WIFI_MULTICAST_STATE` wird im MVP nicht deklariert, weil keine
-Multicast- oder mDNS-Erkennung stattfindet. UDP-Broadcast an ein explizit
-konfiguriertes Wake-on-LAN-Ziel benötigt sie nicht. Bei späterer automatischer
-Host-Erkennung muss diese Entscheidung neu geprüft werden.
+rohe Multicast-Sperre durch die App verwaltet wird; die Dienstsuche übernimmt
+Androids `NsdManager`. UDP-Broadcast an ein explizit konfiguriertes
+Wake-on-LAN-Ziel benötigt die Berechtigung nicht. Die Entscheidung wird erneut
+geprüft, falls eine spätere Android-Version oder Suchtechnik eine App-eigene
+Multicast-Sperre verlangt.
 
 Der `<queries>`-Block im Manifest ist keine Laufzeitberechtigung. Er beschränkt
 die Package-Sichtbarkeit auf Activities mit Launcher-Intent.
@@ -657,6 +731,13 @@ Weiterführend: [Android Local Network Permission](https://developer.android.com
 - Cleartext-HTTP ist deaktiviert; der optionale Downloadtest verwendet HTTPS
 - Logs enthalten keine IP-Adressen, SSIDs oder MAC-Adressen
 - Netzwerkoperationen haben Timeouts und respektieren Coroutine-Cancellation
+- Konfigurationsexporte entstehen nur an einem vom Benutzer gewählten Ort; sie
+  können sensible Hostdaten und optional die Messhistorie enthalten
+
+Vollständige Hinweise: [Datenschutzerklärung](docs/de/datenschutz/index.html),
+[MIT-Lizenz](LICENSE) und [Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md).
+Release-Vorbereitung: [Hardware-Testplan](docs/PHYSICAL_TEST_PLAN.md) und
+[Store-Eintrag/Data-Safety-Entwurf](docs/STORE_LISTING.md).
 
 Beim Deinstallieren entfernt Android die lokale Datenbank und DataStore-Daten.
 Die Messhistorie kann außerdem separat in der App gelöscht werden.
@@ -670,8 +751,9 @@ Die Messhistorie kann außerdem separat in der App gelöscht werden.
 - Wake-on-LAN funktioniert nur, wenn Host, Firmware, Netzwerkkarte und Router Magic Packets unterstützen.
 - Der Broadcast `255.255.255.255` funktioniert nicht in jedem Netz; pro Host kann ein Subnetz-Broadcast oder Unicast-Ziel gesetzt werden.
 - Demo-Kacheln nutzen verbreitete Package-Namen; Hersteller- oder Store-Varianten können abweichen.
-- Die MVP-Historie zeigt die letzten 100 Messungen als Liste; vollständige Diagramme fehlen noch.
-- Automatische Sunshine-/Moonlight-Erkennung und Port-Scanning gehören ausdrücklich nicht zum MVP.
+- Die Historie hält die letzten 100 Messungen und bietet einen kompakten Latenzverlauf, aber kein vollständiges Analyse-Dashboard.
+- Die Sunshine-/Moonlight-Suche sieht nur Hosts, die `_nvstream._tcp` im selben lokalen Netz ankündigen. Ein Subnetz-Scan findet nie statt.
+- Streaming-Profile und Empfehlungen dienen als Orientierung; Drittanbieter-Apps ohne unterstützte öffentliche Konfigurations-API werden nicht verändert.
 
 ### Tests
 
@@ -679,25 +761,35 @@ Abgedeckt sind:
 
 - Qualitätsbewertung für Grün, Gelb, Rot und Grau
 - Jitter- und Paketverlustberechnung
-- IPv4-, Hostname- und MAC-Validierung
+- IPv4-, IPv6-, Hostname- und MAC-Validierung
 - exakter Aufbau des 102-Byte-Wake-on-LAN-Pakets
 - erfolgreiche und fehlgeschlagene Netzwerktest-ViewModel-Flows
 - Fehlerfall ohne aktives Netzwerk und ohne erfundene Messwerte
 - Room-Repositories für Launcher-Kacheln, Hosts und Historie
+- Room-Schema-Migration von Version 1 auf 2
+- Streaming-Profilempfehlungen und vergleichbare Historientrends
+- Dashboard-Startablauf mit Host-Integration und erfolgreichem App-Start
+- Validierung von Konfigurationsexport/-import, Datenbank-/DataStore-Rollback,
+  Historienbegrenzung und datenschutzsicheres Diagnoseprotokoll
+- Normalisierung gespeicherter Diagnoseeinstellungen und sichere Rückfallwerte
+  für Room-Enum-Werte aus zukünftigen Versionen
+- D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. GitHub Actions baut die App, führt Unit Tests und Lint
-aus, kompiliert instrumentierte Tests und lädt Debug-APK sowie Berichte hoch.
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 14
+Android-Instrumentationstests lokal auf Android 15. GitHub Actions baut Debug-
+und optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und
+dieselben 14 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
+aus und lädt danach APK, AAB sowie Berichte hoch.
+Workflow-Abhängigkeiten sind auf geprüfte Commit-Hashes festgesetzt und werden
+über Dependabot aktuell gehalten; die Abhängigkeitsprüfung blockiert neu
+eingebrachte Schwachstellen ab mittlerer Schwere.
 
 ### Roadmap nach dem MVP
 
-- automatische Sunshine- und Moonlight-Host-Erkennung über Android-17-konforme, datenschutzfreundliche Abläufe
 - Port-Scanning nur für explizit eingetragene Hosts
-- Profile pro Streaming-Dienst
-- empfohlene Auflösung und Bitrate
 - getrennte Profile für WLAN und Ethernet
 - Widgets und Quick Settings Tile
-- Export und Import der Konfiguration
 - Backup auf ein lokales NAS
 - Controller-Mapping-Test
 - Streaming-Session-Timer
@@ -726,6 +818,12 @@ Feedback sind willkommen.
 Thor Stream Butler folgt derselben local-first und handheld-first Philosophie wie
 [Thor ROM Butler](https://github.com/Strugglechen1337/ThorROMButler), der
 Android-Assistent zum Sortieren, Prüfen, Patchen und Pflegen von ROM-Sammlungen.
+
+### Lizenz
+
+Thor Stream Butler ist unter der [MIT-Lizenz](LICENSE) verfügbar. Eine
+[inoffizielle deutsche Lesehilfe](LICENSE.de.md) und zweisprachige
+[Hinweise zu Drittkomponenten](THIRD_PARTY_NOTICES.md) sind enthalten.
 
 ### Optional unterstützen
 

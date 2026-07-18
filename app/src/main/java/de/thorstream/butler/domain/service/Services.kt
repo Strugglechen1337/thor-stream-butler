@@ -55,6 +55,28 @@ interface HostDiscoveryService {
     suspend fun isReachable(host: String, port: Int?, timeoutMillis: Int = 2000): AppResult<Boolean>
 }
 
+data class DiscoveredHost(
+    val name: String,
+    val address: String,
+    val port: Int,
+    val serviceType: String,
+)
+
+interface LocalHostDiscoveryService {
+    suspend fun discover(timeoutMillis: Long = 8_000): AppResult<List<DiscoveredHost>>
+}
+
 interface WakeOnLanService {
     suspend fun sendMagicPacket(macAddress: String, broadcastAddress: String, port: Int = 9): AppResult<Unit>
+}
+
+data class ConfigurationTransferSummary(
+    val streamingEntries: Int,
+    val localHosts: Int,
+    val historyMeasurements: Int,
+)
+
+interface ConfigurationTransferService {
+    suspend fun exportTo(documentUri: String, includeHistory: Boolean): AppResult<ConfigurationTransferSummary>
+    suspend fun importFrom(documentUri: String): AppResult<ConfigurationTransferSummary>
 }

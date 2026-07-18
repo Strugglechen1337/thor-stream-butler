@@ -55,12 +55,16 @@ class AndroidInstalledAppsRepository @Inject constructor(
         }
     }
 
-    override fun canLaunch(packageName: String): Boolean = packageManager.getLaunchIntentForPackage(packageName) != null
+    override fun canLaunch(packageName: String): Boolean = try {
+        packageManager.getLaunchIntentForPackage(packageName) != null
+    } catch (_: RuntimeException) {
+        false
+    }
 
     override fun launch(packageName: String): AppResult<Unit> {
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            ?: return AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_app_not_launchable)))
         return try {
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+                ?: return AppResult.Failure(AppError.Unavailable(strings.get(R.string.error_app_not_launchable)))
             context.startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
             AppResult.Success(Unit)
         } catch (_: SecurityException) {
