@@ -176,7 +176,12 @@ jobs:
       - name: Verify artifact signatures / Artefaktsignaturen prüfen
         shell: bash
         run: |
-          apksigner verify --verbose --print-certs "$APK_ASSET"
+          apksigner_path="$ANDROID_HOME/build-tools/36.0.0/apksigner"
+          if [ ! -x "$apksigner_path" ]; then
+            echo "::error::apksigner is unavailable at $apksigner_path / apksigner ist unter $apksigner_path nicht verfügbar."
+            exit 1
+          fi
+          "$apksigner_path" verify --verbose --print-certs "$APK_ASSET"
           aab_verification="$(jarsigner -verify -verbose -certs "$AAB_ASSET" 2>&1)"
           printf '%s\n' "$aab_verification"
           if grep -Fqi 'jar is unsigned' <<< "$aab_verification" || ! grep -Fq 'jar verified.' <<< "$aab_verification"; then
