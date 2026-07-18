@@ -10,6 +10,16 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
+No unreleased changes.
+
+### Deutsch
+
+Keine unveröffentlichten Änderungen.
+
+## [0.9.0-alpha.1] - 2026-07-18
+
+### English
+
 #### Added
 
 - Local Wi-Fi stability comparison: the history screen groups saved Wi-Fi
