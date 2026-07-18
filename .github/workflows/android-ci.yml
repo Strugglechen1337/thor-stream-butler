@@ -60,10 +60,18 @@ jobs:
             app/build/reports/tests/testDebugUnitTest/
 
   instrumented:
-    name: Android 15 device tests / Android-15-Gerätetests
+    name: Android ${{ matrix.api-level }} device tests / Android-${{ matrix.api-level }}-Gerätetests
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api-level: 28
+            profile: pixel_2
+          - api-level: 35
+            profile: pixel_7
 
     steps:
       - name: Check out repository / Repository auschecken
@@ -93,13 +101,13 @@ jobs:
       - name: Make Gradle wrapper executable / Gradle Wrapper ausführbar machen
         run: chmod +x gradlew
 
-      - name: Run Android 15 tests / Android-15-Tests ausführen
+      - name: Run Android device tests / Android-Gerätetests ausführen
         uses: ReactiveCircus/android-emulator-runner@0a638108440efd5c7f980e6ba145dbcdd8f32009 # v2.37.0
         with:
-          api-level: 35
+          api-level: ${{ matrix.api-level }}
           target: google_apis
           arch: x86_64
-          profile: pixel_7
+          profile: ${{ matrix.profile }}
           disable-animations: true
           script: ./gradlew :app:connectedDebugAndroidTest --stacktrace
 
@@ -107,7 +115,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          name: thor-stream-butler-android-tests-${{ github.run_number }}
+          name: thor-stream-butler-android-tests-api-${{ matrix.api-level }}-${{ github.run_number }}
           if-no-files-found: warn
           retention-days: 14
           path: |
