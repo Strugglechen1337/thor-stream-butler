@@ -337,4 +337,14 @@
     <string name="dashboard_profile_ethernet_marker">LAN-Profil gesetzt</string>
     <string name="dashboard_applied_profile">Aktives Profil: %1$s · %2$d fps · %3$d Mbit/s</string>
     <string name="dashboard_applied_profile_ethernet">Aktives Profil (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
+
+    <!-- Host port check -->
+    <string name="hosts_check_ports">Ports prüfen</string>
+    <string name="hosts_port_check_title">Ports auf %1$s</string>
+    <string name="hosts_port_check_running">Bekannte Streaming-Ports werden geprüft…</string>
+    <string name="hosts_port_check_hint">Es werden nur dieser Host und eine kuratierte Liste lokaler Streaming-Ports geprüft. Es wird kein Netzwerk gescannt.</string>
+    <string name="hosts_port_configured">Konfigurierter Host-Port</string>
+    <string name="hosts_port_open">Offen</string>
+    <string name="hosts_port_closed">Geschlossen</string>
+    <string name="error_port_check_failed">Die Portprüfung konnte nicht abgeschlossen werden.</string>
 </resources>

@@ -6,11 +6,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.thorstream.butler.R
 import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.core.common.StringProvider
+import de.thorstream.butler.core.network.StreamingPorts
 import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.service.DiscoveredHost
 import de.thorstream.butler.domain.repository.LocalHostRepository
 import de.thorstream.butler.domain.service.HostDiscoveryService
+import de.thorstream.butler.domain.service.PortCheckResult
+import de.thorstream.butler.domain.service.PortCheckService
 import de.thorstream.butler.domain.service.LocalHostDiscoveryService
 import de.thorstream.butler.domain.service.WakeOnLanService
 import javax.inject.Inject
@@ -22,11 +25,18 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+data class PortCheckUiState(
+    val host: LocalHost,
+    val running: Boolean = true,
+    val results: List<PortCheckResult> = emptyList(),
+)
+
 data class HostsUiState(
     val hosts: List<LocalHost> = emptyList(),
     val testingHostId: Long? = null,
     val isDiscovering: Boolean = false,
     val discoveredHosts: List<DiscoveredHost> = emptyList(),
+    val portCheck: PortCheckUiState? = null,
     val message: String? = null,
 )
 
@@ -36,6 +46,7 @@ class HostsViewModel @Inject constructor(
     private val discoveryService: HostDiscoveryService,
     private val localHostDiscoveryService: LocalHostDiscoveryService,
     private val wakeOnLanService: WakeOnLanService,
+    private val portCheckService: PortCheckService,
     private val strings: StringProvider,
 ) : ViewModel() {
     private val localState = MutableStateFlow(HostsUiState())
@@ -141,6 +152,33 @@ class HostsViewModel @Inject constructor(
                 localState.value = localState.value.copy(isDiscovering = false)
             }
         }
+    }
+
+    /**
+     * Probes the curated streaming ports plus the host's configured port on
+     * this explicitly entered host only. Never scans the network.
+     */
+    fun checkPorts(host: LocalHost) {
+        if (localState.value.portCheck?.running == true) return
+        viewModelScope.launch {
+            localState.value = localState.value.copy(portCheck = PortCheckUiState(host = host), message = null)
+            try {
+                when (val result = portCheckService.checkPorts(host.address, StreamingPorts.probesFor(host))) {
+                    is AppResult.Success -> localState.value = localState.value.copy(
+                        portCheck = localState.value.portCheck?.copy(running = false, results = result.value),
+                    )
+                    is AppResult.Failure -> localState.value = localState.value.copy(portCheck = null, message = result.error.message)
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                localState.value = localState.value.copy(portCheck = null, message = strings.get(R.string.error_port_check_failed))
+            }
+        }
+    }
+
+    fun dismissPortCheck() {
+        localState.value = localState.value.copy(portCheck = null)
     }
 
     fun dismissDiscovery() {
