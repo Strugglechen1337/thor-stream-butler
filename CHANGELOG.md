@@ -10,11 +10,26 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- Streaming session timer: launching a streaming app records a local session
+  marker, and returning to the dashboard completes it. The last session
+  (app, duration, start time) is shown on the dashboard. Sessions shorter
+  than one minute or longer than twelve hours are discarded as implausible.
+  Tracking is local only, permissionless, and an approximation because
+  Android grants no app-usage insight without extra permissions.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- Streaming-Session-Timer: Beim Start einer Streaming-App wird lokal ein
+  Session-Marker gesetzt, die Rückkehr zum Dashboard schließt ihn ab. Die
+  letzte Session (App, Dauer, Startzeit) erscheint auf dem Dashboard.
+  Sessions unter einer Minute oder über zwölf Stunden werden als
+  unplausibel verworfen. Die Erfassung ist rein lokal, berechtigungsfrei
+  und eine Näherung, da Android ohne Zusatzberechtigungen keinen Einblick
+  in die App-Nutzung gewährt.
 
 ## [0.5.0-alpha.1] - 2026-07-18
 

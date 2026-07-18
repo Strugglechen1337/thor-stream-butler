@@ -14,6 +14,7 @@ import de.thorstream.butler.data.database.StreamingEntryDao
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.data.common.AndroidStringProvider
 import de.thorstream.butler.data.database.ThorDatabase
+import de.thorstream.butler.data.datastore.DataStoreSessionRepository
 import de.thorstream.butler.data.datastore.DataStoreSettingsRepository
 import de.thorstream.butler.data.repository.AndroidInstalledAppsRepository
 import de.thorstream.butler.data.repository.FileDiagnosticLogRepository
@@ -26,6 +27,7 @@ import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
+import de.thorstream.butler.domain.repository.StreamingSessionRepository
 import javax.inject.Singleton
 
 @Module
@@ -52,5 +54,6 @@ abstract class RepositoryModule {
     @Binds abstract fun bindHostRepository(implementation: RoomLocalHostRepository): LocalHostRepository
     @Binds abstract fun bindHistoryRepository(implementation: RoomNetworkHistoryRepository): NetworkHistoryRepository
     @Binds abstract fun bindSettingsRepository(implementation: DataStoreSettingsRepository): SettingsRepository
+    @Binds abstract fun bindStreamingSessionRepository(implementation: DataStoreSessionRepository): StreamingSessionRepository
     @Binds abstract fun bindStringProvider(implementation: AndroidStringProvider): StringProvider
 }

@@ -17,6 +17,7 @@ import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.model.QualityAssessment
 import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.model.StreamingProfile
+import de.thorstream.butler.domain.model.StreamingSession
 import de.thorstream.butler.domain.model.StreamingType
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.DiagnosticEvent
@@ -25,6 +26,7 @@ import de.thorstream.butler.domain.repository.LocalHostRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
+import de.thorstream.butler.domain.repository.StreamingSessionRepository
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.core.network.QualityEvaluator
 import de.thorstream.butler.core.network.StreamingRecommendation
@@ -58,6 +60,7 @@ data class DashboardUiState(
     val message: String? = null,
     val preLaunch: PreLaunchUiState? = null,
     val focusAnimationsEnabled: Boolean = true,
+    val lastSession: StreamingSession? = null,
 )
 
 data class PreLaunchUiState(
@@ -85,6 +88,7 @@ class DashboardViewModel @Inject constructor(
     private val wakeOnLanService: WakeOnLanService,
     private val diagnosticLogRepository: DiagnosticLogRepository,
     private val strings: StringProvider,
+    private val sessionRepository: StreamingSessionRepository,
 ) : ViewModel() {
     private val localState = MutableStateFlow(DashboardUiState())
     private var preLaunchJob: Job? = null
@@ -94,7 +98,8 @@ class DashboardViewModel @Inject constructor(
         localHostRepository.observeHosts(),
         localState,
         settingsRepository.settings,
-    ) { entries, hosts, local, settings ->
+        sessionRepository.lastSession,
+    ) { entries, hosts, local, settings, lastSession ->
         local.copy(
             items = entries.map { entry ->
                 DashboardItem(
@@ -105,9 +110,26 @@ class DashboardViewModel @Inject constructor(
             },
             hosts = hosts,
             focusAnimationsEnabled = settings.focusAnimationsEnabled,
+            lastSession = lastSession,
         )
         // canLaunch queries the PackageManager per entry; keep that off the main thread.
     }.flowOn(Dispatchers.Default).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DashboardUiState())
+
+    /**
+     * Called when the dashboard becomes visible again: closes a session
+     * marker left behind by the last streaming launch, if any.
+     */
+    fun completeSessionIfAny() {
+        viewModelScope.launch {
+            try {
+                sessionRepository.completeActiveSession(System.currentTimeMillis())
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                // Session tracking is best effort and must never disturb the dashboard.
+            }
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -268,6 +290,13 @@ class DashboardViewModel @Inject constructor(
         when (result) {
             is AppResult.Success -> viewModelScope.launch {
                 logSafely(DiagnosticEvent.APP_LAUNCH_SUCCEEDED)
+                try {
+                    sessionRepository.startSession(entry.displayName, System.currentTimeMillis())
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (_: Exception) {
+                    // Session tracking is best effort; the launch already succeeded.
+                }
                 try {
                     entriesRepository.markLaunched(entry.id, System.currentTimeMillis(), quality?.name ?: entry.lastNetworkQuality?.name)
                     localState.value = localState.value.copy(preLaunch = null)

@@ -325,4 +325,9 @@
     <string name="settings_controller_test_title">Controller test</string>
     <string name="settings_controller_test_hint">Check buttons, sticks, and triggers live</string>
     <string name="settings_controller_test_action">Start</string>
+
+    <!-- Session timer -->
+    <string name="dashboard_last_session">Last session: %1$s · %2$s</string>
+    <string name="session_duration_minutes">%1$d min</string>
+    <string name="session_duration_hours">%1$d h %2$d min</string>
 </resources>

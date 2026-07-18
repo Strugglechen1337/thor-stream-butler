@@ -2,18 +2,21 @@ package de.thorstream.butler.fakes
 
 import de.thorstream.butler.core.common.AppError
 import de.thorstream.butler.core.common.AppResult
+import de.thorstream.butler.core.common.SessionCalculations
 import de.thorstream.butler.core.common.StringProvider
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.domain.model.StreamingSession
 import de.thorstream.butler.domain.repository.LocalHostRepository
 import de.thorstream.butler.domain.repository.DiagnosticEvent
 import de.thorstream.butler.domain.repository.DiagnosticLogEntry
 import de.thorstream.butler.domain.repository.DiagnosticLogRepository
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
+import de.thorstream.butler.domain.repository.StreamingSessionRepository
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
 import de.thorstream.butler.domain.model.StreamingEntry
@@ -173,4 +176,24 @@ class FakeDeviceStatusService(
     var status: DeviceStatus = DeviceStatus(batteryPercent = 80, charging = false, batteryTemperatureCelsius = 30.0),
 ) : DeviceStatusService {
     override fun readStatus(): DeviceStatus = status
+}
+
+class FakeStreamingSessionRepository : StreamingSessionRepository {
+    val last = MutableStateFlow<StreamingSession?>(null)
+    var activeName: String? = null
+    var activeStart: Long? = null
+    override val lastSession: Flow<StreamingSession?> get() = last
+    override suspend fun startSession(entryName: String, startedAt: Long) {
+        activeName = entryName
+        activeStart = startedAt
+    }
+    override suspend fun completeActiveSession(endedAt: Long) {
+        val name = activeName ?: return
+        val start = activeStart ?: return
+        SessionCalculations.sessionDurationMinutes(start, endedAt)?.let {
+            last.value = StreamingSession(name, start, it)
+        }
+        activeName = null
+        activeStart = null
+    }
 }

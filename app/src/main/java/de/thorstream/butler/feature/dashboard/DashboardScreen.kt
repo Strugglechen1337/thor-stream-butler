@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Timer
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Edit
@@ -98,6 +99,7 @@ import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.LocalHost
 import de.thorstream.butler.domain.model.StreamingProfile
 import de.thorstream.butler.domain.model.StreamingResolution
+import de.thorstream.butler.domain.model.StreamingSession
 import de.thorstream.butler.domain.model.StreamingType
 import java.text.DateFormat
 import java.util.Date
@@ -127,6 +129,9 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
         }
     }
 
+    // Returning to the dashboard ends a streaming session started from here.
+    LaunchedEffect(Unit) { viewModel.completeSessionIfAny() }
+
     LaunchedEffect(state.message) {
         state.message?.let {
             snackbarHostState.showSnackbar(it)
@@ -147,6 +152,7 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             DashboardHeader(onAdd = { viewModel.loadInstalledApps(); showPicker = true })
+            state.lastSession?.let { LastSessionBanner(it) }
             if (state.items.isEmpty()) {
                 EmptyDashboard(onAdd = { viewModel.loadInstalledApps(); showPicker = true })
             } else {
@@ -312,6 +318,38 @@ private fun PreLaunchDialog(
             }
         },
     )
+}
+
+@Composable
+private fun LastSessionBanner(session: StreamingSession) {
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Icon(Icons.Rounded.Timer, contentDescription = null, tint = ThorCyan)
+            Column {
+                Text(
+                    stringResource(R.string.dashboard_last_session, session.entryName, sessionDurationLabel(session.durationMinutes)),
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(session.startedAt)),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun sessionDurationLabel(minutes: Long): String {
+    val hours = minutes / 60
+    val remainder = minutes % 60
+    return if (hours > 0) stringResource(R.string.session_duration_hours, hours, remainder)
+    else stringResource(R.string.session_duration_minutes, minutes)
 }
 
 @Composable

@@ -127,3 +127,14 @@ data class AppSettings(
 
 enum class ThemePreference { DARK, SYSTEM }
 
+
+/**
+ * A completed streaming session measured between launching a streaming app
+ * and returning to Thor Stream Butler. Tracked locally without any
+ * usage-stats permission; the duration is therefore an approximation.
+ */
+data class StreamingSession(
+    val entryName: String,
+    val startedAt: Long,
+    val durationMinutes: Long,
+)

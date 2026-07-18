@@ -4,6 +4,7 @@ import de.thorstream.butler.core.common.AppResult
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.InstalledApp
 import de.thorstream.butler.domain.model.LocalHost
+import de.thorstream.butler.domain.model.StreamingSession
 import de.thorstream.butler.domain.model.NetworkMeasurement
 import de.thorstream.butler.domain.model.StreamingEntry
 import kotlinx.coroutines.flow.Flow
@@ -75,4 +76,18 @@ interface DiagnosticLogRepository {
     suspend fun log(event: DiagnosticEvent)
     suspend fun read(): List<DiagnosticLogEntry>
     suspend fun clear()
+}
+
+interface StreamingSessionRepository {
+    /** Latest completed session, or null when none was recorded yet. */
+    val lastSession: Flow<StreamingSession?>
+
+    /** Marks a streaming app as launched now; replaces any previous active marker. */
+    suspend fun startSession(entryName: String, startedAt: Long)
+
+    /**
+     * Completes the active session if one exists and its duration is
+     * plausible; otherwise the marker is discarded silently.
+     */
+    suspend fun completeActiveSession(endedAt: Long)
 }

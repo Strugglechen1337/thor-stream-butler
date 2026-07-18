@@ -18,6 +18,7 @@ import de.thorstream.butler.fakes.FakeLocalHostRepository
 import de.thorstream.butler.fakes.FakeNetworkDiagnosticsService
 import de.thorstream.butler.fakes.FakeSettingsRepository
 import de.thorstream.butler.fakes.FakeStreamingEntryRepository
+import de.thorstream.butler.fakes.FakeStreamingSessionRepository
 import de.thorstream.butler.fakes.FakeStringProvider
 import de.thorstream.butler.fakes.FakeWakeOnLanService
 import kotlinx.coroutines.Dispatchers
@@ -166,6 +167,29 @@ class DashboardViewModelTest {
         assertTrue(entries.values.value.single().lastUsedAt != null)
     }
 
+    @Test
+    fun `successful launch starts a session and returning completes it`() = runTest(dispatcher) {
+        val entry = StreamingEntry(id = 1, displayName = "Moonlight", packageName = "com.limelight")
+        val entries = FakeStreamingEntryRepository().apply { values.value = listOf(entry) }
+        val sessions = FakeStreamingSessionRepository()
+        val viewModel = createViewModel(
+            entries = entries,
+            settings = FakeSettingsRepository(AppSettings(preLaunchCheckEnabled = false)),
+            sessions = sessions,
+        )
+
+        viewModel.launch(entry)
+        advanceUntilIdle()
+        assertEquals("Moonlight", sessions.activeName)
+
+        sessions.activeStart = sessions.activeStart!! - 600_000
+        viewModel.completeSessionIfAny()
+        advanceUntilIdle()
+
+        assertEquals("Moonlight", sessions.last.value?.entryName)
+        assertEquals(10L, sessions.last.value?.durationMinutes)
+    }
+
     private fun createViewModel(
         entries: FakeStreamingEntryRepository = FakeStreamingEntryRepository(),
         hosts: FakeLocalHostRepository = FakeLocalHostRepository(),
@@ -174,6 +198,7 @@ class DashboardViewModelTest {
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         history: FakeHistoryRepository = FakeHistoryRepository(),
         log: FakeDiagnosticLogRepository = FakeDiagnosticLogRepository(),
+        sessions: FakeStreamingSessionRepository = FakeStreamingSessionRepository(),
     ) = DashboardViewModel(
         entriesRepository = entries,
         localHostRepository = hosts,
@@ -186,5 +211,6 @@ class DashboardViewModelTest {
         wakeOnLanService = FakeWakeOnLanService(),
         diagnosticLogRepository = log,
         strings = FakeStringProvider(),
+        sessionRepository = sessions,
     )
 }
