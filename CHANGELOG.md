@@ -16,7 +16,7 @@ No unreleased changes.
 
 Keine unveröffentlichten Änderungen.
 
-## [0.4.0-alpha.1] - 2026-07-17
+## [0.4.0-alpha.1] - 2026-07-18
 
 ### English
 
@@ -92,9 +92,9 @@ Keine unveröffentlichten Änderungen.
 
 #### Known limitations
 
-- The release remains a debug-signed alpha unless all production-signing
-  secrets are configured. A debug-signed build may require uninstalling the
-  previous alpha, which removes its local data.
+- This is the first prerelease signed with the permanent production update key.
+  It cannot update older debug-signed alphas in place; export the configuration
+  if needed before uninstalling an older build and its local data.
 - Android 9 and Android 15 emulator validation is complete; physical
   handheld/controller, vendor Wi-Fi, Ethernet, Wake-on-LAN, and long-session
   validation is still pending.
@@ -180,9 +180,9 @@ Keine unveröffentlichten Änderungen.
 
 #### Bekannte Einschränkungen
 
-- Das Release bleibt eine debug-signierte Alpha, solange nicht alle produktiven
-  Signing-Secrets eingerichtet sind. Ein Debug-Build kann die Deinstallation
-  der vorherigen Alpha erfordern; dabei werden deren lokale Daten gelöscht.
+- Dies ist das erste Prerelease mit dem dauerhaften produktiven Update-Schlüssel.
+  Es kann ältere debug-signierte Alphas nicht direkt aktualisieren; exportiere
+  bei Bedarf die Konfiguration, bevor du einen alten Build samt lokalen Daten deinstallierst.
 - Die Emulatorprüfung auf Android 9 und Android 15 ist abgeschlossen; Tests auf
   physischem Handheld und Controller sowie herstellerspezifischem WLAN, Ethernet,
   Wake-on-LAN und langen Sitzungen stehen noch aus.
