@@ -80,3 +80,18 @@ interface ConfigurationTransferService {
     suspend fun exportTo(documentUri: String, includeHistory: Boolean): AppResult<ConfigurationTransferSummary>
     suspend fun importFrom(documentUri: String): AppResult<ConfigurationTransferSummary>
 }
+
+/**
+ * Snapshot of device health values that matter during long streaming
+ * sessions on handhelds. Every value is optional because Android may not
+ * report it on all devices.
+ */
+data class DeviceStatus(
+    val batteryPercent: Int? = null,
+    val charging: Boolean? = null,
+    val batteryTemperatureCelsius: Double? = null,
+)
+
+interface DeviceStatusService {
+    fun readStatus(): DeviceStatus
+}

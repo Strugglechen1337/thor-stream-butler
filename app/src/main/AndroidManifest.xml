@@ -53,6 +53,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Quick Settings tile: shows the last network quality, opens a fresh test. -->
+        <service
+            android:name=".feature.quicksettings.NetworkCheckTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_tile_network_check"
+            android:label="@string/tile_network_check"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

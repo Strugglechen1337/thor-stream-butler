@@ -17,6 +17,8 @@ import de.thorstream.butler.domain.repository.SettingsRepository
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.StreamingEntryRepository
 import de.thorstream.butler.domain.model.StreamingEntry
+import de.thorstream.butler.domain.service.DeviceStatus
+import de.thorstream.butler.domain.service.DeviceStatusService
 import de.thorstream.butler.domain.service.DiagnosticProgress
 import de.thorstream.butler.domain.service.HostDiscoveryService
 import de.thorstream.butler.domain.service.LocalHostDiscoveryService
@@ -166,3 +168,9 @@ class FakeLocalHostRepository : LocalHostRepository {
     }
 }
 
+
+class FakeDeviceStatusService(
+    var status: DeviceStatus = DeviceStatus(batteryPercent = 80, charging = false, batteryTemperatureCelsius = 30.0),
+) : DeviceStatusService {
+    override fun readStatus(): DeviceStatus = status
+}

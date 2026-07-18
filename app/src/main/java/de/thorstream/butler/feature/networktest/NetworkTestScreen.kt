@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,10 +46,16 @@ import de.thorstream.butler.core.designsystem.ThorYellow
 import de.thorstream.butler.core.designsystem.label
 import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
+import de.thorstream.butler.domain.service.DeviceStatus
 import java.util.Locale
+import kotlinx.coroutines.delay
 
 @Composable
-fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
+fun NetworkTestRoute(
+    autoStart: Boolean = false,
+    onAutoStartConsumed: () -> Unit = {},
+    viewModel: NetworkTestViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val wifiPermissions = if (Build.VERSION.SDK_INT >= 33) {
@@ -60,6 +67,22 @@ fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
     val startWithPermission = {
         if (wifiPermissions.all { ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED }) viewModel.startTest()
         else permissionLauncher.launch(wifiPermissions)
+    }
+
+    // Entry from the Quick Settings tile: run the test once without an extra tap.
+    LaunchedEffect(autoStart) {
+        if (autoStart) {
+            onAutoStartConsumed()
+            startWithPermission()
+        }
+    }
+
+    // Keep battery and temperature values fresh while the screen is visible.
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.refreshDeviceStatus()
+            delay(10_000)
+        }
     }
 
     Column(
@@ -102,6 +125,34 @@ fun NetworkTestRoute(viewModel: NetworkTestViewModel = hiltViewModel()) {
         }
 
         state.snapshot?.let { MetricsGrid(it) }
+        state.deviceStatus?.let { DeviceStatusSection(it) }
+    }
+}
+
+@Composable
+private fun DeviceStatusSection(status: DeviceStatus) {
+    Text(stringResource(R.string.nettest_device_status), style = MaterialTheme.typography.titleLarge)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        MetricCard(
+            stringResource(R.string.nettest_metric_battery),
+            status.batteryPercent?.let { "$it %" } ?: stringResource(R.string.value_not_available),
+        )
+        MetricCard(
+            stringResource(R.string.nettest_metric_charging),
+            when (status.charging) {
+                true -> stringResource(R.string.value_yes)
+                false -> stringResource(R.string.value_no)
+                null -> stringResource(R.string.value_not_available)
+            },
+        )
+        MetricCard(
+            stringResource(R.string.nettest_metric_battery_temp),
+            status.batteryTemperatureCelsius?.let { String.format(Locale.getDefault(), "%.1f °C", it) }
+                ?: stringResource(R.string.value_not_available),
+        )
+    }
+    if ((status.batteryTemperatureCelsius ?: 0.0) >= 43.0) {
+        Text(stringResource(R.string.nettest_temp_warning), color = ThorYellow)
     }
 }
 

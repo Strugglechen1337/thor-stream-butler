@@ -6,6 +6,7 @@ import de.thorstream.butler.domain.model.NetworkQuality
 import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.service.DiagnosticProgress
 import de.thorstream.butler.domain.service.DiagnosticStep
+import de.thorstream.butler.fakes.FakeDeviceStatusService
 import de.thorstream.butler.fakes.FakeHistoryRepository
 import de.thorstream.butler.fakes.FakeNetworkDiagnosticsService
 import de.thorstream.butler.fakes.FakeSettingsRepository
@@ -43,7 +44,7 @@ class NetworkTestViewModelTest {
             ),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider())
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider(), FakeDeviceStatusService())
 
         viewModel.startTest()
         advanceUntilIdle()
@@ -59,7 +60,7 @@ class NetworkTestViewModelTest {
             progress = flowOf(DiagnosticProgress(DiagnosticStep.NETWORK_UNAVAILABLE, 1f, completed = true, errorMessage = "no active network")),
         )
         val history = FakeHistoryRepository()
-        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider())
+        val viewModel = NetworkTestViewModel(diagnostics, FakeSettingsRepository(), history, QualityEvaluator(FakeStringProvider()), FakeStringProvider(), FakeDeviceStatusService())
 
         viewModel.startTest()
         advanceUntilIdle()
@@ -78,6 +79,7 @@ class NetworkTestViewModelTest {
             FakeHistoryRepository(),
             QualityEvaluator(FakeStringProvider()),
             FakeStringProvider(),
+            FakeDeviceStatusService(),
         )
 
         viewModel.startTest()
@@ -108,6 +110,7 @@ class NetworkTestViewModelTest {
             history,
             QualityEvaluator(FakeStringProvider()),
             FakeStringProvider(),
+            FakeDeviceStatusService(),
         )
 
         viewModel.startTest()

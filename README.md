@@ -87,6 +87,9 @@ handheld hardware as the project moves toward its first release.
 - Room-backed history with filters, averages, a latency sparkline, and comparable trends
 - Optional privacy-safe diagnostic event log without network identifiers
 - DataStore settings for launch behavior, diagnostics, and presentation
+- Quick Settings tile with the last network quality and one-tap test start
+- Live controller test for buttons, D-pad, sticks, and triggers
+- Battery level, charging state, and battery temperature during diagnostics
 
 Initial streaming categories:
 
@@ -383,11 +386,9 @@ dependency review blocks newly introduced vulnerabilities of moderate or higher 
 
 - Port scanning only for explicitly entered hosts
 - Separate Wi-Fi and Ethernet profiles
-- Widgets and a Quick Settings tile
+- Home-screen widgets
 - Backup to a local NAS
-- Controller mapping test
 - Streaming-session timer
-- Battery and temperature monitoring
 - Comparison of multiple Wi-Fi networks
 - Notifications for unstable connections
 - Optional Windows companion service
@@ -490,6 +491,9 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - Room-Historie mit Filtern, Mittelwerten, Latenzverlauf und vergleichbaren Trends
 - Optionales datenschutzsicheres Diagnoseprotokoll ohne Netzwerkkennungen
 - DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
+- Quick-Settings-Kachel mit letzter Netzwerkqualität und Teststart per Tipp
+- Live-Controller-Test für Tasten, Steuerkreuz, Sticks und Trigger
+- Akkustand, Ladezustand und Akkutemperatur während der Diagnose
 
 Erste Streaming-Kategorien:
 
@@ -789,11 +793,9 @@ eingebrachte Schwachstellen ab mittlerer Schwere.
 
 - Port-Scanning nur für explizit eingetragene Hosts
 - getrennte Profile für WLAN und Ethernet
-- Widgets und Quick Settings Tile
+- Widgets für den Startbildschirm
 - Backup auf ein lokales NAS
-- Controller-Mapping-Test
 - Streaming-Session-Timer
-- Akku- und Temperaturüberwachung
 - Vergleich mehrerer WLAN-Netze
 - Benachrichtigung bei instabiler Verbindung
 - optionaler Windows-Companion-Dienst

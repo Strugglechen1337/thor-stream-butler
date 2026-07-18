@@ -295,4 +295,34 @@
     <string name="error_app_not_launchable">The app is not installed or has no launchable screen.</string>
     <string name="error_app_blocked">Android blocked launching this app.</string>
     <string name="error_app_launch">The app could not be launched.</string>
+
+    <!-- Quick Settings tile -->
+    <string name="tile_network_check">Network check</string>
+    <string name="tile_no_measurement">No measurement yet</string>
+
+    <!-- Device status -->
+    <string name="nettest_device_status">Device status</string>
+    <string name="nettest_metric_battery">Battery</string>
+    <string name="nettest_metric_charging">Charging</string>
+    <string name="nettest_metric_battery_temp">Battery temperature</string>
+    <string name="nettest_temp_warning">The battery is hot. Give the device a break or reduce the load.</string>
+    <string name="value_yes">Yes</string>
+    <string name="value_no">No</string>
+
+    <!-- Controller test -->
+    <string name="controller_kicker">THOR // CONTROLLER</string>
+    <string name="controller_title">Controller test</string>
+    <string name="controller_hint">Press buttons and move the sticks — inputs appear live. While the test is open it captures the D-pad; leave with touch or the system back gesture.</string>
+    <string name="controller_connected">Connected controllers</string>
+    <string name="controller_no_devices">No controller detected. Connect one via Bluetooth or USB, or use the built-in controls of your handheld.</string>
+    <string name="controller_left_stick">Left stick</string>
+    <string name="controller_right_stick">Right stick</string>
+    <string name="controller_buttons">Buttons</string>
+    <string name="controller_dpad">D-pad</string>
+    <string name="controller_last_input">Last input: %1$s</string>
+    <string name="controller_waiting">Waiting for the first input …</string>
+    <string name="controller_exit">Exit</string>
+    <string name="settings_controller_test_title">Controller test</string>
+    <string name="settings_controller_test_hint">Check buttons, sticks, and triggers live</string>
+    <string name="settings_controller_test_action">Start</string>
 </resources>

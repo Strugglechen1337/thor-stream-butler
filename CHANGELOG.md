@@ -10,12 +10,38 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
+#### Added
+
+- Quick Settings tile: shows the most recent stored network quality as its
+  state and subtitle and opens the app directly into a running network test
+  when tapped. The tile never measures on its own.
+- Controller test (Settings → Appearance and input): visualizes pressed
+  buttons, D-pad, both analog sticks, and trigger values live, and lists
+  connected controllers. Gamepad input is captured only while the test is
+  open; touch and the system back gesture always exit.
+- Device status on the network test screen: battery level, charging state,
+  and battery temperature refresh every ten seconds, with a notice when the
+  battery gets hot.
+
 #### Fixed
 
 - Release signature verification now invokes `apksigner` from the exact Android
   Build Tools directory instead of relying on the runner's executable search path.
 
 ### Deutsch
+
+#### Hinzugefügt
+
+- Quick-Settings-Kachel: zeigt die zuletzt gespeicherte Netzwerkqualität als
+  Status und Untertitel und öffnet beim Antippen die App direkt mit laufendem
+  Netzwerktest. Die Kachel misst nie selbstständig.
+- Controller-Test (Einstellungen → Darstellung und Bedienung): visualisiert
+  gedrückte Tasten, Steuerkreuz, beide Analog-Sticks und Trigger-Werte live
+  und listet verbundene Controller auf. Gamepad-Eingaben werden nur bei
+  geöffnetem Test abgefangen; Touch und die System-Zurück-Geste beenden ihn
+  jederzeit.
+- Gerätestatus im Netzwerktest: Akkustand, Ladezustand und Akkutemperatur
+  aktualisieren sich alle zehn Sekunden, mit Hinweis bei heißem Akku.
 
 #### Behoben
 

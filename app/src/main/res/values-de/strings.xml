@@ -295,4 +295,34 @@
     <string name="error_app_not_launchable">Die App ist nicht installiert oder besitzt keinen startbaren Bildschirm.</string>
     <string name="error_app_blocked">Android hat den Start dieser App blockiert.</string>
     <string name="error_app_launch">Die App konnte nicht gestartet werden.</string>
+
+    <!-- Quick Settings tile -->
+    <string name="tile_network_check">Netzwerkcheck</string>
+    <string name="tile_no_measurement">Noch keine Messung</string>
+
+    <!-- Device status -->
+    <string name="nettest_device_status">Gerätestatus</string>
+    <string name="nettest_metric_battery">Akku</string>
+    <string name="nettest_metric_charging">Lädt</string>
+    <string name="nettest_metric_battery_temp">Akkutemperatur</string>
+    <string name="nettest_temp_warning">Der Akku ist heiß. Gönn dem Gerät eine Pause oder reduziere die Last.</string>
+    <string name="value_yes">Ja</string>
+    <string name="value_no">Nein</string>
+
+    <!-- Controller test -->
+    <string name="controller_kicker">THOR // CONTROLLER</string>
+    <string name="controller_title">Controller-Test</string>
+    <string name="controller_hint">Drücke Tasten und bewege die Sticks — Eingaben erscheinen live. Solange der Test offen ist, fängt er das Steuerkreuz ab; verlasse ihn per Touch oder System-Zurück-Geste.</string>
+    <string name="controller_connected">Verbundene Controller</string>
+    <string name="controller_no_devices">Kein Controller erkannt. Verbinde einen per Bluetooth oder USB oder nutze die eingebauten Bedienelemente deines Handhelds.</string>
+    <string name="controller_left_stick">Linker Stick</string>
+    <string name="controller_right_stick">Rechter Stick</string>
+    <string name="controller_buttons">Tasten</string>
+    <string name="controller_dpad">Steuerkreuz</string>
+    <string name="controller_last_input">Letzte Eingabe: %1$s</string>
+    <string name="controller_waiting">Warte auf die erste Eingabe …</string>
+    <string name="controller_exit">Beenden</string>
+    <string name="settings_controller_test_title">Controller-Test</string>
+    <string name="settings_controller_test_hint">Tasten, Sticks und Trigger live prüfen</string>
+    <string name="settings_controller_test_action">Starten</string>
 </resources>

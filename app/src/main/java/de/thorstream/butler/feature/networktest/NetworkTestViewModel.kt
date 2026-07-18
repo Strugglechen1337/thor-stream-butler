@@ -14,6 +14,8 @@ import de.thorstream.butler.domain.model.NetworkSnapshot
 import de.thorstream.butler.domain.model.QualityAssessment
 import de.thorstream.butler.domain.repository.NetworkHistoryRepository
 import de.thorstream.butler.domain.repository.SettingsRepository
+import de.thorstream.butler.domain.service.DeviceStatus
+import de.thorstream.butler.domain.service.DeviceStatusService
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -32,6 +34,7 @@ data class NetworkTestUiState(
     val snapshot: NetworkSnapshot? = null,
     val assessment: QualityAssessment? = null,
     val errorMessage: String? = null,
+    val deviceStatus: DeviceStatus? = null,
 )
 
 @HiltViewModel
@@ -41,10 +44,21 @@ class NetworkTestViewModel @Inject constructor(
     private val historyRepository: NetworkHistoryRepository,
     private val qualityEvaluator: QualityEvaluator,
     private val strings: StringProvider,
+    private val deviceStatusService: DeviceStatusService,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(NetworkTestUiState())
     val uiState: StateFlow<NetworkTestUiState> = _uiState.asStateFlow()
     private var testJob: Job? = null
+
+    /** Re-reads battery and temperature values; called on entry and periodically while visible. */
+    fun refreshDeviceStatus() {
+        val status = try {
+            deviceStatusService.readStatus()
+        } catch (_: RuntimeException) {
+            null
+        }
+        _uiState.value = _uiState.value.copy(deviceStatus = status)
+    }
 
     fun startTest() {
         testJob?.cancel()

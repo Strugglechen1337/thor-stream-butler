@@ -59,7 +59,10 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsRoute(
+    onOpenControllerTest: () -> Unit = {},
+    viewModel: SettingsViewModel = hiltViewModel(),
+) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val transferState by viewModel.transferState.collectAsStateWithLifecycle()
     val diagnosticLogCount by viewModel.diagnosticLogCount.collectAsStateWithLifecycle()
@@ -166,6 +169,13 @@ fun SettingsRoute(viewModel: SettingsViewModel = hiltViewModel()) {
             }
             SettingSwitch(stringResource(R.string.settings_focus_title), stringResource(R.string.settings_focus_hint), settings.focusAnimationsEnabled) {
                 viewModel.update { current -> current.copy(focusAnimationsEnabled = it) }
+            }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(stringResource(R.string.settings_controller_test_title), fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.settings_controller_test_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                FilledTonalButton(onClick = onOpenControllerTest) { Text(stringResource(R.string.settings_controller_test_action)) }
             }
         }
 
