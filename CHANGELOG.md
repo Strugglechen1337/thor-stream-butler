@@ -10,11 +10,24 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- Port check for explicitly entered hosts: each saved host has a "Check ports"
+  action that probes a curated list of common local streaming ports
+  (Sunshine/GameStream, PlayStation Remote Play, Steam Remote Play) plus the
+  host's own configured port and reports each as open or closed. Only the one
+  entered host is probed — no network, subnet, or address-range scanning.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- Portprüfung für explizit eingetragene Hosts: Jeder gespeicherte Host hat eine
+  Aktion „Ports prüfen“, die eine kuratierte Liste gängiger lokaler
+  Streaming-Ports (Sunshine/GameStream, PlayStation Remote Play, Steam Remote
+  Play) sowie den konfigurierten Port des Hosts prüft und je Port „offen“ oder
+  „geschlossen“ meldet. Es wird nur der eine eingetragene Host geprüft — kein
+  Netzwerk-, Subnetz- oder Adressbereich-Scan.
 
 ## [0.7.0-alpha.1] - 2026-07-18
 

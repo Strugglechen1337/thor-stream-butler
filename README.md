@@ -79,6 +79,7 @@ handheld hardware as the project moves toward its first release.
 - VPN-aware transport detection with a contextual quality recommendation
 - Complete cancellable network test with live progress
 - Local host management, TCP port checks, and Wake-on-LAN
+- Curated streaming-port check for an explicitly entered host, without network scanning
 - Per-tile local-host assignment and resolution, FPS, and bitrate profiles
 - Optional dedicated Ethernet profile per tile, applied automatically on wired connections
 - Network-aware streaming-profile recommendations based on all quality signals
@@ -387,7 +388,6 @@ dependency review blocks newly introduced vulnerabilities of moderate or higher 
 
 ### Roadmap after the MVP
 
-- Port scanning only for explicitly entered hosts
 - Home-screen widgets
 - Backup to a local NAS
 - Comparison of multiple Wi-Fi networks
@@ -483,6 +483,7 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - VPN-bewusste Transporterkennung mit passender Qualitätsempfehlung
 - Vollständiger, abbrechbarer Netzwerktest mit Live-Fortschritt
 - Lokale Hostverwaltung, TCP-Port-Tests und Wake-on-LAN
+- Kuratierte Streaming-Portprüfung für einen explizit eingetragenen Host, ohne Netzwerkscan
 - Host-Zuordnung pro Kachel sowie Profile für Auflösung, FPS und Bitrate
 - Optionales eigenes Ethernet-Profil pro Kachel, bei Kabelverbindung automatisch aktiv
 - Netzwerkabhängige Streaming-Empfehlungen aus allen Qualitätssignalen
@@ -795,7 +796,6 @@ eingebrachte Schwachstellen ab mittlerer Schwere.
 
 ### Roadmap nach dem MVP
 
-- Port-Scanning nur für explizit eingetragene Hosts
 - Widgets für den Startbildschirm
 - Backup auf ein lokales NAS
 - Vergleich mehrerer WLAN-Netze

@@ -29,6 +29,9 @@ import de.thorstream.butler.domain.service.DiscoveredHost
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.domain.service.PingResult
 import de.thorstream.butler.domain.service.PingService
+import de.thorstream.butler.domain.service.PortCheckResult
+import de.thorstream.butler.domain.service.PortCheckService
+import de.thorstream.butler.domain.service.StreamingPortProbe
 import de.thorstream.butler.domain.service.SpeedTestService
 import de.thorstream.butler.domain.service.WakeOnLanService
 import kotlinx.coroutines.flow.Flow
@@ -195,5 +198,20 @@ class FakeStreamingSessionRepository : StreamingSessionRepository {
         }
         activeName = null
         activeStart = null
+    }
+}
+
+class FakePortCheckService(
+    var result: AppResult<List<PortCheckResult>> = AppResult.Success(emptyList()),
+) : PortCheckService {
+    var lastHost: String? = null
+    override suspend fun checkPorts(host: String, probes: List<StreamingPortProbe>, timeoutMillis: Int): AppResult<List<PortCheckResult>> {
+        lastHost = host
+        return when (val current = result) {
+            is AppResult.Success -> AppResult.Success(
+                probes.map { probe -> PortCheckResult(probe.port, probe.serviceName, current.value.any { it.port == probe.port && it.open }) },
+            )
+            is AppResult.Failure -> current
+        }
     }
 }

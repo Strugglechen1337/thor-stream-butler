@@ -95,3 +95,32 @@ data class DeviceStatus(
 interface DeviceStatusService {
     fun readStatus(): DeviceStatus
 }
+
+/**
+ * A single TCP port to probe on an explicitly entered host. [serviceName] is
+ * a technical service label (proper noun, not localized); null marks the
+ * host's own configured port.
+ */
+data class StreamingPortProbe(
+    val port: Int,
+    val serviceName: String?,
+)
+
+data class PortCheckResult(
+    val port: Int,
+    val serviceName: String?,
+    val open: Boolean,
+)
+
+interface PortCheckService {
+    /**
+     * Probes the given TCP ports on one explicitly entered host. Never scans
+     * networks or address ranges; a closed or filtered port is a result, not
+     * an error.
+     */
+    suspend fun checkPorts(
+        host: String,
+        probes: List<StreamingPortProbe>,
+        timeoutMillis: Int = 1500,
+    ): AppResult<List<PortCheckResult>>
+}

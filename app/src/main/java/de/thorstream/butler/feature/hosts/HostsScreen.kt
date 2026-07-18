@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.Lan
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Router
 import androidx.compose.material.icons.rounded.WifiFind
@@ -171,6 +172,7 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
                         host = host,
                         testing = state.testingHostId == host.id,
                         onTest = { withLocalNetworkPermission { viewModel.test(host) } },
+                        onCheckPorts = { withLocalNetworkPermission { viewModel.checkPorts(host) } },
                         onWake = { withLocalNetworkPermission { viewModel.wake(host) } },
                         onEdit = { editedHost = host; showEditor = true },
                         onDelete = { pendingDelete = host },
@@ -185,6 +187,9 @@ fun HostsRoute(viewModel: HostsViewModel = hiltViewModel()) {
             onDismiss = { showEditor = false },
             onSave = { host -> viewModel.save(host).also { if (it == null) showEditor = false } },
         )
+    }
+    state.portCheck?.let { portCheck ->
+        PortCheckDialog(portCheck = portCheck, onDismiss = viewModel::dismissPortCheck)
     }
     pendingDelete?.let { host ->
         AlertDialog(
@@ -221,7 +226,7 @@ private fun DiscoveredHostCard(host: DiscoveredHost, onAdd: () -> Unit) {
 }
 
 @Composable
-private fun HostCard(host: LocalHost, testing: Boolean, onTest: () -> Unit, onWake: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
+private fun HostCard(host: LocalHost, testing: Boolean, onTest: () -> Unit, onCheckPorts: () -> Unit, onWake: () -> Unit, onEdit: () -> Unit, onDelete: () -> Unit) {
     ElevatedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -249,6 +254,10 @@ private fun HostCard(host: LocalHost, testing: Boolean, onTest: () -> Unit, onWa
                     if (testing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Icon(Icons.Rounded.WifiFind, contentDescription = null)
                     Text(" " + stringResource(R.string.hosts_test_connection))
                 }
+                OutlinedButton(onClick = onCheckPorts) {
+                    Icon(Icons.Rounded.Lan, contentDescription = null)
+                    Text(" " + stringResource(R.string.hosts_check_ports))
+                }
                 if (host.wakeOnLanEnabled) {
                     OutlinedButton(onClick = onWake, enabled = host.macAddress != null) {
                         Icon(Icons.Rounded.Bolt, contentDescription = null)
@@ -258,6 +267,44 @@ private fun HostCard(host: LocalHost, testing: Boolean, onTest: () -> Unit, onWa
             }
         }
     }
+}
+
+@Composable
+private fun PortCheckDialog(portCheck: PortCheckUiState, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.hosts_port_check_title, portCheck.host.name)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (portCheck.running) {
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Text(stringResource(R.string.hosts_port_check_running))
+                    }
+                } else {
+                    Text(stringResource(R.string.hosts_port_check_hint), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    portCheck.results.forEach { result ->
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text("${result.port}", fontWeight = FontWeight.Bold)
+                                Text(
+                                    result.serviceName ?: stringResource(R.string.hosts_port_configured),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                            Text(
+                                stringResource(if (result.open) R.string.hosts_port_open else R.string.hosts_port_closed),
+                                color = if (result.open) ThorGreen else ThorGray,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) } },
+    )
 }
 
 @Composable

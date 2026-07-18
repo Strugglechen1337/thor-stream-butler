@@ -11,6 +11,7 @@ import de.thorstream.butler.data.service.AndroidPingService
 import de.thorstream.butler.data.service.HttpsSpeedTestService
 import de.thorstream.butler.data.service.TcpHostDiscoveryService
 import de.thorstream.butler.data.service.NsdLocalHostDiscoveryService
+import de.thorstream.butler.data.service.TcpPortCheckService
 import de.thorstream.butler.data.service.UdpWakeOnLanService
 import de.thorstream.butler.domain.service.DeviceStatusService
 import de.thorstream.butler.domain.service.HostDiscoveryService
@@ -18,6 +19,7 @@ import de.thorstream.butler.domain.service.ConfigurationTransferService
 import de.thorstream.butler.domain.service.NetworkDiagnosticsService
 import de.thorstream.butler.domain.service.LocalHostDiscoveryService
 import de.thorstream.butler.domain.service.PingService
+import de.thorstream.butler.domain.service.PortCheckService
 import de.thorstream.butler.domain.service.SpeedTestService
 import de.thorstream.butler.domain.service.WakeOnLanService
 
@@ -32,4 +34,5 @@ abstract class NetworkModule {
     @Binds abstract fun bindLocalHostDiscoveryService(implementation: NsdLocalHostDiscoveryService): LocalHostDiscoveryService
     @Binds abstract fun bindWakeOnLanService(implementation: UdpWakeOnLanService): WakeOnLanService
     @Binds abstract fun bindDeviceStatusService(implementation: AndroidDeviceStatusService): DeviceStatusService
+    @Binds abstract fun bindPortCheckService(implementation: TcpPortCheckService): PortCheckService
 }
