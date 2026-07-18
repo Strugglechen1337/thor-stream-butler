@@ -102,21 +102,32 @@ private fun StreamingEntryEntity.toDomain() = StreamingEntry(
     displayName = displayName,
     packageName = packageName,
     iconReference = iconReference,
-    streamingType = StreamingType.valueOf(streamingType),
+    streamingType = enumValueOrDefault(streamingType, StreamingType.CUSTOM),
     customName = customName,
     hostId = hostId,
     profile = StreamingProfile(
         resolution = runCatching { StreamingResolution.valueOf(profileResolution) }.getOrDefault(StreamingResolution.AUTO),
-        framesPerSecond = profileFramesPerSecond,
-        bitrateMbps = profileBitrateMbps,
+        framesPerSecond = profileFramesPerSecond.coerceIn(30, 120),
+        bitrateMbps = profileBitrateMbps.coerceIn(1, 200),
     ),
     sortOrder = sortOrder,
     lastUsedAt = lastUsedAt,
-    lastNetworkQuality = lastNetworkQuality?.let(NetworkQuality::valueOf),
+    lastNetworkQuality = lastNetworkQuality?.let { enumValueOrNull<NetworkQuality>(it) },
     isDemo = isDemo,
 )
 private fun LocalHost.toEntity() = LocalHostEntity(id, name, address, macAddress, port, streamingType.name, wakeOnLanEnabled, broadcastAddress, lastReachable, lastSuccessfulTestAt)
-private fun LocalHostEntity.toDomain() = LocalHost(id, name, address, macAddress, port, StreamingType.valueOf(streamingType), wakeOnLanEnabled, broadcastAddress, lastReachable, lastSuccessfulTestAt)
+private fun LocalHostEntity.toDomain() = LocalHost(
+    id,
+    name,
+    address,
+    macAddress,
+    port,
+    enumValueOrDefault(streamingType, StreamingType.CUSTOM),
+    wakeOnLanEnabled,
+    broadcastAddress,
+    lastReachable,
+    lastSuccessfulTestAt,
+)
 
 private fun NetworkMeasurement.toEntity() = NetworkMeasurementEntity(
     id, timestamp, snapshot.connectionType.name, snapshot.localIpAddress, snapshot.gateway, snapshot.ssid,
@@ -129,11 +140,17 @@ private fun NetworkMeasurementEntity.toDomain() = NetworkMeasurement(
     id = id,
     timestamp = timestamp,
     snapshot = NetworkSnapshot(
-        connectionType = ConnectionType.valueOf(connectionType), localIpAddress = localIpAddress, gateway = gateway,
+        connectionType = enumValueOrDefault(connectionType, ConnectionType.OTHER), localIpAddress = localIpAddress, gateway = gateway,
         ssid = ssid, wifiFrequencyMhz = wifiFrequencyMhz, linkSpeedMbps = linkSpeedMbps,
         signalStrengthPercent = signalStrengthPercent, internetValidated = internetValidated, dnsReachable = dnsReachable,
         latencyMs = latencyMs, jitterMs = jitterMs, packetLossPercent = packetLossPercent, downloadMbps = downloadMbps,
         hostReachable = hostReachable, host = host,
     ),
-    assessment = QualityAssessment(NetworkQuality.valueOf(quality), summary, problems, recommendations),
+    assessment = QualityAssessment(enumValueOrDefault(quality, NetworkQuality.NOT_MEASURABLE), summary, problems, recommendations),
 )
+
+private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, fallback: T): T =
+    runCatching { enumValueOf<T>(value) }.getOrDefault(fallback)
+
+private inline fun <reified T : Enum<T>> enumValueOrNull(value: String): T? =
+    runCatching { enumValueOf<T>(value) }.getOrNull()

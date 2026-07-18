@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
+import de.thorstream.butler.core.validation.NetworkValidators
 import de.thorstream.butler.domain.model.AppSettings
 import de.thorstream.butler.domain.model.ThemePreference
 import de.thorstream.butler.domain.repository.SettingsRepository
@@ -45,9 +46,10 @@ class DataStoreSettingsRepository @Inject constructor(
                 autoLaunchOnGreen = preferences[Keys.autoGreen] ?: true,
                 warnOnYellow = preferences[Keys.warnYellow] ?: true,
                 confirmOnRed = preferences[Keys.confirmRed] ?: true,
-                defaultTestTarget = preferences[Keys.target] ?: "1.1.1.1",
-                pingCount = preferences[Keys.pingCount] ?: 5,
-                testDurationSeconds = preferences[Keys.duration] ?: 5,
+                defaultTestTarget = normalizeTarget(preferences[Keys.target]),
+                pingCount = (preferences[Keys.pingCount] ?: DEFAULT_PING_COUNT).coerceIn(MIN_PING_COUNT, MAX_PING_COUNT),
+                testDurationSeconds = (preferences[Keys.duration] ?: DEFAULT_TEST_DURATION_SECONDS)
+                    .coerceIn(MIN_TEST_DURATION_SECONDS, MAX_TEST_DURATION_SECONDS),
                 downloadTestEnabled = preferences[Keys.download] ?: false,
                 theme = preferences[Keys.theme]?.let { runCatching { ThemePreference.valueOf(it) }.getOrNull() } ?: ThemePreference.DARK,
                 focusAnimationsEnabled = preferences[Keys.focusAnimations] ?: true,
@@ -61,13 +63,28 @@ class DataStoreSettingsRepository @Inject constructor(
             preferences[Keys.autoGreen] = settings.autoLaunchOnGreen
             preferences[Keys.warnYellow] = settings.warnOnYellow
             preferences[Keys.confirmRed] = settings.confirmOnRed
-            preferences[Keys.target] = settings.defaultTestTarget
-            preferences[Keys.pingCount] = settings.pingCount.coerceIn(1, 20)
-            preferences[Keys.duration] = settings.testDurationSeconds.coerceIn(1, 30)
+            preferences[Keys.target] = normalizeTarget(settings.defaultTestTarget)
+            preferences[Keys.pingCount] = settings.pingCount.coerceIn(MIN_PING_COUNT, MAX_PING_COUNT)
+            preferences[Keys.duration] = settings.testDurationSeconds.coerceIn(MIN_TEST_DURATION_SECONDS, MAX_TEST_DURATION_SECONDS)
             preferences[Keys.download] = settings.downloadTestEnabled
             preferences[Keys.theme] = settings.theme.name
             preferences[Keys.focusAnimations] = settings.focusAnimationsEnabled
             preferences[Keys.logging] = settings.diagnosticLoggingEnabled
         }
+    }
+
+    private fun normalizeTarget(value: String?): String = value
+        ?.let(NetworkValidators::normalizeHost)
+        ?.takeIf(NetworkValidators::isValidHostnameOrIp)
+        ?: DEFAULT_TEST_TARGET
+
+    private companion object {
+        const val DEFAULT_TEST_TARGET = "1.1.1.1"
+        const val DEFAULT_PING_COUNT = 5
+        const val MIN_PING_COUNT = 1
+        const val MAX_PING_COUNT = 20
+        const val DEFAULT_TEST_DURATION_SECONDS = 5
+        const val MIN_TEST_DURATION_SECONDS = 1
+        const val MAX_TEST_DURATION_SECONDS = 15
     }
 }
