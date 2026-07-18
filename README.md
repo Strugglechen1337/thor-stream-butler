@@ -376,7 +376,7 @@ The test suite covers:
 - D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. The latest validation run passed 40 JVM tests and 14 Android
+network access. The latest validation run passed 47 JVM tests and 14 Android
 instrumentation tests locally on Android 15. GitHub Actions builds debug and
 optimized release variants, runs unit tests, both lint variants, and the same
 14 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
@@ -783,7 +783,7 @@ Abgedeckt sind:
 - D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 14
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 47 JVM-Tests und 14
 Android-Instrumentationstests lokal auf Android 15. GitHub Actions baut Debug-
 und optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und
 dieselben 14 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
