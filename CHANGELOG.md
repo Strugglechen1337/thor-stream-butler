@@ -10,6 +10,16 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
+No unreleased changes.
+
+### Deutsch
+
+Keine unveröffentlichten Änderungen.
+
+## [0.7.0-alpha.1] - 2026-07-18
+
+### English
+
 #### Added
 
 - Separate Wi-Fi and Ethernet streaming profiles: every tile can optionally
