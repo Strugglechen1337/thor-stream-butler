@@ -26,8 +26,8 @@ android {
         applicationId = "de.thorstream.butler"
         minSdk = 28
         targetSdk = 37
-        versionCode = 6
-        versionName = "0.6.0-alpha.1"
+        versionCode = 7
+        versionName = "0.7.0-alpha.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
