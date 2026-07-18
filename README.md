@@ -370,13 +370,16 @@ The test suite covers:
 - dashboard pre-launch host integration and successful app launching
 - configuration export/import validation, database/DataStore rollback, history
   retention, and privacy-safe diagnostic logging
+- normalization of persisted diagnostic settings and safe fallbacks for
+  forward-version Room enum values
 - D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. The latest validation run passed 40 JVM tests and 12 Android
-instrumentation tests on Android 15. GitHub Actions builds debug and optimized
-release variants, runs unit tests, both lint variants, and the 12 Android 15
-instrumentation tests, then uploads APK, AAB, and reports. Workflow dependencies
+network access. The latest validation run passed 40 JVM tests and 14 Android
+instrumentation tests locally on Android 15. GitHub Actions builds debug and
+optimized release variants, runs unit tests, both lint variants, and the same
+14 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
+uploads APK, AAB, and reports. Workflow dependencies
 are pinned to reviewed commit hashes and kept current through Dependabot;
 dependency review blocks newly introduced vulnerabilities of moderate or higher severity.
 
@@ -776,13 +779,16 @@ Abgedeckt sind:
 - Dashboard-Startablauf mit Host-Integration und erfolgreichem App-Start
 - Validierung von Konfigurationsexport/-import, Datenbank-/DataStore-Rollback,
   Historienbegrenzung und datenschutzsicheres Diagnoseprotokoll
+- Normalisierung gespeicherter Diagnoseeinstellungen und sichere Rückfallwerte
+  für Room-Enum-Werte aus zukünftigen Versionen
 - D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 12
-Android-Instrumentationstests auf Android 15. GitHub Actions baut Debug- und
-optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und die 12
-Android-15-Instrumentationstests aus und lädt danach APK, AAB sowie Berichte hoch.
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 14
+Android-Instrumentationstests lokal auf Android 15. GitHub Actions baut Debug-
+und optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und
+dieselben 14 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
+aus und lädt danach APK, AAB sowie Berichte hoch.
 Workflow-Abhängigkeiten sind auf geprüfte Commit-Hashes festgesetzt und werden
 über Dependabot aktuell gehalten; die Abhängigkeitsprüfung blockiert neu
 eingebrachte Schwachstellen ab mittlerer Schwere.

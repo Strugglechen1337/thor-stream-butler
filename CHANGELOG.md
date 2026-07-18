@@ -57,6 +57,8 @@ Keine unveröffentlichten Änderungen.
   the settings write fails or the operation is cancelled.
 - History is capped at the latest 100 measurements. Unexpected network, storage,
   discovery, and ViewModel failures now preserve cancellation and surface safely.
+- Stored diagnostic targets, ping counts, and test durations are normalized when
+  read or written. Unknown future Room enum values use non-crashing fallbacks.
 - Quality evaluation now considers DNS, measured download speed, and Wi-Fi link
   rate in addition to latency, jitter, packet loss, transport, signal, and host reachability.
 - Portrait handhelds use bottom navigation, system bars follow the selected theme,
@@ -66,8 +68,9 @@ Keine unveröffentlichten Änderungen.
 - The signing helper keeps passwords out of `keytool` command arguments and
   verifies every individual GitHub secret upload.
 - Release variants now use R8 and resource shrinking. CI builds APK and AAB,
-  runs Android 15 instrumentation tests, pins all workflow actions to reviewed
-  commits, rejects new moderate-or-higher dependency vulnerabilities, and the
+  runs instrumentation tests on Android 9/API 28 and Android 15/API 35, pins
+  all workflow actions to reviewed commits, rejects new moderate-or-higher
+  dependency vulnerabilities, and the
   release workflow rejects unsigned bundles explicitly.
 - Gradle now verifies the wrapper distribution and resolved dependency artifacts
   with reviewed SHA-256 metadata across Windows, Linux, and macOS build hosts.
@@ -75,8 +78,9 @@ Keine unveröffentlichten Änderungen.
 #### Testing
 
 - Added recommendation, comparable-history, dashboard launch-flow, Room
-  migration, configuration transfer, and private-log coverage.
-- The final local run passed 40 JVM tests, 12 Android instrumentation tests,
+  migration, configuration transfer, persisted-state recovery, and private-log
+  coverage.
+- The final local run passed 40 JVM tests, 14 Android instrumentation tests,
   debug/release lint, an optimized APK/AAB build, D-pad navigation, permission
   denial, configuration, diagnostics, history, and real target-app launch on Android 15.
 
@@ -91,8 +95,9 @@ Keine unveröffentlichten Änderungen.
 - The release remains a debug-signed alpha unless all production-signing
   secrets are configured. A debug-signed build may require uninstalling the
   previous alpha, which removes its local data.
-- Android 15 emulator validation is complete; physical handheld/controller,
-  vendor Wi-Fi, Ethernet, Wake-on-LAN, and long-session validation is still pending.
+- Android 9 and Android 15 emulator validation is complete; physical
+  handheld/controller, vendor Wi-Fi, Ethernet, Wake-on-LAN, and long-session
+  validation is still pending.
 - Discovery only finds compatible hosts advertising `_nvstream._tcp` on the
   same local network; routers and Android devices may filter discovery traffic.
 - Stored profiles and recommendations are guidance. Thor Stream Butler cannot
@@ -138,6 +143,9 @@ Keine unveröffentlichten Änderungen.
   einem Einstellungsfehler oder Abbruch wieder her.
 - Die Historie ist auf die letzten 100 Messungen begrenzt. Unerwartete Netzwerk-,
   Speicher-, Such- und ViewModel-Fehler werden ohne Verlust der Cancellation sicher angezeigt.
+- Gespeicherte Diagnoseziele, Ping-Anzahlen und Testdauern werden beim Lesen und
+  Schreiben normalisiert. Unbekannte zukünftige Room-Enum-Werte nutzen
+  absturzsichere Rückfallwerte.
 - Die Bewertung berücksichtigt nun zusätzlich DNS, gemessene Downloadrate und
   WLAN-Linkrate sowie weiterhin Latenz, Jitter, Paketverlust, Transport, Signal und Host.
 - Portrait-Handhelds verwenden die untere Navigation, Systemleisten folgen dem
@@ -147,8 +155,9 @@ Keine unveröffentlichten Änderungen.
 - Der Signing-Helfer hält Passwörter aus `keytool`-Kommandoargumenten heraus und
   prüft jeden einzelnen Upload eines GitHub-Secrets.
 - Release-Varianten verwenden R8 und Ressourcenverkleinerung. CI baut APK und AAB,
-  führt Android-15-Instrumentationstests aus, setzt alle Workflow-Aktionen auf
-  geprüfte Commits fest, blockiert neue Abhängigkeitsschwachstellen ab mittlerer
+  führt Instrumentationstests auf Android 9/API 28 und Android 15/API 35 aus und
+  setzt alle Workflow-Aktionen auf geprüfte Commits fest, blockiert neue
+  Abhängigkeitsschwachstellen ab mittlerer
   Schwere und weist unsignierte Bundles ausdrücklich zurück.
 - Gradle prüft Wrapper-Distribution und aufgelöste Abhängigkeitsartefakte jetzt
   per kontrollierter SHA-256-Metadaten auf Windows-, Linux- und macOS-Buildhosts.
@@ -156,8 +165,9 @@ Keine unveröffentlichten Änderungen.
 #### Tests
 
 - Neue Abdeckung für Profilempfehlungen, vergleichbare Historientrends,
-  Dashboard-Startablauf, Room-Migration, Konfigurationstransfer und privates Log.
-- Der abschließende lokale Lauf bestand 40 JVM-Tests, 12 Android-
+  Dashboard-Startablauf, Room-Migration, Konfigurationstransfer,
+  Wiederherstellung gespeicherter Daten und privates Log.
+- Der abschließende lokale Lauf bestand 40 JVM-Tests, 14 Android-
   Instrumentationstests, Debug-/Release-Lint, optimierten APK-/AAB-Build,
   D-Pad-Navigation, Berechtigungsverweigerung, Konfiguration, Diagnose, Historie
   und den echten Ziel-App-Start auf Android 15.
@@ -173,9 +183,9 @@ Keine unveröffentlichten Änderungen.
 - Das Release bleibt eine debug-signierte Alpha, solange nicht alle produktiven
   Signing-Secrets eingerichtet sind. Ein Debug-Build kann die Deinstallation
   der vorherigen Alpha erfordern; dabei werden deren lokale Daten gelöscht.
-- Die Android-15-Emulatorprüfung ist abgeschlossen; Tests auf physischem Handheld
-  und Controller sowie herstellerspezifischem WLAN, Ethernet, Wake-on-LAN und
-  langen Sitzungen stehen noch aus.
+- Die Emulatorprüfung auf Android 9 und Android 15 ist abgeschlossen; Tests auf
+  physischem Handheld und Controller sowie herstellerspezifischem WLAN, Ethernet,
+  Wake-on-LAN und langen Sitzungen stehen noch aus.
 - Die Suche findet nur kompatible Hosts, die `_nvstream._tcp` im selben lokalen
   Netz ankündigen; Router und Android-Geräte können Discovery-Verkehr filtern.
 - Gespeicherte Profile und Empfehlungen dienen als Orientierung. Thor Stream
