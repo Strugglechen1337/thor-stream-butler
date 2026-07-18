@@ -88,6 +88,7 @@ handheld hardware as the project moves toward its first release.
 - Room-backed history with filters, averages, a latency sparkline, and comparable trends
 - Optional privacy-safe diagnostic event log without network identifiers
 - DataStore settings for launch behavior, diagnostics, and presentation
+- Local, permissionless streaming session timer with the last session on the dashboard
 - Quick Settings tile with the last network quality and one-tap test start
 - Live controller test for buttons, D-pad, sticks, and triggers
 - Battery level, charging state, and battery temperature during diagnostics
@@ -389,7 +390,6 @@ dependency review blocks newly introduced vulnerabilities of moderate or higher 
 - Separate Wi-Fi and Ethernet profiles
 - Home-screen widgets
 - Backup to a local NAS
-- Streaming-session timer
 - Comparison of multiple Wi-Fi networks
 - Notifications for unstable connections
 - Optional Windows companion service
@@ -493,6 +493,7 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - Room-Historie mit Filtern, Mittelwerten, Latenzverlauf und vergleichbaren Trends
 - Optionales datenschutzsicheres Diagnoseprotokoll ohne Netzwerkkennungen
 - DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
+- Lokaler, berechtigungsfreier Streaming-Session-Timer mit letzter Session auf dem Dashboard
 - Quick-Settings-Kachel mit letzter Netzwerkqualität und Teststart per Tipp
 - Live-Controller-Test für Tasten, Steuerkreuz, Sticks und Trigger
 - Akkustand, Ladezustand und Akkutemperatur während der Diagnose
@@ -797,7 +798,6 @@ eingebrachte Schwachstellen ab mittlerer Schwere.
 - getrennte Profile für WLAN und Ethernet
 - Widgets für den Startbildschirm
 - Backup auf ein lokales NAS
-- Streaming-Session-Timer
 - Vergleich mehrerer WLAN-Netze
 - Benachrichtigung bei instabiler Verbindung
 - optionaler Windows-Companion-Dienst
