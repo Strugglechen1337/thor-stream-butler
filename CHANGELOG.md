@@ -10,6 +10,16 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
+No unreleased changes.
+
+### Deutsch
+
+Keine unveröffentlichten Änderungen.
+
+## [0.8.0-alpha.1] - 2026-07-18
+
+### English
+
 #### Added
 
 - Port check for explicitly entered hosts: each saved host has a "Check ports"
