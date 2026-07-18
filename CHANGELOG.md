@@ -10,11 +10,17 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Fixed
+
+- Release signature verification now invokes `apksigner` from the exact Android
+  Build Tools directory instead of relying on the runner's executable search path.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Behoben
+
+- Die Release-Signaturprüfung ruft `apksigner` jetzt direkt aus dem Android-
+  Build-Tools-Verzeichnis auf, statt sich auf den Suchpfad des Runners zu verlassen.
 
 ## [0.4.0-alpha.1] - 2026-07-18
 
