@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Thor Stream Butler</string>
 
     <!-- Navigation -->
@@ -181,6 +181,25 @@
     <string name="history_trend_improved">Latenz um %1$s ms verbessert</string>
     <string name="history_trend_worse">Latenz um %1$s ms verschlechtert</string>
     <string name="history_trend_unavailable">Kein vergleichbarer Latenzwert</string>
+    <string name="history_view_timeline">Zeitverlauf</string>
+    <string name="history_view_wifi_comparison">WLAN vergleichen</string>
+    <string name="history_wifi_comparison_title">WLAN-Stabilitätsvergleich</string>
+    <string name="history_wifi_comparison_hint">Der Wert kombiniert durchschnittliche Latenz, Jitter, Paketverlust, Signalstärke und Linkrate. Mehr Messungen erhöhen die Aussagekraft.</string>
+    <string name="history_wifi_comparison_privacy">Verwendet nur bereits auf diesem Gerät gespeicherte Tests. Es werden keine Netze oder Adressbereiche gescannt.</string>
+    <string name="history_wifi_comparison_empty">Noch kein WLAN-Netz zum Vergleichen</string>
+    <string name="history_wifi_comparison_run_tests">Starte einen Netzwerktest, während du mit einem WLAN verbunden bist.</string>
+    <string name="history_wifi_comparison_ssid_unavailable">Android hat für die gespeicherten WLAN-Messungen keine SSID bereitgestellt.</string>
+    <string name="history_wifi_hidden_measurements">Messungen ohne verfügbare SSID: %1$d</string>
+    <string name="history_wifi_samples_and_confidence">Messungen: %1$d · Aussagekraft: %2$s</string>
+    <string name="history_wifi_score">%1$d / 100</string>
+    <string name="history_wifi_score_unavailable">Nicht messbar</string>
+    <string name="history_wifi_best_measured">Bestes Messergebnis</string>
+    <string name="history_wifi_core_metrics">Ø Latenz %1$s · Jitter %2$s · Verlust %3$s</string>
+    <string name="history_wifi_radio_metrics">Ø Signal %1$s · Linkrate %2$s</string>
+    <string name="history_wifi_last_measured">Zuletzt gemessen: %1$s</string>
+    <string name="history_wifi_confidence_low">niedrig</string>
+    <string name="history_wifi_confidence_medium">mittel</string>
+    <string name="history_wifi_confidence_high">hoch</string>
 
     <!-- Settings -->
     <string name="settings_kicker">THOR // KONFIGURATION</string>
@@ -335,8 +354,8 @@
     <string name="dashboard_ethernet_profile">Separates Ethernet-Profil</string>
     <string name="dashboard_ethernet_profile_hint">Bei Kabelverbindung eigene Auflösung, FPS und Bitrate verwenden</string>
     <string name="dashboard_profile_ethernet_marker">LAN-Profil gesetzt</string>
-    <string name="dashboard_applied_profile">Aktives Profil: %1$s · %2$d fps · %3$d Mbit/s</string>
-    <string name="dashboard_applied_profile_ethernet">Aktives Profil (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
+    <string name="dashboard_applied_profile" tools:ignore="PluralsCandidate">Aktives Profil: %1$s · %2$d fps · %3$d Mbit/s</string>
+    <string name="dashboard_applied_profile_ethernet" tools:ignore="PluralsCandidate">Aktives Profil (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
 
     <!-- Host port check -->
     <string name="hosts_check_ports">Ports prüfen</string>

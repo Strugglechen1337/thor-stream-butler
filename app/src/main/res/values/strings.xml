@@ -181,6 +181,25 @@
     <string name="history_trend_improved">Latency improved by %1$s ms</string>
     <string name="history_trend_worse">Latency worsened by %1$s ms</string>
     <string name="history_trend_unavailable">No comparable latency value</string>
+    <string name="history_view_timeline">Timeline</string>
+    <string name="history_view_wifi_comparison">Compare Wi-Fi</string>
+    <string name="history_wifi_comparison_title">Wi-Fi stability comparison</string>
+    <string name="history_wifi_comparison_hint">The score combines average latency, jitter, packet loss, signal strength, and link rate. More measurements raise confidence.</string>
+    <string name="history_wifi_comparison_privacy">Uses only tests already stored on this device. No nearby networks or address ranges are scanned.</string>
+    <string name="history_wifi_comparison_empty">No Wi-Fi network to compare yet</string>
+    <string name="history_wifi_comparison_run_tests">Run a network test while connected to Wi-Fi.</string>
+    <string name="history_wifi_comparison_ssid_unavailable">Android did not expose an SSID for the saved Wi-Fi measurements.</string>
+    <string name="history_wifi_hidden_measurements">Measurements without an available SSID: %1$d</string>
+    <string name="history_wifi_samples_and_confidence">Measurements: %1$d · Confidence: %2$s</string>
+    <string name="history_wifi_score">%1$d / 100</string>
+    <string name="history_wifi_score_unavailable">Not measurable</string>
+    <string name="history_wifi_best_measured">Best measured</string>
+    <string name="history_wifi_core_metrics">Average latency %1$s · Jitter %2$s · Loss %3$s</string>
+    <string name="history_wifi_radio_metrics">Average signal %1$s · Link rate %2$s</string>
+    <string name="history_wifi_last_measured">Last measured: %1$s</string>
+    <string name="history_wifi_confidence_low">low</string>
+    <string name="history_wifi_confidence_medium">medium</string>
+    <string name="history_wifi_confidence_high">high</string>
 
     <!-- Settings -->
     <string name="settings_kicker">THOR // CONFIGURATION</string>
@@ -335,8 +354,8 @@
     <string name="dashboard_ethernet_profile">Separate Ethernet profile</string>
     <string name="dashboard_ethernet_profile_hint">Use its own resolution, FPS, and bitrate on wired connections</string>
     <string name="dashboard_profile_ethernet_marker">LAN profile set</string>
-    <string name="dashboard_applied_profile">Active profile: %1$s · %2$d fps · %3$d Mbit/s</string>
-    <string name="dashboard_applied_profile_ethernet">Active profile (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
+    <string name="dashboard_applied_profile" tools:ignore="PluralsCandidate">Active profile: %1$s · %2$d fps · %3$d Mbit/s</string>
+    <string name="dashboard_applied_profile_ethernet" tools:ignore="PluralsCandidate">Active profile (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
 
     <!-- Host port check -->
     <string name="hosts_check_ports">Check ports</string>

@@ -21,6 +21,8 @@ import kotlinx.coroutines.launch
 
 enum class HistoryFilter { ALL, WIFI, ETHERNET, CELLULAR, VPN, WITH_HOST }
 
+enum class HistoryView { TIMELINE, WIFI_COMPARISON }
+
 data class HistoryTrend(val direction: Int, val differenceMs: Double? = null, val isFirstComparable: Boolean = false)
 
 data class HistoryItem(
@@ -36,10 +38,12 @@ data class HistorySummary(
 )
 
 data class HistoryUiState(
+    val view: HistoryView = HistoryView.TIMELINE,
     val filter: HistoryFilter = HistoryFilter.ALL,
     val allMeasurements: List<NetworkMeasurement> = emptyList(),
     val items: List<HistoryItem> = emptyList(),
     val summary: HistorySummary = HistorySummary(),
+    val wifiComparison: WifiComparisonSummary = WifiComparisonSummary(),
     val message: String? = null,
 )
 
@@ -48,6 +52,7 @@ class HistoryViewModel @Inject constructor(
     private val repository: NetworkHistoryRepository,
     private val strings: StringProvider,
 ) : ViewModel() {
+    private val view = MutableStateFlow(HistoryView.TIMELINE)
     private val filter = MutableStateFlow(HistoryFilter.ALL)
     private val message = MutableStateFlow<String?>(null)
 
@@ -56,16 +61,22 @@ class HistoryViewModel @Inject constructor(
         emit(emptyList())
     }
 
-    val uiState: StateFlow<HistoryUiState> = combine(history, filter, message) { history, selectedFilter, currentMessage ->
+    val uiState: StateFlow<HistoryUiState> = combine(history, view, filter, message) { history, selectedView, selectedFilter, currentMessage ->
         val filtered = history.filter { it.matches(selectedFilter) }
         HistoryUiState(
+            view = selectedView,
             filter = selectedFilter,
             allMeasurements = history,
             items = buildHistoryItems(filtered),
             summary = filtered.toSummary(),
+            wifiComparison = buildWifiComparison(history),
             message = currentMessage,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HistoryUiState())
+
+    fun selectView(value: HistoryView) {
+        view.value = value
+    }
 
     fun selectFilter(value: HistoryFilter) {
         filter.value = value

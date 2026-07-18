@@ -87,7 +87,8 @@ handheld hardware as the project moves toward its first release.
 - Versioned JSON configuration export/import with optional history, strict size
   and value validation, and rollback if any part of an import fails
 - IPv4, IPv6 (including bracketed and scoped addresses), and hostname support
-- Room-backed history with filters, averages, a latency sparkline, and comparable trends
+- Room-backed history with filters, averages, a latency sparkline, comparable
+  trends, and a local Wi-Fi stability comparison across saved measurements
 - Optional privacy-safe diagnostic event log without network identifiers
 - DataStore settings for launch behavior, diagnostics, and presentation
 - Local, permissionless streaming session timer with the last session on the dashboard
@@ -356,6 +357,8 @@ Android. Measurement history can also be deleted separately inside the app.
 - The history keeps the latest 100 measurements and provides a compact latency sparkline, not a full analytics dashboard.
 - Sunshine/Moonlight discovery only sees hosts advertising `_nvstream._tcp` on the same local network. It never scans the subnet.
 - Streaming profiles and recommendations are guidance; third-party apps without a supported public configuration API are not modified.
+- Wi-Fi comparison uses only saved measurements and available SSIDs. It does not
+  scan nearby networks, and its confidence is limited when only a few measurements exist.
 
 ### Tests
 
@@ -368,20 +371,21 @@ The test suite covers:
 - successful and failed network-test ViewModel flows
 - no-active-network errors without invented measurements
 - Room repositories for launcher tiles, hosts, and history
-- Room schema migration from version 1 to 2
+- Room schema migrations from version 1 through 3
 - streaming-profile recommendations and comparable history trends
 - dashboard pre-launch host integration and successful app launching
 - configuration export/import validation, database/DataStore rollback, history
   retention, and privacy-safe diagnostic logging
 - normalization of persisted diagnostic settings and safe fallbacks for
   forward-version Room enum values
+- local Wi-Fi comparison grouping, ranking, missing-data handling, and ViewModel state
 - D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. The latest validation run passed 47 JVM tests and 14 Android
+network access. The latest validation run passed 60 JVM tests and 15 Android
 instrumentation tests locally on Android 15. GitHub Actions builds debug and
 optimized release variants, runs unit tests, both lint variants, and the same
-14 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
+15 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
 uploads APK, AAB, and reports. Workflow dependencies
 are pinned to reviewed commit hashes and kept current through Dependabot;
 dependency review blocks newly introduced vulnerabilities of moderate or higher severity.
@@ -390,7 +394,6 @@ dependency review blocks newly introduced vulnerabilities of moderate or higher 
 
 - Home-screen widgets
 - Backup to a local NAS
-- Comparison of multiple Wi-Fi networks
 - Notifications for unstable connections
 - Optional Windows companion service
 
@@ -492,7 +495,8 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
   strikter Größen-/Werteprüfung und Rollback bei einem unvollständigen Import
 - Unterstützung für IPv4, IPv6 (einschließlich Klammer- und Bereichsnotation)
   sowie Hostnamen
-- Room-Historie mit Filtern, Mittelwerten, Latenzverlauf und vergleichbaren Trends
+- Room-Historie mit Filtern, Mittelwerten, Latenzverlauf, vergleichbaren Trends
+  und lokalem WLAN-Stabilitätsvergleich aus gespeicherten Messungen
 - Optionales datenschutzsicheres Diagnoseprotokoll ohne Netzwerkkennungen
 - DataStore-Einstellungen für Startablauf, Diagnose und Darstellung
 - Lokaler, berechtigungsfreier Streaming-Session-Timer mit letzter Session auf dem Dashboard
@@ -763,6 +767,8 @@ Die Messhistorie kann außerdem separat in der App gelöscht werden.
 - Die Historie hält die letzten 100 Messungen und bietet einen kompakten Latenzverlauf, aber kein vollständiges Analyse-Dashboard.
 - Die Sunshine-/Moonlight-Suche sieht nur Hosts, die `_nvstream._tcp` im selben lokalen Netz ankündigen. Ein Subnetz-Scan findet nie statt.
 - Streaming-Profile und Empfehlungen dienen als Orientierung; Drittanbieter-Apps ohne unterstützte öffentliche Konfigurations-API werden nicht verändert.
+- Der WLAN-Vergleich verwendet nur gespeicherte Messungen und verfügbare SSIDs.
+  Er scannt keine benachbarten Netze; bei wenigen Messungen ist seine Aussagekraft begrenzt.
 
 ### Tests
 
@@ -775,20 +781,21 @@ Abgedeckt sind:
 - erfolgreiche und fehlgeschlagene Netzwerktest-ViewModel-Flows
 - Fehlerfall ohne aktives Netzwerk und ohne erfundene Messwerte
 - Room-Repositories für Launcher-Kacheln, Hosts und Historie
-- Room-Schema-Migration von Version 1 auf 2
+- Room-Schema-Migrationen von Version 1 bis 3
 - Streaming-Profilempfehlungen und vergleichbare Historientrends
 - Dashboard-Startablauf mit Host-Integration und erfolgreichem App-Start
 - Validierung von Konfigurationsexport/-import, Datenbank-/DataStore-Rollback,
   Historienbegrenzung und datenschutzsicheres Diagnoseprotokoll
 - Normalisierung gespeicherter Diagnoseeinstellungen und sichere Rückfallwerte
   für Room-Enum-Werte aus zukünftigen Versionen
+- lokale WLAN-Vergleichslogik für Gruppierung, Rangfolge, fehlende Daten und ViewModel-Zustand
 - D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 47 JVM-Tests und 14
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 60 JVM-Tests und 15
 Android-Instrumentationstests lokal auf Android 15. GitHub Actions baut Debug-
 und optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und
-dieselben 14 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
+dieselben 15 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
 aus und lädt danach APK, AAB sowie Berichte hoch.
 Workflow-Abhängigkeiten sind auf geprüfte Commit-Hashes festgesetzt und werden
 über Dependabot aktuell gehalten; die Abhängigkeitsprüfung blockiert neu
@@ -798,7 +805,6 @@ eingebrachte Schwachstellen ab mittlerer Schwere.
 
 - Widgets für den Startbildschirm
 - Backup auf ein lokales NAS
-- Vergleich mehrerer WLAN-Netze
 - Benachrichtigung bei instabiler Verbindung
 - optionaler Windows-Companion-Dienst
 
