@@ -8,7 +8,7 @@
     ·
     <a href="https://strugglechen1337.github.io/thor-stream-butler/de/"><strong>Deutsche Website</strong></a>
     ·
-    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.5.0-alpha.1"><strong>Download v0.5.0-alpha.1</strong></a>
+    <a href="https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.6.0-alpha.1"><strong>Download v0.6.0-alpha.1</strong></a>
     ·
     <a href="#build"><strong>Build guide</strong></a>
     ·
@@ -44,16 +44,16 @@ similar devices running Android 9 or newer.
 ### Alpha download
 
 The current installable development preview is available as
-[v0.5.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.5.0-alpha.1)
+[v0.6.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.6.0-alpha.1)
 for Android 9 and newer. Download the APK and its SHA-256 checksum from the
 release assets. The in-app interface is fully localized in English and German:
 English is the default, German follows the system or per-app language setting
 (Android 13+).
 
-> **Alpha warning:** v0.5.0-alpha.1 is signed with the permanent Thor Stream
-> Butler production key and updates v0.4.0-alpha.1 in place. It cannot update
+> **Alpha warning:** v0.6.0-alpha.1 is signed with the permanent Thor Stream
+> Butler production key and updates v0.4.0-alpha.1 or newer in place. It cannot update
 > the older debug-signed previews (v0.3 and earlier); export the configuration
-> if needed, uninstall the old alpha, and then install v0.5.0-alpha.1 —
+> if needed, uninstall the old alpha, and then install v0.6.0-alpha.1 —
 > uninstalling removes the old app's local data. Physical handheld validation
 > is still pending.
 
@@ -447,17 +447,17 @@ und vergleichbaren Geräten ab Android 9.
 ### Alpha-Download
 
 Die aktuelle installierbare Entwicklungsvorschau steht als
-[v0.5.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.5.0-alpha.1)
+[v0.6.0-alpha.1](https://github.com/Strugglechen1337/thor-stream-butler/releases/tag/v0.6.0-alpha.1)
 für Android 9 und neuer bereit. Lade die APK und ihre SHA-256-Prüfsumme aus den
 Release-Dateien herunter. Die App-Oberfläche ist vollständig auf Englisch und
 Deutsch lokalisiert: Englisch ist der Standard, Deutsch folgt der Systemsprache
 bzw. der App-Sprach-Einstellung (Android 13+).
 
-> **Alpha-Warnung:** v0.5.0-alpha.1 ist mit dem dauerhaften
+> **Alpha-Warnung:** v0.6.0-alpha.1 ist mit dem dauerhaften
 > Thor-Stream-Butler-Produktionsschlüssel signiert und aktualisiert
-> v0.4.0-alpha.1 direkt. Ältere debug-signierte Vorschauen (v0.3 und früher)
+> v0.4.0-alpha.1 oder neuer direkt. Ältere debug-signierte Vorschauen (v0.3 und früher)
 > kann sie nicht direkt aktualisieren; exportiere bei Bedarf die Konfiguration,
-> deinstalliere die alte Alpha und installiere danach v0.5.0-alpha.1 — die
+> deinstalliere die alte Alpha und installiere danach v0.6.0-alpha.1 — die
 > Deinstallation löscht die alten lokalen App-Daten. Die Prüfung auf echten
 > Handhelds steht weiterhin aus.
 
