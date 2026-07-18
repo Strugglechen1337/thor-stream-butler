@@ -157,6 +157,14 @@ class AndroidConfigurationTransferService @Inject constructor(
             .put("resolution", profile.resolution.name)
             .put("framesPerSecond", profile.framesPerSecond)
             .put("bitrateMbps", profile.bitrateMbps))
+        .apply {
+            ethernetProfile?.let { wired ->
+                put("ethernetProfile", JSONObject()
+                    .put("resolution", wired.resolution.name)
+                    .put("framesPerSecond", wired.framesPerSecond)
+                    .put("bitrateMbps", wired.bitrateMbps))
+            }
+        }
         .put("sortOrder", sortOrder)
         .putNullable("lastUsedAt", lastUsedAt)
         .putNullable("lastNetworkQuality", lastNetworkQuality?.name)
@@ -185,6 +193,13 @@ class AndroidConfigurationTransferService @Inject constructor(
                 framesPerSecond = profile.optInt("framesPerSecond", 60).coerceIn(30, 120),
                 bitrateMbps = profile.optInt("bitrateMbps", 20).coerceIn(1, 200),
             ),
+            ethernetProfile = optJSONObject("ethernetProfile")?.let { wired ->
+                StreamingProfile(
+                    resolution = enumValue(wired.optString("resolution"), StreamingResolution.AUTO),
+                    framesPerSecond = wired.optInt("framesPerSecond", 60).coerceIn(30, 120),
+                    bitrateMbps = wired.optInt("bitrateMbps", 20).coerceIn(1, 200),
+                )
+            },
             sortOrder = optInt("sortOrder", 0),
             lastUsedAt = nullableLong("lastUsedAt"),
             lastNetworkQuality = nullableString("lastNetworkQuality")?.let { enumValue(it, NetworkQuality.NOT_MEASURABLE) },

@@ -330,4 +330,11 @@
     <string name="dashboard_last_session">Letzte Session: %1$s · %2$s</string>
     <string name="session_duration_minutes">%1$d min</string>
     <string name="session_duration_hours">%1$d h %2$d min</string>
+
+    <!-- Transport-specific streaming profiles -->
+    <string name="dashboard_ethernet_profile">Separates Ethernet-Profil</string>
+    <string name="dashboard_ethernet_profile_hint">Bei Kabelverbindung eigene Auflösung, FPS und Bitrate verwenden</string>
+    <string name="dashboard_profile_ethernet_marker">LAN-Profil gesetzt</string>
+    <string name="dashboard_applied_profile">Aktives Profil: %1$s · %2$d fps · %3$d Mbit/s</string>
+    <string name="dashboard_applied_profile_ethernet">Aktives Profil (Ethernet): %1$s · %2$d fps · %3$d Mbit/s</string>
 </resources>

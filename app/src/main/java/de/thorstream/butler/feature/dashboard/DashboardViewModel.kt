@@ -19,6 +19,7 @@ import de.thorstream.butler.domain.model.StreamingEntry
 import de.thorstream.butler.domain.model.StreamingProfile
 import de.thorstream.butler.domain.model.StreamingSession
 import de.thorstream.butler.domain.model.StreamingType
+import de.thorstream.butler.domain.model.profileFor
 import de.thorstream.butler.domain.repository.InstalledAppsRepository
 import de.thorstream.butler.domain.repository.DiagnosticEvent
 import de.thorstream.butler.domain.repository.DiagnosticLogRepository
@@ -71,6 +72,10 @@ data class PreLaunchUiState(
     val snapshot: NetworkSnapshot? = null,
     val assessment: QualityAssessment? = null,
     val recommendation: StreamingRecommendation? = null,
+    /** Profile that applies for the measured transport (Ethernet override or default). */
+    val appliedProfile: StreamingProfile? = null,
+    /** True when [appliedProfile] is the entry's dedicated Ethernet profile. */
+    val appliedProfileIsEthernet: Boolean = false,
     val autoLaunching: Boolean = false,
     val errorMessage: String? = null,
 )
@@ -247,6 +252,8 @@ class DashboardViewModel @Inject constructor(
                                 snapshot = snapshot,
                                 assessment = assessment,
                                 recommendation = recommendation,
+                                appliedProfile = entry.profileFor(snapshot.connectionType),
+                                appliedProfileIsEthernet = snapshot.connectionType == ConnectionType.ETHERNET && entry.ethernetProfile != null,
                                 autoLaunching = autoLaunch,
                             ),
                         )
@@ -339,10 +346,10 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
-    fun saveConfiguration(entry: StreamingEntry, hostId: Long?, profile: StreamingProfile) {
+    fun saveConfiguration(entry: StreamingEntry, hostId: Long?, profile: StreamingProfile, ethernetProfile: StreamingProfile? = null) {
         viewModelScope.launch {
             try {
-                entriesRepository.save(entry.copy(hostId = hostId, profile = profile))
+                entriesRepository.save(entry.copy(hostId = hostId, profile = profile, ethernetProfile = ethernetProfile))
                 localState.value = localState.value.copy(message = strings.get(R.string.dashboard_configuration_saved))
             } catch (cancelled: CancellationException) {
                 throw cancelled

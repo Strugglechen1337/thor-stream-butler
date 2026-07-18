@@ -10,11 +10,35 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- Separate Wi-Fi and Ethernet streaming profiles: every tile can optionally
+  store a dedicated Ethernet profile (resolution, FPS, bitrate) in addition
+  to its default profile. The pre-launch check applies the Ethernet profile
+  on wired connections and shows which profile is active; all other
+  transports use the default profile. Tiles indicate a configured LAN
+  profile, and configuration export/import carries it along.
+
+#### Changed
+
+- Room schema 3 adds the optional Ethernet profile columns with a tested
+  migration; existing tiles keep their profile unchanged.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- Getrennte WLAN- und Ethernet-Streaming-Profile: Jede Kachel kann optional
+  zusätzlich zum Standardprofil ein eigenes Ethernet-Profil (Auflösung, FPS,
+  Bitrate) speichern. Der Netzwerkcheck vor dem Start wendet bei
+  Kabelverbindung das Ethernet-Profil an und zeigt das aktive Profil; alle
+  anderen Transporte nutzen das Standardprofil. Kacheln kennzeichnen ein
+  gesetztes LAN-Profil, und der Konfigurations-Export/-Import nimmt es mit.
+
+#### Geändert
+
+- Room-Schema 3 ergänzt die optionalen Ethernet-Profilspalten mit getesteter
+  Migration; bestehende Kacheln behalten ihr Profil unverändert.
 
 ## [0.6.0-alpha.1] - 2026-07-18
 

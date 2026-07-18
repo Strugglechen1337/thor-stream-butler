@@ -54,11 +54,20 @@ data class StreamingEntry(
     val customName: String? = null,
     val hostId: Long? = null,
     val profile: StreamingProfile = StreamingProfile(),
+    /** Optional wired-only override; null means [profile] applies on every transport. */
+    val ethernetProfile: StreamingProfile? = null,
     val sortOrder: Int = 0,
     val lastUsedAt: Long? = null,
     val lastNetworkQuality: NetworkQuality? = null,
     val isDemo: Boolean = false,
 )
+
+/**
+ * Profile that applies for the given transport: Ethernet uses its dedicated
+ * override when one is configured, every other transport uses the default.
+ */
+fun StreamingEntry.profileFor(connectionType: ConnectionType): StreamingProfile =
+    if (connectionType == ConnectionType.ETHERNET) ethernetProfile ?: profile else profile
 
 data class InstalledApp(
     val label: String,
