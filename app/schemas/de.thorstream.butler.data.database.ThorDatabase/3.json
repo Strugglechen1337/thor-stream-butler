@@ -1,0 +1,312 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "e60765b7a893a6fa913f67eccd7c2e65",
+    "entities": [
+      {
+        "tableName": "streaming_entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `displayName` TEXT NOT NULL, `packageName` TEXT NOT NULL, `iconReference` TEXT NOT NULL, `streamingType` TEXT NOT NULL, `customName` TEXT, `hostId` INTEGER, `profileResolution` TEXT NOT NULL, `profileFramesPerSecond` INTEGER NOT NULL, `profileBitrateMbps` INTEGER NOT NULL, `ethernetResolution` TEXT, `ethernetFramesPerSecond` INTEGER, `ethernetBitrateMbps` INTEGER, `sortOrder` INTEGER NOT NULL, `lastUsedAt` INTEGER, `lastNetworkQuality` TEXT, `isDemo` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "packageName",
+            "columnName": "packageName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "iconReference",
+            "columnName": "iconReference",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "streamingType",
+            "columnName": "streamingType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customName",
+            "columnName": "customName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hostId",
+            "columnName": "hostId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "profileResolution",
+            "columnName": "profileResolution",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileFramesPerSecond",
+            "columnName": "profileFramesPerSecond",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "profileBitrateMbps",
+            "columnName": "profileBitrateMbps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ethernetResolution",
+            "columnName": "ethernetResolution",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ethernetFramesPerSecond",
+            "columnName": "ethernetFramesPerSecond",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ethernetBitrateMbps",
+            "columnName": "ethernetBitrateMbps",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "sortOrder",
+            "columnName": "sortOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUsedAt",
+            "columnName": "lastUsedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastNetworkQuality",
+            "columnName": "lastNetworkQuality",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isDemo",
+            "columnName": "isDemo",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "local_hosts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `address` TEXT NOT NULL, `macAddress` TEXT, `port` INTEGER, `streamingType` TEXT NOT NULL, `wakeOnLanEnabled` INTEGER NOT NULL, `broadcastAddress` TEXT NOT NULL, `lastReachable` INTEGER, `lastSuccessfulTestAt` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "address",
+            "columnName": "address",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "macAddress",
+            "columnName": "macAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "port",
+            "columnName": "port",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "streamingType",
+            "columnName": "streamingType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wakeOnLanEnabled",
+            "columnName": "wakeOnLanEnabled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "broadcastAddress",
+            "columnName": "broadcastAddress",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReachable",
+            "columnName": "lastReachable",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastSuccessfulTestAt",
+            "columnName": "lastSuccessfulTestAt",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "network_measurements",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `timestamp` INTEGER NOT NULL, `connectionType` TEXT NOT NULL, `localIpAddress` TEXT, `gateway` TEXT, `ssid` TEXT, `wifiFrequencyMhz` INTEGER, `linkSpeedMbps` INTEGER, `signalStrengthPercent` INTEGER, `internetValidated` INTEGER, `dnsReachable` INTEGER, `latencyMs` REAL, `jitterMs` REAL, `packetLossPercent` REAL, `downloadMbps` REAL, `hostReachable` INTEGER, `host` TEXT, `quality` TEXT NOT NULL, `summary` TEXT NOT NULL, `problems` TEXT NOT NULL, `recommendations` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "connectionType",
+            "columnName": "connectionType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localIpAddress",
+            "columnName": "localIpAddress",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "gateway",
+            "columnName": "gateway",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "ssid",
+            "columnName": "ssid",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "wifiFrequencyMhz",
+            "columnName": "wifiFrequencyMhz",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "linkSpeedMbps",
+            "columnName": "linkSpeedMbps",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "signalStrengthPercent",
+            "columnName": "signalStrengthPercent",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "internetValidated",
+            "columnName": "internetValidated",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "dnsReachable",
+            "columnName": "dnsReachable",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "latencyMs",
+            "columnName": "latencyMs",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "jitterMs",
+            "columnName": "jitterMs",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "packetLossPercent",
+            "columnName": "packetLossPercent",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "downloadMbps",
+            "columnName": "downloadMbps",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "hostReachable",
+            "columnName": "hostReachable",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "host",
+            "columnName": "host",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "quality",
+            "columnName": "quality",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "summary",
+            "columnName": "summary",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "problems",
+            "columnName": "problems",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "recommendations",
+            "columnName": "recommendations",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e60765b7a893a6fa913f67eccd7c2e65')"
+    ]
+  }
+}

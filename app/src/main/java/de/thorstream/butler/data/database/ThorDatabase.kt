@@ -19,7 +19,7 @@ class StringListConverters {
 
 @Database(
     entities = [StreamingEntryEntity::class, LocalHostEntity::class, NetworkMeasurementEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(StringListConverters::class)
@@ -35,6 +35,14 @@ abstract class ThorDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE streaming_entries ADD COLUMN profileResolution TEXT NOT NULL DEFAULT 'AUTO'")
                 db.execSQL("ALTER TABLE streaming_entries ADD COLUMN profileFramesPerSecond INTEGER NOT NULL DEFAULT 60")
                 db.execSQL("ALTER TABLE streaming_entries ADD COLUMN profileBitrateMbps INTEGER NOT NULL DEFAULT 20")
+            }
+        }
+
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE streaming_entries ADD COLUMN ethernetResolution TEXT")
+                db.execSQL("ALTER TABLE streaming_entries ADD COLUMN ethernetFramesPerSecond INTEGER")
+                db.execSQL("ALTER TABLE streaming_entries ADD COLUMN ethernetBitrateMbps INTEGER")
             }
         }
     }

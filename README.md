@@ -80,6 +80,7 @@ handheld hardware as the project moves toward its first release.
 - Complete cancellable network test with live progress
 - Local host management, TCP port checks, and Wake-on-LAN
 - Per-tile local-host assignment and resolution, FPS, and bitrate profiles
+- Optional dedicated Ethernet profile per tile, applied automatically on wired connections
 - Network-aware streaming-profile recommendations based on all quality signals
 - User-initiated Sunshine/Moonlight-compatible discovery through Android NSD
 - Versioned JSON configuration export/import with optional history, strict size
@@ -376,7 +377,7 @@ The test suite covers:
 - D-pad focus movement between dashboard tiles on an Android emulator
 
 Test fakes implement network service and settings interfaces without Android
-network access. The latest validation run passed 40 JVM tests and 14 Android
+network access. The latest validation run passed 47 JVM tests and 14 Android
 instrumentation tests locally on Android 15. GitHub Actions builds debug and
 optimized release variants, runs unit tests, both lint variants, and the same
 14 Android tests on Android 9/API 28 and Android 15/API 35 in parallel, then
@@ -387,7 +388,6 @@ dependency review blocks newly introduced vulnerabilities of moderate or higher 
 ### Roadmap after the MVP
 
 - Port scanning only for explicitly entered hosts
-- Separate Wi-Fi and Ethernet profiles
 - Home-screen widgets
 - Backup to a local NAS
 - Comparison of multiple Wi-Fi networks
@@ -484,6 +484,7 @@ ersten Release durch Aufnahmen von getesteter Handheld-Hardware ersetzt.
 - Vollständiger, abbrechbarer Netzwerktest mit Live-Fortschritt
 - Lokale Hostverwaltung, TCP-Port-Tests und Wake-on-LAN
 - Host-Zuordnung pro Kachel sowie Profile für Auflösung, FPS und Bitrate
+- Optionales eigenes Ethernet-Profil pro Kachel, bei Kabelverbindung automatisch aktiv
 - Netzwerkabhängige Streaming-Empfehlungen aus allen Qualitätssignalen
 - Benutzergesteuerte Sunshine-/Moonlight-kompatible Erkennung über Android NSD
 - Versionierter JSON-Konfigurationsexport/-import mit optionaler Historie,
@@ -783,7 +784,7 @@ Abgedeckt sind:
 - D-Pad-Fokuswechsel zwischen Dashboard-Kacheln auf einem Android-Emulator
 
 Test-Fakes implementieren Netzwerkdienste und Einstellungen ohne
-Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 40 JVM-Tests und 14
+Android-Netzwerkzugriff. Im letzten Prüflauf bestanden 47 JVM-Tests und 14
 Android-Instrumentationstests lokal auf Android 15. GitHub Actions baut Debug-
 und optimierte Release-Varianten, führt Unit Tests, beide Lint-Varianten und
 dieselben 14 Android-Tests parallel auf Android 9/API 28 und Android 15/API 35
@@ -795,7 +796,6 @@ eingebrachte Schwachstellen ab mittlerer Schwere.
 ### Roadmap nach dem MVP
 
 - Port-Scanning nur für explizit eingetragene Hosts
-- getrennte Profile für WLAN und Ethernet
 - Widgets für den Startbildschirm
 - Backup auf ein lokales NAS
 - Vergleich mehrerer WLAN-Netze

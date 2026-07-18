@@ -37,7 +37,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ThorDatabase =
         Room.databaseBuilder(context, ThorDatabase::class.java, "thor_stream_butler.db")
-            .addMigrations(ThorDatabase.MIGRATION_1_2)
+            .addMigrations(ThorDatabase.MIGRATION_1_2, ThorDatabase.MIGRATION_2_3)
             .build()
 
     @Provides fun provideStreamingDao(database: ThorDatabase): StreamingEntryDao = database.streamingEntryDao()

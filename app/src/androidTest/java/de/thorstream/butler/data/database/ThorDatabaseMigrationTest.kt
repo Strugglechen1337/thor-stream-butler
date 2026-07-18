@@ -37,6 +37,38 @@ class ThorDatabaseMigrationTest {
         }
     }
 
+    @Test
+    fun migrateTwoToThreeKeepsEthernetProfileEmpty() {
+        helper.createDatabase(TEST_DATABASE, 2).apply {
+            execSQL(
+                """
+                INSERT INTO streaming_entries (
+                    id, displayName, packageName, iconReference, streamingType, customName,
+                    hostId, profileResolution, profileFramesPerSecond, profileBitrateMbps,
+                    sortOrder, lastUsedAt, lastNetworkQuality, isDemo
+                ) VALUES (
+                    1, 'Moonlight', 'com.limelight', 'package://com.limelight', 'MOONLIGHT', NULL,
+                    NULL, 'FULL_HD_1080P', 60, 40,
+                    0, NULL, NULL, 0
+                )
+                """.trimIndent(),
+            )
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DATABASE, 3, true, ThorDatabase.MIGRATION_2_3).use { database ->
+            database.query(
+                "SELECT profileResolution, ethernetResolution, ethernetFramesPerSecond, ethernetBitrateMbps FROM streaming_entries WHERE id = 1",
+            ).use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("FULL_HD_1080P", cursor.getString(0))
+                assertEquals(null, cursor.getString(1))
+                assertEquals(true, cursor.isNull(2))
+                assertEquals(true, cursor.isNull(3))
+            }
+        }
+    }
+
     private fun SupportSQLiteDatabase.insertLegacyEntry() {
         execSQL(
             """

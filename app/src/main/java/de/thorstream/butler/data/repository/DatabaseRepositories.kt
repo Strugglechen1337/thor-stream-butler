@@ -92,6 +92,9 @@ private fun StreamingEntry.toEntity() = StreamingEntryEntity(
     profileResolution = profile.resolution.name,
     profileFramesPerSecond = profile.framesPerSecond,
     profileBitrateMbps = profile.bitrateMbps,
+    ethernetResolution = ethernetProfile?.resolution?.name,
+    ethernetFramesPerSecond = ethernetProfile?.framesPerSecond,
+    ethernetBitrateMbps = ethernetProfile?.bitrateMbps,
     sortOrder = sortOrder,
     lastUsedAt = lastUsedAt,
     lastNetworkQuality = lastNetworkQuality?.name,
@@ -110,6 +113,13 @@ private fun StreamingEntryEntity.toDomain() = StreamingEntry(
         framesPerSecond = profileFramesPerSecond.coerceIn(30, 120),
         bitrateMbps = profileBitrateMbps.coerceIn(1, 200),
     ),
+    ethernetProfile = if (ethernetResolution != null || ethernetFramesPerSecond != null || ethernetBitrateMbps != null) {
+        StreamingProfile(
+            resolution = runCatching { StreamingResolution.valueOf(ethernetResolution.orEmpty()) }.getOrDefault(StreamingResolution.AUTO),
+            framesPerSecond = (ethernetFramesPerSecond ?: 60).coerceIn(30, 120),
+            bitrateMbps = (ethernetBitrateMbps ?: 20).coerceIn(1, 200),
+        )
+    } else null,
     sortOrder = sortOrder,
     lastUsedAt = lastUsedAt,
     lastNetworkQuality = lastNetworkQuality?.let { enumValueOrNull<NetworkQuality>(it) },

@@ -13,6 +13,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -57,6 +59,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.OutlinedTextField
@@ -192,8 +195,8 @@ fun DashboardRoute(viewModel: DashboardViewModel = hiltViewModel()) {
             item = item,
             hosts = state.hosts,
             onDismiss = { editedItem = null },
-            onSave = { hostId, profile ->
-                viewModel.saveConfiguration(item.entry, hostId, profile)
+            onSave = { hostId, profile, ethernetProfile ->
+                viewModel.saveConfiguration(item.entry, hostId, profile, ethernetProfile)
                 editedItem = null
             },
         )
@@ -281,6 +284,17 @@ private fun PreLaunchDialog(
                     })
                     it.problems.take(3).forEach { problem -> Text("• $problem") }
                     it.recommendations.firstOrNull()?.let { recommendation -> Text("→ $recommendation", color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
+                state.appliedProfile?.let { applied ->
+                    Text(
+                        stringResource(
+                            if (state.appliedProfileIsEthernet) R.string.dashboard_applied_profile_ethernet else R.string.dashboard_applied_profile,
+                            resolutionLabel(applied.resolution),
+                            applied.framesPerSecond,
+                            applied.bitrateMbps,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 state.recommendation?.let { recommendation ->
                     Text(
@@ -418,7 +432,7 @@ private fun StreamingTile(
                         resolutionLabel(item.entry.profile.resolution),
                         item.entry.profile.framesPerSecond,
                         item.entry.profile.bitrateMbps,
-                    ),
+                    ) + if (item.entry.ethernetProfile != null) " · " + stringResource(R.string.dashboard_profile_ethernet_marker) else "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -461,19 +475,24 @@ private fun TileConfigurationDialog(
     item: DashboardItem,
     hosts: List<LocalHost>,
     onDismiss: () -> Unit,
-    onSave: (Long?, StreamingProfile) -> Unit,
+    onSave: (Long?, StreamingProfile, StreamingProfile?) -> Unit,
 ) {
     var hostId by remember(item.entry.id) { mutableStateOf(item.entry.hostId) }
     var resolution by remember(item.entry.id) { mutableStateOf(item.entry.profile.resolution) }
     var framesPerSecond by remember(item.entry.id) { mutableStateOf(item.entry.profile.framesPerSecond.toString()) }
     var bitrate by remember(item.entry.id) { mutableStateOf(item.entry.profile.bitrateMbps.toString()) }
+    var ethernetEnabled by remember(item.entry.id) { mutableStateOf(item.entry.ethernetProfile != null) }
+    var ethernetResolution by remember(item.entry.id) { mutableStateOf((item.entry.ethernetProfile ?: item.entry.profile).resolution) }
+    var ethernetFps by remember(item.entry.id) { mutableStateOf((item.entry.ethernetProfile ?: item.entry.profile).framesPerSecond.toString()) }
+    var ethernetBitrate by remember(item.entry.id) { mutableStateOf((item.entry.ethernetProfile ?: item.entry.profile).bitrateMbps.toString()) }
     var hostMenu by remember { mutableStateOf(false) }
     var resolutionMenu by remember { mutableStateOf(false) }
+    var ethernetResolutionMenu by remember { mutableStateOf(false) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.dashboard_configure_title, item.entry.displayName)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(stringResource(R.string.dashboard_host_assignment), fontWeight = FontWeight.Bold)
                 Box {
                     FilledTonalButton(onClick = { hostMenu = true }) {
@@ -511,6 +530,39 @@ private fun TileConfigurationDialog(
                         singleLine = true,
                     )
                 }
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(stringResource(R.string.dashboard_ethernet_profile), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.dashboard_ethernet_profile_hint), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
+                    }
+                    Switch(checked = ethernetEnabled, onCheckedChange = { ethernetEnabled = it })
+                }
+                if (ethernetEnabled) {
+                    Box {
+                        FilledTonalButton(onClick = { ethernetResolutionMenu = true }) { Text(resolutionLabel(ethernetResolution)) }
+                        DropdownMenu(expanded = ethernetResolutionMenu, onDismissRequest = { ethernetResolutionMenu = false }) {
+                            StreamingResolution.entries.forEach { option ->
+                                DropdownMenuItem(text = { Text(resolutionLabel(option)) }, onClick = { ethernetResolution = option; ethernetResolutionMenu = false })
+                            }
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedTextField(
+                            value = ethernetFps,
+                            onValueChange = { ethernetFps = it.filter(Char::isDigit).take(3) },
+                            label = { Text(stringResource(R.string.dashboard_profile_fps)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                        )
+                        OutlinedTextField(
+                            value = ethernetBitrate,
+                            onValueChange = { ethernetBitrate = it.filter(Char::isDigit).take(3) },
+                            label = { Text(stringResource(R.string.dashboard_profile_bitrate)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                        )
+                    }
+                }
             }
         },
         confirmButton = {
@@ -523,6 +575,13 @@ private fun TileConfigurationDialog(
                             framesPerSecond = framesPerSecond.toIntOrNull()?.coerceIn(30, 120) ?: 60,
                             bitrateMbps = bitrate.toIntOrNull()?.coerceIn(1, 200) ?: 20,
                         ),
+                        if (ethernetEnabled) {
+                            StreamingProfile(
+                                resolution = ethernetResolution,
+                                framesPerSecond = ethernetFps.toIntOrNull()?.coerceIn(30, 120) ?: 60,
+                                bitrateMbps = ethernetBitrate.toIntOrNull()?.coerceIn(1, 200) ?: 20,
+                            )
+                        } else null,
                     )
                 },
             ) { Text(stringResource(R.string.action_save)) }
