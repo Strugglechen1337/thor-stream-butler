@@ -95,20 +95,28 @@ fun HistoryRoute(viewModel: HistoryViewModel = hiltViewModel()) {
             }
         }
         if (state.allMeasurements.isNotEmpty()) {
-            HistoryFilters(selected = state.filter, onSelect = viewModel::selectFilter)
-            HistorySummaryCard(state)
+            HistoryViewSelector(selected = state.view, onSelect = viewModel::selectView)
+            if (state.view == HistoryView.TIMELINE) {
+                HistoryFilters(selected = state.filter, onSelect = viewModel::selectFilter)
+                HistorySummaryCard(state)
+            }
         }
         if (state.allMeasurements.isEmpty()) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.history_empty_title), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.history_empty_hint), color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
+        } else if (state.view == HistoryView.WIFI_COMPARISON) {
+            WifiComparisonContent(
+                summary = state.wifiComparison,
+                modifier = Modifier.fillMaxWidth().weight(1f),
+            )
         } else if (state.items.isEmpty()) {
             Column(Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(stringResource(R.string.history_filter_empty), style = MaterialTheme.typography.titleLarge)
             }
         } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            LazyColumn(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 items(state.items, key = { it.measurement.id }) { item ->
                     HistoryCard(item)
                 }
@@ -131,6 +139,29 @@ fun HistoryRoute(viewModel: HistoryViewModel = hiltViewModel()) {
 }
 
 @Composable
+private fun HistoryViewSelector(selected: HistoryView, onSelect: (HistoryView) -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        HistoryView.entries.forEach { view ->
+            FilterChip(
+                selected = selected == view,
+                onClick = { onSelect(view) },
+                label = {
+                    Text(
+                        stringResource(
+                            if (view == HistoryView.TIMELINE) R.string.history_view_timeline
+                            else R.string.history_view_wifi_comparison,
+                        ),
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
 private fun HistoryFilters(selected: HistoryFilter, onSelect: (HistoryFilter) -> Unit) {
     Row(
         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -141,6 +172,130 @@ private fun HistoryFilters(selected: HistoryFilter, onSelect: (HistoryFilter) ->
                 selected = selected == filter,
                 onClick = { onSelect(filter) },
                 label = { Text(stringResource(filter.labelRes())) },
+            )
+        }
+    }
+}
+
+@Composable
+private fun WifiComparisonContent(summary: WifiComparisonSummary, modifier: Modifier = Modifier) {
+    LazyColumn(modifier, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item {
+            ElevatedCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        stringResource(R.string.history_wifi_comparison_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = ThorCyan,
+                    )
+                    Text(
+                        stringResource(R.string.history_wifi_comparison_hint),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(
+                        stringResource(R.string.history_wifi_comparison_privacy),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = ThorGray,
+                    )
+                }
+            }
+        }
+        if (summary.networks.isEmpty()) {
+            item {
+                Column(
+                    Modifier.fillMaxWidth().padding(vertical = 28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(stringResource(R.string.history_wifi_comparison_empty), style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        stringResource(
+                            if (summary.wifiMeasurementCount == 0) R.string.history_wifi_comparison_run_tests
+                            else R.string.history_wifi_comparison_ssid_unavailable,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        } else {
+            items(summary.networks, key = { it.ssid }) { network ->
+                WifiComparisonCard(network)
+            }
+            if (summary.measurementsWithoutSsid > 0) {
+                item {
+                    Text(
+                        stringResource(R.string.history_wifi_hidden_measurements, summary.measurementsWithoutSsid),
+                        color = ThorGray,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WifiComparisonCard(network: WifiNetworkComparison) {
+    ElevatedCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.Top,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(network.ssid, style = MaterialTheme.typography.titleLarge)
+                    Text(
+                        stringResource(
+                            R.string.history_wifi_samples_and_confidence,
+                            network.measurementCount,
+                            stringResource(network.confidence.labelRes()),
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    network.stabilityScore?.let { score ->
+                        Text(
+                            stringResource(R.string.history_wifi_score, score),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = wifiScoreColor(score),
+                        )
+                    } ?: Text(stringResource(R.string.history_wifi_score_unavailable), color = ThorGray)
+                    if (network.isBestMeasured) {
+                        Text(
+                            stringResource(R.string.history_wifi_best_measured),
+                            color = ThorGreen,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                    }
+                }
+            }
+            Text(
+                stringResource(
+                    R.string.history_wifi_core_metrics,
+                    network.averageLatencyMs.value("ms"),
+                    network.averageJitterMs.value("ms"),
+                    network.averagePacketLossPercent.value("%"),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                stringResource(
+                    R.string.history_wifi_radio_metrics,
+                    network.averageSignalPercent.value("%"),
+                    network.averageLinkSpeedMbps.value("Mbit/s"),
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                stringResource(
+                    R.string.history_wifi_last_measured,
+                    DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(network.lastMeasuredAt)),
+                ),
+                color = ThorGray,
+                style = MaterialTheme.typography.bodySmall,
             )
         }
     }
@@ -239,8 +394,20 @@ private fun HistoryFilter.labelRes(): Int = when (this) {
     HistoryFilter.WITH_HOST -> R.string.history_filter_host
 }
 
+@StringRes
+private fun WifiComparisonConfidence.labelRes(): Int = when (this) {
+    WifiComparisonConfidence.LOW -> R.string.history_wifi_confidence_low
+    WifiComparisonConfidence.MEDIUM -> R.string.history_wifi_confidence_medium
+    WifiComparisonConfidence.HIGH -> R.string.history_wifi_confidence_high
+}
+
 private fun Double?.value(unit: String) = this?.let { "${it.format()} $unit" } ?: "–"
 private fun Double.format() = String.format(Locale.getDefault(), "%.1f", this)
+private fun wifiScoreColor(score: Int): Color = when {
+    score >= 75 -> ThorGreen
+    score >= 45 -> ThorYellow
+    else -> ThorRed
+}
 private fun qualityColor(quality: NetworkQuality): Color = when (quality) {
     NetworkQuality.OPTIMAL -> ThorGreen
     NetworkQuality.USABLE -> ThorYellow

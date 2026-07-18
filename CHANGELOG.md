@@ -10,11 +10,24 @@ Einträge beider Sprachabschnitte müssen inhaltlich gleichwertig bleiben.
 
 ### English
 
-No unreleased changes.
+#### Added
+
+- Local Wi-Fi stability comparison: the history screen groups saved Wi-Fi
+  measurements by available SSID, compares average latency, jitter, packet
+  loss, signal strength, and link rate, and marks the best measured network
+  with an explicit confidence level. It uses no active Wi-Fi or address-range
+  scan and never invents a score when Android did not provide measurable data.
 
 ### Deutsch
 
-Keine unveröffentlichten Änderungen.
+#### Hinzugefügt
+
+- Lokaler WLAN-Stabilitätsvergleich: Die Historie gruppiert gespeicherte
+  WLAN-Messungen nach verfügbarer SSID, vergleicht durchschnittliche Latenz,
+  Jitter, Paketverlust, Signalstärke und Linkrate und markiert das beste
+  Messergebnis mit klarer Aussagekraft. Die Funktion verwendet keinen aktiven
+  WLAN- oder Adressbereich-Scan und erfindet keinen Wert, wenn Android keine
+  messbaren Daten geliefert hat.
 
 ## [0.8.0-alpha.1] - 2026-07-18
 
